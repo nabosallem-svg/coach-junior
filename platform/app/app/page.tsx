@@ -10,8 +10,8 @@ import { daysLeft, fmtDate, planMacros } from "@/lib/calc";
 import { LineChart } from "@/components/charts";
 import { Field, SectionLabel, Segmented, Sheet } from "@/components/ui";
 import { noticeIcon, noticeText } from "@/components/ClientShell";
+import { COACH_WA, waLink } from "@/lib/wa";
 
-const WA = "201014007764";
 type Range = "30" | "90" | "180" | "all";
 
 export default function ClientHome() {
@@ -62,7 +62,7 @@ export default function ClientHome() {
           <p className="mt-2 text-text-2">{t("preparingSub")}</p>
           <div className="mt-4 grid gap-2">
             {starter && <Link href={`/app/forms/fill?id=${starter.id}`} className="btn-gold">{t("fillStartForm")}</Link>}
-            <Link href="/app/messages" className="btn-ghost">{t("chatWithCoach")}</Link>
+            <a href={waLink(COACH_WA, me.name)} target="_blank" rel="noopener" className="btn-ghost">{t("msgCoachWa")}</a>
           </div>
         </section>
       )}
@@ -85,7 +85,7 @@ export default function ClientHome() {
                 </>
               );
               return n.kind === "sub" ? (
-                <a key={n.kind} href={`https://wa.me/${WA}?text=${encodeURIComponent(`${t("renewWa")} - ${me.name}`)}`} target="_blank" rel="noopener" className="card flex items-center gap-3 rounded-full p-3 pe-4">{inner}</a>
+                <a key={n.kind} href={waLink(COACH_WA, `${t("renewWa")} - ${me.name}`)} target="_blank" rel="noopener" className="card flex items-center gap-3 rounded-full p-3 pe-4">{inner}</a>
               ) : (
                 <Link key={n.kind} href={n.href} className="card flex items-center gap-3 rounded-full p-3 pe-4">{inner}</Link>
               );

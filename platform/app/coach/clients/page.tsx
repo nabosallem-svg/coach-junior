@@ -46,13 +46,12 @@ function Clients() {
       <ul className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2">
         {list.map((c) => {
           const left = daysLeft(c.subEnd);
-          const unread = db.messages.filter((m) => m.clientId === c.id && m.from === "client" && !m.read).length;
           return (
             <li key={c.id}>
               <Link href={`/coach/clients/view?id=${c.id}`} className="card flex items-center gap-3 p-3 hover:border-line-gold">
                 <Avatar name={c.name} size={44} />
                 <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2 font-bold">{c.name}{unread > 0 && <span className="size-2 rounded-full bg-gold" />}</span>
+                  <span className="flex items-center gap-2 font-bold">{c.name}</span>
                   <span className="block truncate text-sm text-muted">{c.goal} · <span className="num">{c.packageName}</span></span>
                 </span>
                 <span className={`num shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${!c.active ? "bg-card-hi text-muted" : left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>

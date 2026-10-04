@@ -3,27 +3,26 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { Bell, Home, Salad, Dumbbell, ClipboardList, MessageSquare, LogOut, CreditCard, MessageCircle } from "lucide-react";
+import { Bell, Home, Salad, Dumbbell, ClipboardList, LogOut, CreditCard, MessageCircle } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { clientNotices, useMe, type Notice } from "@/lib/hooks";
 import { Avatar, Brand, Field, Sheet } from "./ui";
 import { asset } from "@/lib/asset";
+import { COACH_WA, waLink } from "@/lib/wa";
 
 const tabs = [
   { href: "/app", icon: Home, key: "home" },
   { href: "/app/nutrition", icon: Salad, key: "nutrition" },
   { href: "/app/training", icon: Dumbbell, key: "training" },
   { href: "/app/forms", icon: ClipboardList, key: "forms" },
-  { href: "/app/messages", icon: MessageSquare, key: "messages" },
 ] as const;
 
 export function noticeText(n: Notice, t: ReturnType<typeof useI18n>["t"]) {
   if (n.kind === "sub") return n.n > 0 ? [t("subExpiring"), t("subExpiringSub", { n: n.n })] : [t("subExpired"), t("subExpiredSub")];
-  if (n.kind === "form") return [t("pendingFormsCta", { n: n.n }), ""];
-  return [t("unreadCta", { n: n.n }), ""];
+  return [t("pendingFormsCta", { n: n.n }), ""];
 }
-export const noticeIcon = { sub: CreditCard, form: ClipboardList, msg: MessageCircle };
+export const noticeIcon = { sub: CreditCard, form: ClipboardList };
 
 export function ClientShell({ children }: { children: ReactNode }) {
   const { ready, session, setSession, db, update } = useStore();
@@ -48,7 +47,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
         <img src={asset("/img/logo.webp")} alt="" width={96} height={96} className="mb-6 rounded-full" />
         <h1 className="text-2xl font-black">{pending ? t("pendingTitle") : t("pausedTitle")}</h1>
         <p className="mt-3 text-text-2">{pending ? t("pendingSub") : t("pausedSub")}</p>
-        <a className="btn-gold mt-8 w-full" target="_blank" rel="noopener" href={`https://wa.me/201014007764?text=${encodeURIComponent(`${me.name} - ${me.phone}`)}`}>{t("msgCoachWa")}</a>
+        <a className="btn-gold mt-8 w-full" target="_blank" rel="noopener" href={waLink(COACH_WA, `${me.name} - ${me.phone}`)}>{t("msgCoachWa")}</a>
         <div className="mt-3 flex w-full gap-2">
           <button onClick={toggle} className="btn-ghost flex-1">{t("langToggle")}</button>
           <button onClick={() => { setSession(null); router.replace("/"); }} className="btn-quiet flex-1"><LogOut size={18} /> {t("logout")}</button>
@@ -88,7 +87,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
           <ul className="mx-auto flex max-w-xl justify-around px-2 py-2">
             {tabs.map(({ href, icon: Icon, key }) => {
               const on = href === "/app" ? path === "/app" : path.startsWith(href);
-              const badge = key === "messages" ? notices.find((n) => n.kind === "msg") : key === "forms" ? notices.find((n) => n.kind === "form") : undefined;
+              const badge = key === "forms" ? notices.find((n) => n.kind === "form") : undefined;
               return (
                 <li key={href} className="flex-1">
                   <Link href={href} className="flex flex-col items-center gap-1" aria-current={on ? "page" : undefined}>
@@ -101,6 +100,12 @@ export function ClientShell({ children }: { children: ReactNode }) {
                 </li>
               );
             })}
+            <li className="flex-1">
+              <a href={waLink(COACH_WA, me.name)} target="_blank" rel="noopener" className="flex flex-col items-center gap-1">
+                <span className="grid h-9 w-16 place-items-center rounded-full text-[#25d366]"><MessageCircle size={24} strokeWidth={1.8} /></span>
+                <span className="text-xs font-bold text-muted">{t("whatsapp")}</span>
+              </a>
+            </li>
           </ul>
         </nav>
       )}

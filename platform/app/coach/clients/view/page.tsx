@@ -3,13 +3,14 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, MessageSquare, Send, CalendarPlus, ClipboardList, Phone, KeyRound } from "lucide-react";
+import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound } from "lucide-react";
 import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate } from "@/lib/calc";
 import { LineChart } from "@/components/charts";
 import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
+import { waLink } from "@/lib/wa";
 import { Creds } from "@/components/Creds";
 import { ActivateSheet } from "@/components/Activate";
 
@@ -52,8 +53,7 @@ function ClientDetail() {
           <p className="text-muted">{c.goal}</p>
         </div>
         <div className="flex gap-2">
-          <a href={`https://wa.me/${c.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener" className="btn-quiet px-3" aria-label={t("phone")}><Phone size={18} /></a>
-          <Link href={`/coach/messages/chat?id=${c.id}`} className="btn-ghost"><MessageSquare size={18} /> {t("openChat")}</Link>
+          <a href={waLink(c.phone)} target="_blank" rel="noopener" className="btn-ghost"><MessageCircle size={18} /> {t("whatsapp")}</a>
         </div>
       </div>
 

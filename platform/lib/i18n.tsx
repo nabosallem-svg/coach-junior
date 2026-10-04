@@ -13,6 +13,8 @@ const dict = {
   training: ["التمرين", "Training"],
   forms: ["الفورمز", "Forms"],
   messages: ["الرسائل", "Messages"],
+  whatsapp: ["واتساب", "WhatsApp"],
+  waClient: ["واتساب", "WhatsApp"],
   notifications: ["الإشعارات", "Notifications"],
   noNotifications: ["مفيش إشعارات جديدة", "No new notifications"],
   logout: ["تسجيل خروج", "Log out"],
