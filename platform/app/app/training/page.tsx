@@ -39,7 +39,7 @@ export default function Training() {
   return (
     <div>
       <div className="flex items-start justify-between gap-3">
-        <h1 className="h1">{plan.name}</h1>
+        <h1 className="h1">{plan.ownerId ? plan.name.replace(/ - [^-]+$/, "") : plan.name}</h1>
         <div className="flex shrink-0 gap-2">
           <button onClick={() => setHistory(true)} aria-label={t("history")} className="grid size-12 place-items-center rounded-full border border-line text-text-2 hover:border-line-gold"><History size={22} /></button>
         </div>

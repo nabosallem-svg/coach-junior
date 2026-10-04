@@ -37,12 +37,13 @@ function Plans() {
       if (tab === "forms") { const p = structuredClone(d.forms.find((x) => x.id === id)!); d.forms.push({ ...p, id: uid("fm"), title: `${p.title} (2)` }); }
     });
 
+  const owner = (id: string) => db.clients.find((c) => c.id === id)?.name ?? "";
   const rows =
     tab === "training"
-      ? db.trainingPlans.map((p) => ({ id: p.id, name: p.name, sub: `${p.days.length} ${t("days_")} · ${t("assignedTo", { n: assigned("trainingPlanId", p.id) })}`, icon: Dumbbell }))
+      ? [...db.trainingPlans].sort((a, b) => Number(!!a.ownerId) - Number(!!b.ownerId)).map((p) => ({ id: p.id, name: p.name, own: p.ownerId, sub: `${p.days.length} ${t("days_")} · ${p.ownerId ? t("ownPlans", { name: owner(p.ownerId) }) : t("assignedTo", { n: assigned("trainingPlanId", p.id) })}`, icon: Dumbbell }))
       : tab === "nutrition"
-        ? db.nutritionPlans.map((p) => ({ id: p.id, name: p.name, sub: `${Math.round(planMacros(db, p.meals).kcal)} ${t("kcal")} · ${p.meals.length} ${t("meals")} · ${t("assignedTo", { n: assigned("nutritionPlanId", p.id) })}`, icon: Salad }))
-        : db.forms.map((f) => ({ id: f.id, name: f.title, sub: `${f.questions.length} ${t("question")}`, icon: ClipboardList }));
+        ? [...db.nutritionPlans].sort((a, b) => Number(!!a.ownerId) - Number(!!b.ownerId)).map((p) => ({ id: p.id, name: p.name, own: p.ownerId, sub: `${Math.round(planMacros(db, p.meals).kcal)} ${t("kcal")} · ${p.meals.length} ${t("meals")} · ${p.ownerId ? t("ownPlans", { name: owner(p.ownerId) }) : t("assignedTo", { n: assigned("nutritionPlanId", p.id) })}`, icon: Salad }))
+        : db.forms.map((f) => ({ id: f.id, name: f.title, own: undefined as string | undefined, sub: `${f.questions.length} ${t("question")}`, icon: ClipboardList }));
 
   return (
     <div>
@@ -61,12 +62,12 @@ function Plans() {
         ]}
       />
       <ul className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2">
-        {rows.map(({ id, name, sub, icon: Icon }) => (
+        {rows.map(({ id, name, sub, own, icon: Icon }) => (
           <li key={id} className="card flex items-center gap-3 p-3 hover:border-line-gold">
             <Link href={`/coach/plans/${tab}/edit?id=${id}`} className="flex min-w-0 flex-1 items-center gap-3">
               <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gold-soft text-gold"><Icon size={20} /></span>
               <span className="min-w-0">
-                <span className="block truncate font-bold">{name}</span>
+                <span className="flex items-center gap-2"><span className="truncate font-bold">{name}</span>{own && <span className="shrink-0 rounded-full bg-gold-soft px-2 py-0.5 text-xs font-bold text-gold">{t("personal")}</span>}</span>
                 <span className="block truncate text-sm text-muted">{sub}</span>
               </span>
             </Link>

@@ -110,13 +110,13 @@ function Clients() {
           <Field label={t("trainingPlan")}>
             <select className="input" value={form.tp} onChange={(e) => setForm({ ...form, tp: e.target.value })}>
               <option value="">{t("none")}</option>
-              {db.trainingPlans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {db.trainingPlans.filter((p) => !p.ownerId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </Field>
           <Field label={t("nutritionPlan")}>
             <select className="input" value={form.np} onChange={(e) => setForm({ ...form, np: e.target.value })}>
               <option value="">{t("none")}</option>
-              {db.nutritionPlans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {db.nutritionPlans.filter((p) => !p.ownerId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </Field>
           {err && <p className="text-center text-sm font-bold text-danger">{err}</p>}

@@ -50,13 +50,13 @@ export function ActivateSheet({ client, onClose, onDone }: { client: Client | nu
         <Field label={t("trainingPlan")}>
           <select className="input" value={tp} onChange={(e) => setTp(e.target.value)}>
             <option value="">{t("none")}</option>
-            {db.trainingPlans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            {db.trainingPlans.filter((p) => !p.ownerId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </Field>
         <Field label={t("nutritionPlan")}>
           <select className="input" value={np} onChange={(e) => setNp(e.target.value)}>
             <option value="">{t("none")}</option>
-            {db.nutritionPlans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            {db.nutritionPlans.filter((p) => !p.ownerId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </Field>
         <button className="btn-gold min-h-13 w-full text-lg"><UserCheck size={20} /> {t("activate")}</button>

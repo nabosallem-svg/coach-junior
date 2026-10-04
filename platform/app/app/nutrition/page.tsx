@@ -64,7 +64,7 @@ export default function Nutrition() {
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
-        <h1 className="h1 min-w-0" dir="auto">{plan.name}</h1>
+        <h1 className="h1 min-w-0" dir="auto">{plan.ownerId ? plan.name.replace(/ - [^-]+$/, "") : plan.name}</h1>
         <button onClick={() => setShop(true)} aria-label={t("shoppingList")} className="btn-ghost size-11 shrink-0 p-0"><ShoppingCart size={20} /></button>
       </div>
 
