@@ -18,11 +18,19 @@ export default function Entry() {
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [err, setErr] = useState("");
+  const [invite, setInvite] = useState(false);
+
+  // ?login=client&phone=... comes from the WhatsApp message the coach sends
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("login") === "client") { setWho("client"); setInvite(true); if (q.get("phone")) setPhone(q.get("phone")!); }
+  }, []);
 
   useEffect(() => {
     if (!ready || !session) return;
+    if (invite && session.role === "coach") return; // stay on the trainee login, don't jump to the coach panel
     router.replace(session.role === "coach" ? "/coach" : "/app");
-  }, [ready, session, router]);
+  }, [ready, session, router, invite]);
 
   // Demo check against local data. With Supabase this becomes
   // supabase.auth.signInWithPassword({ phone, password }) and RLS does the rest.
