@@ -20,6 +20,7 @@ function Clients() {
   const router = useRouter();
   const params = useSearchParams();
   const [q, setQ] = useState("");
+  const [show, setShow] = useState<"all" | "soon" | "paused">("all");
   const [add, setAdd] = useState(false);
   const blank = () => ({ name: "", phone: "", goal: "", pkg: "3+1", pw: genPassword(), tp: "", np: "" });
   const [form, setForm] = useState(blank);
@@ -30,7 +31,13 @@ function Clients() {
 
   useEffect(() => { if (params.get("add")) setAdd(true); }, [params]);
 
-  const list = db.clients.filter((c) => !c.pending && (c.name.includes(q) || c.phone.includes(q)));
+  const soon = (c: Client) => c.active && daysLeft(c.subEnd) <= 7;
+  const list = db.clients
+    .filter((c) => !c.pending && (c.name.includes(q) || c.phone.includes(q)))
+    .filter((c) => show === "all" || (show === "soon" ? soon(c) : !c.active))
+    // ending soon first, paused last
+    .sort((a, b) => Number(!a.active) - Number(!b.active) || daysLeft(a.subEnd) - daysLeft(b.subEnd));
+  const counts = { all: db.clients.filter((c) => !c.pending).length, soon: db.clients.filter((c) => !c.pending && soon(c)).length, paused: db.clients.filter((c) => !c.pending && !c.active).length };
 
   return (
     <div>
@@ -46,7 +53,15 @@ function Clients() {
         <input className="input ps-10" placeholder={t("searchClients")} value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
 
-      <ul className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2">
+      <div className="mt-3 flex gap-2">
+        {(["all", "soon", "paused"] as const).map((k) => (
+          <button key={k} onClick={() => setShow(k)} className={`flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-bold ${show === k ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>
+            {t(k === "all" ? "all" : k === "soon" ? "endingSoon" : "paused")} <span className="num opacity-70">{counts[k]}</span>
+          </button>
+        ))}
+      </div>
+
+      <ul className="mt-3 grid grid-cols-1 gap-2 lg:grid-cols-2">
         {list.map((c) => {
           const left = daysLeft(c.subEnd);
           return (

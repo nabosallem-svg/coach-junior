@@ -14,7 +14,8 @@ import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
 import { waLink } from "@/lib/wa";
 import { Creds } from "@/components/Creds";
-import { ActivateSheet } from "@/components/Activate";
+import { ActivateSheet, PACKAGES } from "@/components/Activate";
+import { deleteAccount } from "@/lib/accounts";
 import { ProgressPhotos } from "@/components/ProgressPhotos";
 import { setAccountPassword } from "@/lib/accounts";
 import { aiTask, photoForAi } from "@/lib/aiTasks";
@@ -28,6 +29,8 @@ function ClientDetail() {
   const [newPw, setNewPw] = useState<string | null>(null);
   const [pwEdit, setPwEdit] = useState<string | null>(null);
   const [act, setAct] = useState(false);
+  const [renewing, setRenewing] = useState(false);
+  const [info, setInfo] = useState<{ name: string; goal: string } | null>(null);
   const [ai, setAi] = useState<{ title: string; text?: string; busy?: boolean; err?: string; wa?: boolean } | null>(null);
   const [drafting, setDrafting] = useState(false);
   const [calc, setCalc] = useState<{ sex: "m" | "f"; age: string; height: string; weight: string; activity: Activity; goal: Goal } | null>(null);
@@ -94,13 +97,14 @@ function ClientDetail() {
     setDrafting(false);
   };
 
-  const extend = () => {
-    const base = new Date(Math.max(Date.now(), new Date(c.subEnd).getTime()));
-    base.setMonth(base.getMonth() + 1);
-    if (!confirm(t("confirmExtend", { name: c.name, d: fmtDate(base.toISOString(), lang, { day: "numeric", month: "long", year: "numeric" }) }))) return;
+  // renew by a package from today or from the current end, whichever is later
+  const renewEnd = (months: number) => { const d = new Date(Math.max(Date.now(), new Date(c.subEnd).getTime())); d.setMonth(d.getMonth() + months); return d; };
+  const renew = (pkg: (typeof PACKAGES)[number]) => {
+    const end = renewEnd(pkg.months);
     // only moves the end date; paused stays paused until the coach taps activate
-    set({ subEnd: base.toISOString().slice(0, 10) });
-    flash(t("extendedTo", { d: fmtDate(base.toISOString(), lang, { day: "numeric", month: "long" }) }));
+    set({ subEnd: end.toISOString().slice(0, 10), packageName: pkg.label });
+    setRenewing(false);
+    flash(t("extendedTo", { d: fmtDate(end.toISOString(), lang, { day: "numeric", month: "long" }) }));
   };
 
   return (
@@ -113,6 +117,7 @@ function ClientDetail() {
           <h1 className="truncate text-2xl font-black">{c.name}</h1>
           <p className="truncate text-muted">{c.goal}</p>
         </div>
+        <button onClick={() => setInfo({ name: c.name, goal: c.goal })} aria-label={t("editInfo")} title={t("editInfo")} className="grid size-12 shrink-0 place-items-center rounded-full border border-line text-muted hover:text-gold"><Pencil size={18} /></button>
         <a href={waLink(c.phone)} target="_blank" rel="noopener" aria-label={t("whatsapp")} className="grid size-12 shrink-0 place-items-center rounded-full border border-line-gold text-gold hover:bg-gold-soft"><MessageCircle size={20} /></a>
       </div>
 
@@ -151,7 +156,7 @@ function ClientDetail() {
             <div><dt className="text-muted">{t("end")}</dt><dd className="font-bold">{fmtDate(c.subEnd, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
           </dl>
           <div className="mt-4 flex gap-2">
-            <button onClick={extend} disabled={c.pending} className="btn-gold flex-1"><CalendarPlus size={18} /> {t("oneMonth")}</button>
+            <button onClick={() => setRenewing(true)} disabled={c.pending} className="btn-gold flex-1"><CalendarPlus size={18} /> {t("renew")}</button>
             {c.pending ? (
               <button onClick={() => setAct(true)} className="btn-ghost flex-1">{t("activate")}</button>
             ) : (
@@ -340,6 +345,28 @@ function ClientDetail() {
             <a href={waLink(c.phone, ai.text)} target="_blank" rel="noopener" className="btn-gold w-full"><Send size={18} /> {t("sendWa")}</a>
           </div>
         ) : <p className="whitespace-pre-line leading-relaxed text-text-2" dir="auto">{ai.text}</p>)}
+      </Sheet>
+      <Sheet open={renewing} onClose={() => setRenewing(false)} title={t("renewTitle", { name: c.name.split(" ")[0] })}>
+        <div className="grid grid-cols-2 gap-2">
+          {PACKAGES.map((p) => (
+            <button key={p.label} onClick={() => renew(p)} className="card flex flex-col items-center gap-1 p-4 hover:border-gold">
+              <span className="num text-2xl font-black text-gold">{p.label}</span>
+              <span className="text-xs text-muted">{t("until", { d: fmtDate(renewEnd(p.months).toISOString(), lang, { day: "numeric", month: "short", year: "numeric" }) })}</span>
+            </button>
+          ))}
+        </div>
+        {!c.active && <p className="mt-3 text-sm text-muted">{t("renewPausedNote")}</p>}
+      </Sheet>
+      <Sheet open={!!info} onClose={() => setInfo(null)} title={t("editInfo")}>
+        {info && (
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (!info.name.trim()) return; set({ name: info.name.trim(), goal: info.goal.trim() }); setInfo(null); flash(t("saved")); }}>
+            <Field label={t("name")}><input className="input" value={info.name} onChange={(e) => setInfo({ ...info, name: e.target.value })} required /></Field>
+            <Field label={t("goal")}><input className="input" value={info.goal} onChange={(e) => setInfo({ ...info, goal: e.target.value })} /></Field>
+            <p className="num text-sm text-muted">{t("phoneLocked", { phone: c.phone })}</p>
+            <button className="btn-gold w-full">{t("save")}</button>
+            <button type="button" onClick={() => { if (confirm(t("confirmDeleteClient", { name: c.name }))) deleteAccount(c.id).then(() => { update((d) => { d.clients = d.clients.filter((x) => x.id !== c.id); }); router.push("/coach/clients"); }, () => flash(t("syncFailed"))); }} className="w-full py-2 text-sm font-bold text-danger">{t("deleteClient")}</button>
+          </form>
+        )}
       </Sheet>
       <ActivateSheet client={act ? c : null} onClose={() => setAct(false)} />
       <Creds client={newPw ? c : null} password={newPw ?? ""} onClose={() => setNewPw(null)} />
