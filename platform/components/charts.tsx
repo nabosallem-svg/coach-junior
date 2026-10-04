@@ -46,11 +46,16 @@ export function LineChart({ points, unit = "", height = 200 }: { points: Point[]
       {points.map((p, i) => (
         <circle key={i} cx={sx(p.x)} cy={sy(p.y)} r={i === points.length - 1 ? 4.5 : 2.5} fill={i === points.length - 1 ? "var(--color-gold)" : "var(--color-bg)"} stroke="var(--color-gold)" strokeWidth="2" />
       ))}
-      {labelIdx.map((i) => (
-        <text key={i} x={sx(points[i].x)} y={H - 6} textAnchor={i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"} fontSize="11" fill="var(--color-muted)">
-          {points[i].label}
-        </text>
-      ))}
+      {labelIdx.map((i) => {
+        // Arabic dates ("12 يوليو") read right-to-left; inside an RTL text "start" is the right edge, so flip the anchors
+        const rtl = /[\u0600-\u06FF]/.test(points[i].label);
+        const edge = i === 0 ? (rtl ? "end" : "start") : i === points.length - 1 ? (rtl ? "start" : "end") : "middle";
+        return (
+          <text key={i} x={sx(points[i].x)} y={H - 6} textAnchor={edge} direction={rtl ? "rtl" : "ltr"} fontSize="11" fill="var(--color-muted)">
+            {points[i].label}
+          </text>
+        );
+      })}
     </svg>
   );
 }

@@ -39,7 +39,7 @@ export default function Entry() {
     setBusy(true);
     const ok = await login(who, phone, pw);
     setBusy(false);
-    if (!ok) return setErr(t("wrongLogin"));
+    if (!ok) return setErr(t(who === "coach" ? "wrongCoachPw" : "wrongLogin"));
     // pending and paused clients get in, but only see the waiting screen (ClientShell)
     router.push(who === "coach" ? "/coach" : "/app");
   };
