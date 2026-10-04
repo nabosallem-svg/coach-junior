@@ -78,7 +78,7 @@ export default function Nutrition() {
           ].map((x) => (
             <div key={x.k}>
               <p className={`num text-sm font-bold ${x.cls}`}>{x.p}%</p>
-              <p className="num text-2xl font-black">{Math.round(x.v)}<span className="text-base font-medium text-muted">g</span></p>
+              <p className="num whitespace-nowrap text-2xl font-black">{Math.round(x.v)}<span className="text-base font-medium text-muted"> {t("gram")}</span></p>
               <p className="text-sm text-muted">{t(x.k as "carbs")}</p>
             </div>
           ))}

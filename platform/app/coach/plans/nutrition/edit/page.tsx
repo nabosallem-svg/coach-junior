@@ -35,9 +35,9 @@ function NutritionBuilder() {
       <div className="card mt-5 flex items-center gap-5 p-4">
         <MacroRing {...total} label={t("kcal")} />
         <div className="grid flex-1 grid-cols-3 gap-2 text-center">
-          <div><p className="num text-2xl font-black text-carbs">{Math.round(total.c)}g</p><p className="text-sm text-muted">{t("carbs")}</p></div>
-          <div><p className="num text-2xl font-black text-fat">{Math.round(total.f)}g</p><p className="text-sm text-muted">{t("fat")}</p></div>
-          <div><p className="num text-2xl font-black text-protein">{Math.round(total.p)}g</p><p className="text-sm text-muted">{t("protein")}</p></div>
+          <div><p className="num whitespace-nowrap text-2xl font-black text-carbs">{Math.round(total.c)}<span className="text-base font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("carbs")}</p></div>
+          <div><p className="num whitespace-nowrap text-2xl font-black text-fat">{Math.round(total.f)}<span className="text-base font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("fat")}</p></div>
+          <div><p className="num whitespace-nowrap text-2xl font-black text-protein">{Math.round(total.p)}<span className="text-base font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("protein")}</p></div>
         </div>
       </div>
 

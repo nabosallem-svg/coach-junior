@@ -5,22 +5,22 @@ const iso = (offsetDays: number) => new Date(Date.now() + offsetDays * day).toIS
 const isoDate = (offsetDays: number) => iso(offsetDays).slice(0, 10);
 
 const exercises: Exercise[] = [
-  { id: "ex-ty", name: "Shoulder warm up (T-Y)", muscle: "shoulders", cue: "تسخين بأوزان خفيفة" },
-  { id: "ex-incline-db", name: "Incline DB Press", muscle: "chest", cue: "انزل ببطء لحد ما تحس بفرد في الصدر" },
-  { id: "ex-flat-bb", name: "Flat Barbell Bench", muscle: "chest" },
-  { id: "ex-fly", name: "Cable Fly", muscle: "chest", cue: "اقفل في النص وامسك ثانية" },
-  { id: "ex-pulldown", name: "Lat Pulldown", muscle: "back", cue: "اسحب بالكوع مش بالإيد" },
-  { id: "ex-row", name: "Chest Supported Row", muscle: "back" },
-  { id: "ex-rear", name: "Reverse Pec Deck", muscle: "shoulders", cue: "رير دلت، متعليش الكتف" },
-  { id: "ex-lateral", name: "DB Lateral Raise", muscle: "shoulders" },
-  { id: "ex-ohp", name: "Seated DB Shoulder Press", muscle: "shoulders" },
-  { id: "ex-curl", name: "Incline DB Curl", muscle: "biceps" },
-  { id: "ex-pushdown", name: "Rope Pushdown", muscle: "triceps" },
-  { id: "ex-wrist", name: "Wrist Curl", muscle: "forearms" },
-  { id: "ex-squat", name: "Hack Squat", muscle: "legs", cue: "نزول كامل وظهرك لازق" },
-  { id: "ex-rdl", name: "Romanian Deadlift", muscle: "legs" },
-  { id: "ex-legext", name: "Leg Extension", muscle: "legs" },
-  { id: "ex-calf", name: "Standing Calf Raise", muscle: "calves" },
+  { id: "ex-ty", name: "تسخين كتف", muscle: "shoulders", cue: "تسخين بأوزان خفيفة" },
+  { id: "ex-incline-db", name: "ضغط دمبل عالي", muscle: "chest", cue: "انزل ببطء لحد ما تحس بفرد في الصدر" },
+  { id: "ex-flat-bb", name: "بنش بار مستوي", muscle: "chest" },
+  { id: "ex-fly", name: "تفتيح كابل", muscle: "chest", cue: "اقفل في النص وامسك ثانية" },
+  { id: "ex-pulldown", name: "سحب أمامي", muscle: "back", cue: "اسحب بالكوع مش بالإيد" },
+  { id: "ex-row", name: "سحب مسنود على الصدر", muscle: "back" },
+  { id: "ex-rear", name: "كتف خلفي على الجهاز", muscle: "shoulders", cue: "رير دلت، متعليش الكتف" },
+  { id: "ex-lateral", name: "رفرفة جانبي دمبل", muscle: "shoulders" },
+  { id: "ex-ohp", name: "ضغط كتف دمبل جالس", muscle: "shoulders" },
+  { id: "ex-curl", name: "باي دمبل على بنش مايل", muscle: "biceps" },
+  { id: "ex-pushdown", name: "تراي حبل", muscle: "triceps" },
+  { id: "ex-wrist", name: "سواعد دمبل", muscle: "forearms" },
+  { id: "ex-squat", name: "هاك سكوات", muscle: "legs", cue: "نزول كامل وظهرك لازق" },
+  { id: "ex-rdl", name: "رومانيان ديدلفت", muscle: "legs" },
+  { id: "ex-legext", name: "رفرفة أمامي", muscle: "legs" },
+  { id: "ex-calf", name: "سمانة واقف", muscle: "calves" },
 ];
 
 const s = (n: number, reps: string, tempo = "", rir = "1") => Array.from({ length: n }, () => ({ reps, tempo, rir }));
@@ -28,7 +28,7 @@ const s = (n: number, reps: string, tempo = "", rir = "1") => Array.from({ lengt
 const trainingPlans: TrainingPlan[] = [
   {
     id: "tp-ul",
-    name: "Upper / Lower x4",
+    name: "علوي وسفلي - 4 أيام",
     days: [
       {
         id: "d1", name: "صدر وضهر",
@@ -89,7 +89,7 @@ const foods: Food[] = [
 const nutritionPlans: NutritionPlan[] = [
   {
     id: "np-recomp",
-    name: "Recomp 4 meals",
+    name: "تنشيف - 4 وجبات",
     meals: [
       {
         id: "m1", name: "الوجبة 1", note: "فيتامين د 5000 + كرياتين 5 جم (أي وقت)",
