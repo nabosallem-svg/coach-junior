@@ -34,14 +34,15 @@ function ClientDetail() {
   const assigns = db.assignments.filter((a) => a.clientId === id).sort((a, b) => b.sentAt.localeCompare(a.sentAt));
   const logs = db.logs.filter((l) => l.clientId === id).sort((a, b) => b.date.localeCompare(a.date));
   const viewing = assigns.find((a) => a.id === viewAs);
-  const flash = (s: string) => { setToast(s); setTimeout(() => setToast(null), 1400); };
+  const flash = (s: string) => { setToast(s); setTimeout(() => setToast(null), 2200); };
   const set = (patch: Partial<typeof c>) => update((d) => { Object.assign(d.clients.find((x) => x.id === id)!, patch); });
 
   const extend = () => {
     const base = new Date(Math.max(Date.now(), new Date(c.subEnd).getTime()));
     base.setMonth(base.getMonth() + 1);
+    // only moves the end date; paused stays paused until the coach taps activate
     set({ subEnd: base.toISOString().slice(0, 10) });
-    flash(t("saved"));
+    flash(t("extendedTo", { d: fmtDate(base.toISOString(), lang, { day: "numeric", month: "long" }) }));
   };
 
   return (
@@ -73,7 +74,7 @@ function ClientDetail() {
             {c.pending ? (
               <button onClick={() => setAct(true)} className="btn-ghost flex-1">{t("activate")}</button>
             ) : (
-              <button onClick={() => set({ active: !c.active })} className="btn-quiet flex-1">{c.active ? t("pause") : t("resume")}</button>
+              <button onClick={() => { if (!c.active || confirm(t("confirmPause"))) { set({ active: !c.active }); flash(c.active ? t("pausedNow") : t("activeNow")); } }} className={`flex-1 ${c.active ? "btn-quiet" : "btn-ghost"}`}>{c.active ? t("pause") : t("resume")}</button>
             )}
           </div>
           {pwEdit === null ? (
