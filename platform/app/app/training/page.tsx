@@ -62,7 +62,7 @@ export default function Training() {
               <div className="mt-3 flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-bold" dir="auto">{ex.name}</h3>
-                  <span className="chip mt-1.5">{muscle(ex.muscle)}</span>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5"><span className="chip">{muscle(ex.muscle)}</span>{pe.rest && <span className="chip num border-line-gold text-gold">{t("restN", { n: pe.rest })}</span>}</div>
                 </div>
                 <div className="flex gap-1 text-text-2">
                   <button onClick={() => setChartFor(pe.id)} aria-label={t("progress")} className="grid size-10 place-items-center hover:text-gold"><ChartIcon size={22} /></button>

@@ -39,7 +39,8 @@ export type Exercise = {
 };
 
 export type SetSpec = { reps: string; tempo?: string; rir?: string };
-export type PlanExercise = { id: ID; exerciseId: ID; note?: string; sets: SetSpec[] };
+/** rest = seconds between sets */
+export type PlanExercise = { id: ID; exerciseId: ID; note?: string; rest?: string; sets: SetSpec[] };
 export type TrainingDay = { id: ID; name: string; exercises: PlanExercise[] };
 /** ownerId set = a personal copy for one client; unset = a reusable template */
 export type TrainingPlan = { id: ID; name: string; days: TrainingDay[]; ownerId?: ID };
