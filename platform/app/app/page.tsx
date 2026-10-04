@@ -98,7 +98,10 @@ export default function ClientHome() {
       {!plan && !np && !starter && (
         <div className="card mt-5 flex items-center gap-3 border-line-gold p-4">
           <Hourglass size={22} className="shrink-0 text-gold" />
-          <span><span className="block font-bold">{t("noPlanYet")}</span><span className="text-sm text-muted">{t("noPlanYetSub")}</span></span>
+          <span><span className="block font-bold">{t("noPlanYet")}</span><span className="text-sm text-muted">{(() => {
+            const sent = db.assignments.find((a) => a.clientId === me.id && a.status === "submitted" && a.submittedAt && db.forms.find((f) => f.id === a.formId)?.starter)?.submittedAt;
+            return sent ? t("planReadyBy", { d: fmtDate(new Date(new Date(sent).getTime() + 7 * 864e5).toISOString(), lang, { weekday: "long", day: "numeric", month: "long" }) }) : t("noPlanYetSub");
+          })()}</span></span>
         </div>
       )}
 

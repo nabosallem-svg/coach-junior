@@ -38,10 +38,14 @@ export default function CoachHome() {
     const n = daysLeft(c.subEnd);
     items.push({ c, text: n >= 0 ? t("daysLeftN", { n }) : t("expiredN", { n: -n }), tone: "red", icon: CalendarClock, wa: t("waRenew", { name: first(c), n: Math.max(n, 0) }) });
   }
-  for (const a of db.assignments.filter((x) => x.status === "submitted" && !x.reviewed && db.forms.find((f) => f.id === x.formId)?.starter)) {
-    const c = clients.find((x) => x.id === a.clientId);
-    if (c) items.push({ c, text: t("formArrived"), tone: "gold", icon: ClipboardCheck });
-  }
+  // filled the starter form but still has no plan: the coach promises one within a week
+  const waiting = active
+    .filter((c) => !c.trainingPlanId || !c.nutritionPlanId)
+    .map((c) => ({ c, a: db.assignments.find((x) => x.clientId === c.id && x.status === "submitted" && x.submittedAt && db.forms.find((f) => f.id === x.formId)?.starter) }))
+    .filter((x) => x.a)
+    .map(({ c, a }) => ({ c, days: Math.floor(ago(a!.submittedAt!)) }))
+    .sort((x, y) => y.days - x.days);
+  for (const { c, days } of waiting) items.push({ c, text: days >= 7 ? t("planLate", { n: days }) : t("planWaiting", { n: days, left: 7 - days }), tone: days >= 5 ? "red" : "gold", icon: ClipboardCheck });
   for (const id of photoClients) { const c = clients.find((x) => x.id === id); if (c) items.push({ c, text: t("sentPhotos"), tone: "gold", icon: Camera }); }
   for (const c of active) {
     const pendingForm = db.assignments.find((a) => a.clientId === c.id && a.status === "pending" && ago(a.sentAt) >= 1);
