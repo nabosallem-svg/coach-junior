@@ -105,7 +105,7 @@ const dict = {
   moveUp: ["لفوق", "Up"],
   moveDown: ["لتحت", "Down"],
   removeExercise: ["شيل التمرين", "Remove"],
-  addExerciseFromLib: ["ضيف تمرين من الفيديوهات", "Add exercise from library"],
+  addExerciseFromLib: ["ضيف تمرين", "Add exercise from library"],
   restN: ["راحة {n} ث", "Rest {n}s"],
   syncFailed: ["التعديل متحفظش، اتأكد من النت وجرب تاني", "Change not saved, check your connection and try again"],
   accountFailed: ["معرفناش نعمل الحساب، جرب تاني", "Could not create the account, try again"],
@@ -306,6 +306,11 @@ const dict = {
 
   // coach library
   uploadVideo: ["ارفع فيديو", "Upload video"],
+  videoOptional: ["ارفع فيديو (اختياري)", "Upload a video (optional)"],
+  addToDay: ["ضيفه لليوم", "Add to day"],
+  savedToLibrary: ["هيتحفظ كمان في الفيديوهات عشان تستخدمه في أي خطة.", "Also saved to the library for other plans."],
+  searchExercise: ["دوّر على تمرين", "Search exercises"],
+  addNamedExercise: ["ضيف «{x}» كتمرين جديد", "Add “{x}” as a new exercise"],
   newExercise: ["تمرين جديد", "New exercise"],
   exerciseName: ["اسم التمرين", "Exercise name"],
   muscle: ["العضلة", "Muscle"],
