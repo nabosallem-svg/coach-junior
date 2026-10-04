@@ -13,7 +13,8 @@ import { I18nProvider } from "@/lib/i18n";
 export const metadata: Metadata = {
   title: "Coach Junior",
   description: "منصة كوتش جونيور للمتابعة الأونلاين",
-  icons: { icon: asset("/img/icon-64.png") },
+  icons: { icon: asset("/img/icon-64.png"), apple: asset("/img/icon-180.png") },
+  appleWebApp: { capable: true, title: "Junior", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = { themeColor: "#0a0a0c", width: "device-width", initialScale: 1, viewportFit: "cover" };

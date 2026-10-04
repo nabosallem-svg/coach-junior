@@ -60,14 +60,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // live: who is signed in, then everything RLS lets them read
   const boot = useCallback(async () => {
-    const { data } = await sb().auth.getSession();
+    const { data } = await (await sb()).auth.getSession();
     const user = data.session?.user;
     if (!user) {
       setSessionState(null);
       setDb(emptyDB());
       return;
     }
-    const { data: coach } = await sb().from("coaches").select("id").eq("id", user.id).maybeSingle();
+    const { data: coach } = await (await sb()).from("coaches").select("id").eq("id", user.id).maybeSingle();
     if (coach) await seedIfEmpty(makeSeed()).catch(() => {});
     setDb(await loadDB().catch(() => emptyDB()));
     setSessionState(coach ? { role: "coach" } : { role: "client", clientId: user.id });
@@ -115,13 +115,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setSession = useCallback((s: Session) => {
     setSessionState(s);
     if (LIVE) {
-      if (!s) sb().auth.signOut().then(() => setDb(emptyDB()));
+      if (!s) sb().then((c) => c.auth.signOut()).then(() => setDb(emptyDB()));
     } else save(SESSION_KEY, s);
   }, []);
 
   const login = useCallback(async (who: "coach" | "client", phone: string, pw: string) => {
     if (LIVE) {
-      const { error } = await sb().auth.signInWithPassword({ email: who === "coach" ? COACH_EMAIL : phoneEmail(phone), password: pw });
+      const { error } = await (await sb()).auth.signInWithPassword({ email: who === "coach" ? COACH_EMAIL : phoneEmail(phone), password: pw });
       if (error) return false;
       await boot();
       return true;

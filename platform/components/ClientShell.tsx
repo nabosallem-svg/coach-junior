@@ -7,7 +7,7 @@ import { Bell, Home, Salad, Dumbbell, ClipboardList, LogOut, CreditCard, Message
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { clientNotices, useMe, type Notice } from "@/lib/hooks";
-import { Avatar, Brand, Field, Sheet } from "./ui";
+import { Avatar, Brand, Field, Sheet, Splash } from "./ui";
 import { asset } from "@/lib/asset";
 import { COACH_WA, waLink } from "@/lib/wa";
 import { changeOwnPassword } from "@/lib/accounts";
@@ -39,7 +39,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
     if (!session || session.role !== "client" || !me) router.replace("/");
   }, [ready, session, me, router]);
 
-  if (!ready || !me) return null;
+  if (!ready || !me) return <Splash />;
   if (!me.active && !me.pending) {
     const pending = false;
     return (

@@ -6,7 +6,7 @@ import { Eye, EyeOff, RotateCcw } from "lucide-react";
 import { useStore, COACH_DEMO_PASSWORD } from "@/lib/store";
 import { COACH_WA, waLink } from "@/lib/wa";
 import { useI18n } from "@/lib/i18n";
-import { Field, Segmented } from "@/components/ui";
+import { Field, Segmented, Splash } from "@/components/ui";
 import { asset } from "@/lib/asset";
 
 export default function Entry() {
@@ -43,6 +43,9 @@ export default function Entry() {
     // pending and paused clients get in, but only see the waiting screen (ClientShell)
     router.push(who === "coach" ? "/coach" : "/app");
   };
+
+  // already signed in: go straight to the panel instead of flashing the login form
+  if (!ready || (session && !invite)) return <Splash />;
 
   return (
     <div className="relative mx-auto flex min-h-dvh max-w-xl flex-col">

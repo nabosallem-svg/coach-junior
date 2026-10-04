@@ -24,7 +24,7 @@ function open(): Promise<IDBDatabase> {
 
 export async function putVideo(key: string, file: Blob) {
   if (LIVE) {
-    const { error } = await sb().storage.from(BUCKET).upload(path(key), file, { upsert: true, contentType: file.type || undefined });
+    const { error } = await (await sb()).storage.from(BUCKET).upload(path(key), file, { upsert: true, contentType: file.type || undefined });
     if (error) throw error;
     return;
   }
@@ -48,7 +48,7 @@ export async function getVideo(key: string): Promise<Blob | undefined> {
 
 export async function deleteVideo(key: string) {
   if (LIVE) {
-    await sb().storage.from(BUCKET).remove([path(key)]);
+    await (await sb()).storage.from(BUCKET).remove([path(key)]);
     return;
   }
   const db = await open();
@@ -78,7 +78,7 @@ export function useVideoSrc(videoKey?: string, videoUrl?: string) {
     let url: string | undefined;
     let alive = true;
     if (LIVE) {
-      sb().storage.from(BUCKET).createSignedUrl(path(videoKey), 3600).then(({ data }) => { if (alive) setSrc(data?.signedUrl ?? videoUrl); });
+      sb().then((c) => c.storage.from(BUCKET).createSignedUrl(path(videoKey!), 3600)).then(({ data }) => { if (alive) setSrc(data?.signedUrl ?? videoUrl); });
       return () => { alive = false; };
     }
     getVideo(videoKey)

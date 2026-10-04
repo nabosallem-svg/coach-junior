@@ -14,6 +14,15 @@ export function Brand({ small }: { small?: boolean }) {
   );
 }
 
+/** shown while the app opens, instead of a blank page */
+export function Splash() {
+  return (
+    <div className="grid min-h-dvh place-items-center">
+      <img src={asset("/img/logo-120.webp")} alt="Coach Junior" width={88} height={88} className="animate-pulse rounded-full" />
+    </div>
+  );
+}
+
 export function SectionLabel({ children }: { children: ReactNode }) {
   return <h2 className="label mb-3 mt-7">{children}</h2>;
 }
