@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound, Pencil, Sparkles, Loader2, FileText, Images, Utensils, Calculator } from "lucide-react";
+import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound, Pencil, Sparkles, Loader2, FileText, Images, Utensils, Calculator, Plus } from "lucide-react";
 import { personalize, type PlanKind } from "@/lib/plans";
 import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
@@ -209,6 +209,21 @@ function ClientDetail() {
                     <Sparkles size={17} /> {t("customizeFor", { name: c.name.split(" ")[0] })}
                   </button>
                 ))}
+                {/* an empty personal plan, built from scratch for this trainee only */}
+                <button
+                  onClick={() => {
+                    const first = c.name.split(" ")[0], pid = uid(kind === "training" ? "tp" : "np");
+                    update((d) => {
+                      if (kind === "training") d.trainingPlans.push({ id: pid, name: t("trainingOf", { name: first }), ownerId: c.id, days: [{ id: uid("d"), name: `${t("days")} 1`, exercises: [] }] });
+                      else d.nutritionPlans.push({ id: pid, name: t("mealsOf", { name: first }), ownerId: c.id, meals: [{ id: uid("m"), name: t("mealN", { n: 1 }), items: [] }] });
+                      d.clients.find((x) => x.id === c.id)![key] = pid;
+                    });
+                    router.push(`/coach/plans/${kind}/edit?id=${pid}`);
+                  }}
+                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line-gold py-2.5 text-sm font-bold text-gold hover:bg-gold-soft"
+                >
+                  <Plus size={16} /> {t("fromScratchFor", { name: c.name.split(" ")[0] })}
+                </button>
               </div>
             );
           })}

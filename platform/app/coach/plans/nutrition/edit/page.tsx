@@ -128,7 +128,7 @@ function NutritionBuilder() {
         })}
       </div>
 
-      <button onClick={() => edit((p) => p.meals.push({ id: uid("m"), name: `${t("mealName")} ${p.meals.length + 1}`, items: [] }))} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addMeal")}</button>
+      <button onClick={() => edit((p) => p.meals.push({ id: uid("m"), name: t("mealN", { n: p.meals.length + 1 }), items: [] }))} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addMeal")}</button>
 
       <Sheet open={!!swap} onClose={() => setSwap(null)} title={t("swapTitle")}>
         {swap && (() => {
