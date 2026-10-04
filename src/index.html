@@ -472,6 +472,11 @@ html.lenis,html.lenis body{height:auto}
 @media (max-width:900px){.progs{grid-template-columns:1fr;max-width:480px;margin-inline:auto}.prog-media{aspect-ratio:16/9}}
 @media (max-width:600px){.progs{gap:var(--s-2)}.prog-body{padding:var(--s-2) var(--s-3) var(--s-3);text-align:center}.prog h3{font-size:var(--fs-lg)}.pm-food .plate{font-size:48px;width:34%}}
 @media (prefers-reduced-motion:reduce){.pm-chat .typing i{animation:none}}
+
+/* offer: old price struck through + save pill */
+.price .was{flex-basis:100%;color:var(--muted);font-size:var(--fs-md);font-weight:700;text-decoration:line-through;text-decoration-color:rgba(var(--red-rgb),.8);text-decoration-thickness:2px;direction:ltr}
+.plan .off{align-self:flex-start;display:inline-flex;gap:var(--s-0);padding:0 var(--s-1);line-height:24px;background:rgba(var(--red-rgb),.14);border:1px solid rgba(var(--red-rgb),.45);border-radius:var(--r-pill);color:#ff8a8a;font-size:var(--fs-xs);font-weight:800;margin-bottom:calc(-1 * var(--s-2))}
+@media (max-width:600px){.plan .off{align-self:center}}
 </style>
 </head>
 <body>
@@ -653,20 +658,20 @@ html.lenis,html.lenis body{height:auto}
       <div class="plans">
         <article class="plan rv" data-plan="basic">
           <h3 data-i="p1">البداية</h3>
-          <div class="price"><b class="num" data-p="1490">1,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <span class="off"><span data-i="save">وفّر</span> <span class="num">34%</span></span><div class="price"><s class="was num" data-p="1490">1,490</s><b class="num" data-p="990">990</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f1">برنامج تمرين</li><li data-i="f2">نظام أكل</li><li data-i="f3">فيديوهات التمارين</li></ul>
           <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
         </article>
         <article class="plan star rv" data-plan="pro">
           <span class="badge" data-i="popular">الأكثر طلباً</span>
           <h3 data-i="p2">المتابعة</h3>
-          <div class="price"><b class="num" data-p="2490">2,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <span class="off"><span data-i="save">وفّر</span> <span class="num">40%</span></span><div class="price"><s class="was num" data-p="2490">2,490</s><b class="num" data-p="1490">1,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f4">كل اللي في البداية</li><li data-i="f5">متابعة أسبوعية</li><li data-i="f6">واتساب مباشر</li><li data-i="f7">تصحيح التكنيك بالفيديو</li></ul>
           <button class="btn btn-gold order mag" type="button" data-i="choose">اطلب</button>
         </article>
         <article class="plan rv" data-plan="comp">
           <h3 data-i="p3">تجهيز بطولة</h3>
-          <div class="price"><b class="num" data-p="4200">4,200</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <span class="off"><span data-i="save">وفّر</span> <span class="num">41%</span></span><div class="price"><s class="was num" data-p="4200">4,200</s><b class="num" data-p="2490">2,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f8">كل اللي في المتابعة</li><li data-i="f9">Peak Week</li><li data-i="f10">تدريب بوزينج</li><li data-i="f11">متابعة يومية</li></ul>
           <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
         </article>
@@ -777,7 +782,7 @@ html.lenis,html.lenis body{height:auto}
       faqT:'أسئلة <span class="g">شائعة</span>', q1:'التدريب الأونلاين مناسب ليا؟', a1:'أيوه، الخطة بتتعمل على مستواك ووقتك، والمتابعة على واتساب.', q2:'لو حصلت مشكلة في الدفع؟', a2:'ابعتلنا على واتساب ونحلها معاك فوراً.', q3:'ينفع أتمرن في البيت؟', a3:'أيوه، البرنامج بيتعمل على الأدوات اللي عندك، جيم أو بيت.',
       finalTitle:'جاهز<span class="g">؟</span>', order:'اطلب دلوقتي', orCall:'أو كلمنا:', fLinks:'روابط', disc:'استشير دكتور قبل أي مجهود عنيف لو عندك مشكلة صحية.',
       sheetTitle:'اطلب باقتك', name:'الاسم', phone:'رقم الموبايل', goal:'الهدف', g1:'تضخيم', g2:'تنشيف', g3:'تجهيز بطولة', err:'اكتب اسمك ورقمك.', send:'كمّل الطلب على واتساب',
-      waHello:'أهلاً كابتن جونيور، عايز أعرف تفاصيل الاشتراك', waOrder:'طلب اشتراك جديد', lPhone:'الموبايل', lPlan:'الباقة', lang:'EN'
+      waHello:'أهلاً كابتن جونيور، عايز أعرف تفاصيل الاشتراك', waOrder:'طلب اشتراك جديد', save:'وفّر', lPhone:'الموبايل', lPlan:'الباقة', lang:'EN'
     },
     en: {
       offer:'1 free month on 3+ months', grab:'Get the offer', clockL:'Offer ends in', subscribe:'Subscribe now',
@@ -798,7 +803,7 @@ html.lenis,html.lenis body{height:auto}
       faqT:'<span class="g">FAQ</span>', q1:'Is online coaching right for me?', a1:'Yes. Your plan fits your level and schedule, with WhatsApp follow-up.', q2:'Problem with payment?', a2:'Message us on WhatsApp and we sort it out right away.', q3:'Can I train at home?', a3:'Yes. The program is built around the equipment you have, gym or home.',
       finalTitle:'Ready<span class="g">?</span>', order:'Order now', orCall:'Or call:', fLinks:'Links', disc:'Consult a doctor before intense training if you have a health condition.',
       sheetTitle:'Order your plan', name:'Name', phone:'Phone', goal:'Goal', g1:'Build muscle', g2:'Lose fat', g3:'Contest prep', err:'Enter your name and phone.', send:'Continue on WhatsApp',
-      waHello:'Hi Coach Junior, I want to know more about coaching', waOrder:'New order', lPhone:'Phone', lPlan:'Plan', lang:'عربي'
+      waHello:'Hi Coach Junior, I want to know more about coaching', waOrder:'New order', save:'Save', lPhone:'Phone', lPlan:'Plan', lang:'عربي'
     }
   };
 
@@ -866,6 +871,7 @@ html.lenis,html.lenis body{height:auto}
         if (window.gsap && !REDUCE) { var o = { v: from }; el._tw = gsap.to(o, { v: to, duration: .6, ease: 'power2.out', onUpdate: function(){ el.textContent = money(Math.round(o.v)); } }); }
         else el.textContent = money(to);
       });
+      $$('.price .was').forEach(function(el){ el.textContent = money(+el.dataset.p * +dur); });
       setPer();
     });
   });
