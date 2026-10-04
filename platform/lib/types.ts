@@ -95,8 +95,12 @@ export type FormAssignment = {
 
 export type Message = { id: ID; clientId: ID; from: "coach" | "client"; text: string; at: string; read: boolean };
 
+/** progress photo the trainee uploads; image blob stored under `key` */
+export type ProgressPhoto = { id: ID; clientId: ID; date: string; pose: "front" | "side" | "back"; key: string };
+
 export type DB = {
   clients: Client[];
+  photos?: ProgressPhoto[];
   measurements: Measurement[];
   exercises: Exercise[];
   trainingPlans: TrainingPlan[];

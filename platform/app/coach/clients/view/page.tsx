@@ -14,6 +14,7 @@ import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
 import { waLink } from "@/lib/wa";
 import { Creds } from "@/components/Creds";
 import { ActivateSheet } from "@/components/Activate";
+import { ProgressPhotos } from "@/components/ProgressPhotos";
 
 function ClientDetail() {
   const id = useSearchParams().get("id") ?? "";
@@ -139,6 +140,9 @@ function ClientDetail() {
           </>
         ) : <p className="text-muted">{t("noWeightYet")}</p>}
       </div>
+
+      <SectionLabel>{t("progressPhotos")}</SectionLabel>
+      <ProgressPhotos clientId={c.id} />
 
       <div className="mb-3 mt-7 flex items-center justify-between">
         <h2 className="label">{t("forms")}</h2>
