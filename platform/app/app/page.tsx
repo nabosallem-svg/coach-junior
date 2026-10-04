@@ -2,24 +2,21 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, Dumbbell, Salad, Hourglass } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Dumbbell, Salad, Hourglass } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { clientNotices, useMe } from "@/lib/hooks";
 import { daysLeft, fmtDate, planMacros } from "@/lib/calc";
-import { LineChart } from "@/components/charts";
-import { Field, SectionLabel, Segmented, Sheet } from "@/components/ui";
+import { WeightCard } from "@/components/WeightCard";
+import { Field, SectionLabel, Sheet } from "@/components/ui";
 import { noticeIcon, noticeText } from "@/components/ClientShell";
 import { COACH_WA, waLink } from "@/lib/wa";
 import { ProgressPhotos } from "@/components/ProgressPhotos";
-
-type Range = "30" | "90" | "180" | "all";
 
 export default function ClientHome() {
   const { db, update } = useStore();
   const { t, lang, dir } = useI18n();
   const me = useMe()!;
-  const [range, setRange] = useState<Range>("90");
   const [logOpen, setLogOpen] = useState(false);
   const [w, setW] = useState("");
   const [waist, setWaist] = useState("");
@@ -27,14 +24,6 @@ export default function ClientHome() {
 
   const notices = clientNotices(db, me.id);
   const all = db.measurements.filter((m) => m.clientId === me.id).sort((a, b) => a.date.localeCompare(b.date));
-  const from = range === "all" ? (all[0]?.date ?? new Date().toISOString()) : new Date(Date.now() - Number(range) * 86400000).toISOString();
-  const shown = all.filter((m) => m.date >= from.slice(0, 10));
-  const latest = all[all.length - 1];
-  const first = shown[0];
-  const change = latest && first ? latest.weight - first.weight : 0;
-
-  const pts = (key: "weight" | "waist") =>
-    shown.filter((m) => m[key] != null).map((m) => ({ x: new Date(m.date).getTime(), y: m[key] as number, label: fmtDate(m.date, lang, { day: "numeric", month: "short" }) }));
 
   const plan = me.active ? db.trainingPlans.find((p) => p.id === me.trainingPlanId) : undefined;
   const lastLog = db.logs.filter((l) => l.clientId === me.id).sort((a, b) => b.date.localeCompare(a.date))[0];
@@ -137,43 +126,7 @@ export default function ClientHome() {
       ) : (
         <>
       <SectionLabel>{t("progress")}</SectionLabel>
-      <Segmented
-        value={range}
-        onChange={setRange}
-        options={[
-          { value: "30", label: lang === "ar" ? "30 يوم" : "30d" },
-          { value: "90", label: lang === "ar" ? "90 يوم" : "90d" },
-          { value: "180", label: lang === "ar" ? "6 شهور" : "6m" },
-          { value: "all", label: t("all") },
-        ]}
-      />
-      <div className="card mt-3 flex items-center justify-center gap-2 rounded-2xl p-3 text-text-2">
-        <CalendarDays size={18} />
-        <span>{fmtDate(from, lang, { day: "numeric", month: "long", year: "numeric" })} - {fmtDate(new Date().toISOString(), lang, { day: "numeric", month: "long", year: "numeric" })}</span>
-      </div>
-
-      <div className="mb-3 mt-7 flex items-center justify-between">
-        <h2 className="label">{t("measurements")}</h2>
-        <button onClick={() => setLogOpen(true)} className="flex items-center gap-1 text-sm font-bold text-gold"><Plus size={16} /> {t("addReading")}</button>
-      </div>
-
-      <div className="card p-5">
-        <p className="text-text-2">{t("weight")}</p>
-        <div className="flex items-baseline gap-3">
-          <p className="num text-4xl font-black">{latest ? <>{latest.weight} <span className="text-2xl">{t("kg")}</span></> : "—"}</p>
-          {shown.length > 1 && <span className={`num text-sm font-bold ${change <= 0 ? "text-ok" : "text-gold"}`}>{change > 0 ? "+" : ""}{change.toFixed(1)}</span>}
-        </div>
-        <p className="mb-4 text-sm text-muted">{t("readings", { n: shown.length })}</p>
-        <LineChart points={pts("weight")} unit={t("kg")} />
-      </div>
-
-      {pts("waist").length > 1 && (
-        <div className="card mt-3 p-5">
-          <p className="text-text-2">{t("waist")}</p>
-          <p className="num mb-4 text-3xl font-black">{shown.filter((m) => m.waist).at(-1)?.waist} <span className="text-xl">{t("cm")}</span></p>
-          <LineChart points={pts("waist")} unit={t("cm")} height={160} />
-        </div>
-      )}
+      <WeightCard readings={all} goal={me.goal} onLog={() => setLogOpen(true)} />
 
         </>
       )}

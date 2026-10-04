@@ -9,7 +9,7 @@ import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate, targets, type Activity, type Goal } from "@/lib/calc";
 import { clientTargets, intakeInputs } from "@/lib/intake";
-import { LineChart } from "@/components/charts";
+import { WeightCard } from "@/components/WeightCard";
 import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
 import { waLink } from "@/lib/wa";
@@ -240,14 +240,7 @@ function ClientDetail() {
       </div>
 
       <SectionLabel>{t("weight")}</SectionLabel>
-      <div className="card p-4">
-        {ms.length ? (
-          <>
-            <p className="num text-3xl font-black">{ms.at(-1)!.weight} <span className="text-lg">{t("kg")}</span></p>
-            <LineChart points={ms.map((m) => ({ x: new Date(m.date).getTime(), y: m.weight, label: fmtDate(m.date, lang, { day: "numeric", month: "short" }) }))} height={180} />
-          </>
-        ) : <p className="text-muted">{t("noWeightYet")}</p>}
-      </div>
+      <WeightCard readings={ms} goal={c.goal} label={t("weight")} />
 
       <SectionLabel>{t("progressPhotos")}</SectionLabel>
       <ProgressPhotos clientId={c.id} />
