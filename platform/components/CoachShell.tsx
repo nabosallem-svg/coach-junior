@@ -16,7 +16,7 @@ const nav = [
 ] as const;
 
 export function CoachShell({ children }: { children: ReactNode }) {
-  const { ready, session, setSession, db } = useStore();
+  const { ready, session, setSession, db, live } = useStore();
   const { t, toggle } = useI18n();
   const path = usePathname();
   const router = useRouter();
@@ -59,6 +59,8 @@ export function CoachShell({ children }: { children: ReactNode }) {
             <button onClick={logout} aria-label={t("logout")} className="grid size-10 place-items-center rounded-xl border border-line text-muted"><LogOut size={18} /></button>
           </div>
         </header>
+        {/* demo data lives in this browser only; say so, or edits "vanish" when checked from another phone */}
+        {!live && <p className="border-b border-line bg-card/60 px-4 py-1.5 text-center text-xs text-muted">{t("demoDeviceOnly")}</p>}
         <main key={path} className="anim-page mx-auto max-w-5xl px-4 pb-32 pt-6 lg:px-8 lg:pb-12">{children}</main>
       </div>
 
