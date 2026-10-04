@@ -40,6 +40,7 @@ function ClientDetail() {
   const extend = () => {
     const base = new Date(Math.max(Date.now(), new Date(c.subEnd).getTime()));
     base.setMonth(base.getMonth() + 1);
+    if (!confirm(t("confirmExtend", { name: c.name, d: fmtDate(base.toISOString(), lang, { day: "numeric", month: "long", year: "numeric" }) }))) return;
     // only moves the end date; paused stays paused until the coach taps activate
     set({ subEnd: base.toISOString().slice(0, 10) });
     flash(t("extendedTo", { d: fmtDate(base.toISOString(), lang, { day: "numeric", month: "long" }) }));
@@ -74,7 +75,7 @@ function ClientDetail() {
             {c.pending ? (
               <button onClick={() => setAct(true)} className="btn-ghost flex-1">{t("activate")}</button>
             ) : (
-              <button onClick={() => { if (!c.active || confirm(t("confirmPause"))) { set({ active: !c.active }); flash(c.active ? t("pausedNow") : t("activeNow")); } }} className={`flex-1 ${c.active ? "btn-quiet" : "btn-ghost"}`}>{c.active ? t("pause") : t("resume")}</button>
+              <button onClick={() => { if (confirm(t(c.active ? "confirmPause" : "confirmActivate", { name: c.name }))) { set({ active: !c.active }); flash(c.active ? t("pausedNow") : t("activeNow")); } }} className={`flex-1 ${c.active ? "btn-quiet" : "btn-ghost"}`}>{c.active ? t("pause") : t("resume")}</button>
             )}
           </div>
           {pwEdit === null ? (
