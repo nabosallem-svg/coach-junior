@@ -70,6 +70,7 @@ function Session() {
               </button>
               {video === pe.id && <div className="mt-3"><VideoBox ex={ex} /></div>}
               {(pe.note || ex.cue) && <p className="mt-2 border-s-2 border-gold ps-3 text-sm text-text-2">{pe.note || ex.cue}</p>}
+              {pe.rest && <p className="mt-1.5 text-sm font-bold text-gold">{t("restN", { n: pe.rest })}</p>}
 
               <div className="mt-3 grid grid-cols-[2rem_1fr_1fr_1fr_2.75rem] items-center gap-2 text-center text-xs font-bold uppercase text-muted">
                 <span>{t("set")}</span><span>{t("prev")}</span><span>{t("kg")}</span><span>{t("reps")}</span><span />

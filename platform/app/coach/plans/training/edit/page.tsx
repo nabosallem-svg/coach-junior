@@ -2,10 +2,11 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Plus, Trash2, ChevronUp, ChevronDown, Search, Video, X } from "lucide-react";
+import { Plus, Trash2, Search, Video } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { BuilderHeader } from "@/components/BuilderHeader";
+import { ExerciseCard } from "@/components/ExerciseCard";
 import { Pills, Sheet } from "@/components/ui";
 import type { TrainingPlan } from "@/lib/types";
 
@@ -25,11 +26,9 @@ function TrainingBuilder() {
 
   const addDay = () => {
     const nid = uid("d");
-    edit((p) => p.days.push({ id: nid, name: `Day ${p.days.length + 1}`, exercises: [] }));
+    edit((p) => p.days.push({ id: nid, name: `${t("days")} ${p.days.length + 1}`, exercises: [] }));
     setDayId(nid);
   };
-
-  const cell = "input num h-11 bg-bg px-1 py-0 text-center text-base font-bold";
 
   return (
     <div>
@@ -59,41 +58,22 @@ function TrainingBuilder() {
 
           <ol className="mt-4 max-w-3xl space-y-3">
             {day.exercises.map((pe, i) => {
-              const ex = db.exercises.find((e) => e.id === pe.exerciseId);
               return (
-                <li key={pe.id} className="card p-4 hover:border-line-gold">
-                  <div className="flex items-start gap-3">
-                    <span className="num grid size-8 shrink-0 place-items-center rounded-full bg-gold-soft text-sm font-black text-gold">{i + 1}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="flex items-center gap-2 text-[17px] font-black leading-snug"><bdi>{ex?.name}</bdi>{(ex?.videoKey || ex?.videoUrl) && <Video size={15} className="shrink-0 text-gold" />}</p>
-                      {ex && <span className="mt-1 inline-block rounded-full border border-line-gold px-2.5 py-0.5 text-xs font-bold text-gold">{muscle(ex.muscle)}</span>}
-                    </div>
-                    <div className="flex gap-1 text-muted">
-                      <button aria-label="up" disabled={i === 0} onClick={() => editDay((d) => { [d.exercises[i - 1], d.exercises[i]] = [d.exercises[i], d.exercises[i - 1]]; })} className="grid size-8 place-items-center rounded-lg hover:text-text disabled:opacity-30"><ChevronUp size={18} /></button>
-                      <button aria-label="down" disabled={i === day.exercises.length - 1} onClick={() => editDay((d) => { [d.exercises[i + 1], d.exercises[i]] = [d.exercises[i], d.exercises[i + 1]]; })} className="grid size-8 place-items-center rounded-lg hover:text-text disabled:opacity-30"><ChevronDown size={18} /></button>
-                      <button aria-label={t("delete")} onClick={() => editDay((d) => { d.exercises.splice(i, 1); })} className="grid size-8 place-items-center rounded-lg hover:text-danger"><Trash2 size={16} /></button>
-                    </div>
-                  </div>
-                  <input className="input mt-3 border-s-2 border-s-gold/60 text-[15px] text-text-2" dir="auto" placeholder={`${t("note")}${ex?.cue ? ` (${ex.cue})` : ""}`} value={pe.note ?? ""} onChange={(e) => editDay((d) => { d.exercises[i].note = e.target.value || undefined; })} />
-                  <div className="mt-4 grid grid-cols-[2rem_1fr_1fr_1fr_2rem] items-center gap-2 text-center text-[13px] font-bold text-text-2">
-                    <span>{t("set")}</span><span>{t("reps")}</span><span>{t("tempo")}</span><span>{t("rir")}</span><span />
-                  </div>
-                  {pe.sets.map((s, si) => (
-                    <div key={si} className="mt-2 grid grid-cols-[2rem_1fr_1fr_1fr_2rem] items-center gap-2">
-                      <span className="num mx-auto grid size-7 place-items-center rounded-full bg-card-hi text-sm font-bold text-text-2">{si + 1}</span>
-                      <input dir="ltr" className={cell} value={s.reps} placeholder="8-12" onChange={(e) => editDay((d) => { d.exercises[i].sets[si].reps = e.target.value; })} />
-                      <input dir="ltr" className={cell} value={s.tempo ?? ""} placeholder="3-1-1" onChange={(e) => editDay((d) => { d.exercises[i].sets[si].tempo = e.target.value; })} />
-                      <input dir="ltr" className={cell} value={s.rir ?? ""} placeholder="1" onChange={(e) => editDay((d) => { d.exercises[i].sets[si].rir = e.target.value; })} />
-                      <button aria-label={t("delete")} disabled={pe.sets.length === 1} onClick={() => editDay((d) => { d.exercises[i].sets.splice(si, 1); })} className="grid size-8 place-items-center text-muted hover:text-danger disabled:opacity-30"><X size={16} /></button>
-                    </div>
-                  ))}
-                  <button onClick={() => editDay((d) => { const last = d.exercises[i].sets.at(-1); d.exercises[i].sets.push({ ...(last ?? { reps: "8-12" }) }); })} className="mt-3 flex min-h-10 items-center gap-1 rounded-xl px-2 text-sm font-bold text-gold hover:bg-gold-soft"><Plus size={16} /> {t("addSet")}</button>
-                </li>
+                <ExerciseCard
+                  key={pe.id}
+                  pe={pe}
+                  ex={db.exercises.find((e) => e.id === pe.exerciseId)}
+                  index={i}
+                  count={day.exercises.length}
+                  onChange={(fn) => editDay((d) => fn(d.exercises[i]))}
+                  onMove={(dir) => editDay((d) => { const j = i + dir; [d.exercises[j], d.exercises[i]] = [d.exercises[i], d.exercises[j]]; })}
+                  onDelete={() => editDay((d) => { d.exercises.splice(i, 1); })}
+                />
               );
             })}
           </ol>
 
-          <button onClick={() => setPicker(true)} className="mt-4 flex w-full max-w-3xl items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addExercise")}</button>
+          <button onClick={() => setPicker(true)} className="mt-4 flex w-full max-w-3xl items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addExerciseFromLib")}</button>
         </div>
       )}
 
@@ -106,7 +86,7 @@ function TrainingBuilder() {
           {db.exercises.filter((e) => !q || e.name.toLowerCase().includes(q.toLowerCase()) || muscle(e.muscle).includes(q)).map((e) => (
             <li key={e.id}>
               <button
-                onClick={() => { editDay((d) => { d.exercises.push({ id: uid("pe"), exerciseId: e.id, sets: [{ reps: "8-12", tempo: "", rir: "1" }, { reps: "8-12", tempo: "", rir: "1" }, { reps: "8-12", tempo: "", rir: "1" }] }); }); setPicker(false); setQ(""); }}
+                onClick={() => { editDay((d) => { d.exercises.push({ id: uid("pe"), exerciseId: e.id, rest: "90", sets: [{ reps: "8-12" }, { reps: "8-12" }, { reps: "8-12" }] }); }); setPicker(false); setQ(""); }}
                 className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-start hover:bg-card-hi"
               >
                 <span className="font-bold" dir="auto">{e.name}</span>
