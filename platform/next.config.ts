@@ -7,7 +7,8 @@ const basePath = exportMode ? process.env.BASE_PATH ?? "" : "";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  ...(exportMode && { output: "export", basePath, trailingSlash: true }),
+  // the static copy has no server, so the AI macros route (route.ts) is left out of it
+  ...(exportMode && { output: "export", basePath, trailingSlash: true, pageExtensions: ["tsx"] }),
   env: { NEXT_PUBLIC_BASE_PATH: basePath },
 };
 

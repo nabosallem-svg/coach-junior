@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Plus, Trash2, Search, Pencil } from "lucide-react";
+import { Plus, Trash2, Search, Pencil, Sparkles, Loader2 } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { itemMacros, mealMacros, planMacros, unitLabel } from "@/lib/calc";
@@ -23,12 +23,26 @@ function NutritionBuilder() {
   const [pickFor, setPickFor] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [nf, setNf] = useState<NewFood | null>(null);
+  const [ai, setAi] = useState<"idle" | "busy" | "nokey" | "fail">("idle");
   if (!plan) return null;
 
   const edit = (fn: (p: NutritionPlan) => void) => update((d) => fn(d.nutritionPlans.find((p) => p.id === id)!));
   const total = planMacros(db, plan.meals);
   const name = (f: { nameAr: string; nameEn: string }) => (lang === "ar" ? f.nameAr : f.nameEn);
-  const closePicker = () => { setPickFor(null); setQ(""); setNf(null); };
+  const closePicker = () => { setPickFor(null); setQ(""); setNf(null); setAi("idle"); };
+  // asks the server (Claude) for the macros of the typed food and amount; coach can still edit them
+  const estimate = async () => {
+    if (!nf?.name.trim()) return;
+    setAi("busy");
+    try {
+      const r = await fetch("/api/macros", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: nf.name, unit: nf.unit, per: nf.per }) });
+      if (r.status === 503 || r.status === 404) return setAi("nokey");
+      if (!r.ok) return setAi("fail");
+      const j = await r.json();
+      setNf((x) => x && { ...x, kcal: String(j.kcal), p: String(j.p), c: String(j.c), f: String(j.f) });
+      setAi("idle");
+    } catch { setAi("fail"); }
+  };
   const addItem = (foodId: string, qty: number) => edit((p) => { p.meals.find((m) => m.id === pickFor)!.items.push({ id: uid("mi"), foodId, qty }); });
   const saveNew = () => {
     if (!nf || !nf.name.trim()) return;
@@ -120,6 +134,11 @@ function NutritionBuilder() {
                 </div>
               </div>
             </Field>
+            <button type="button" onClick={estimate} disabled={ai === "busy" || !nf.name.trim()} className="btn-ghost w-full">
+              {ai === "busy" ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />} {ai === "busy" ? t("aiBusy") : t("aiEstimate")}
+            </button>
+            {ai === "nokey" && <p className="text-sm text-muted">{t("aiNoKey")}</p>}
+            {ai === "fail" && <p className="text-sm text-danger">{t("aiFail")}</p>}
             <div className="grid grid-cols-3 gap-2">
               {(["p", "c", "f"] as const).map((k) => (
                 <Field key={k} label={`${t(k === "p" ? "protein" : k === "c" ? "carbs" : "fat")} (${t("gram")})`}>
