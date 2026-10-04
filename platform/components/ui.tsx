@@ -58,9 +58,9 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
   );
 }
 
-export function Pills<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[] }) {
+export function Pills<T extends string>({ value, onChange, options, bleed = true }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; bleed?: boolean }) {
   return (
-    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+    <div className={`no-scrollbar flex gap-2 overflow-x-auto ${bleed ? "-mx-4 px-4" : ""}`}>
       {options.map((o) => (
         <button
           key={o.value}

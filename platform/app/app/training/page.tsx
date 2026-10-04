@@ -58,7 +58,7 @@ export default function Training() {
           const prev = prevSets(myLogs, pe.id);
           return (
             <article key={pe.id}>
-              <VideoBox ex={ex} />
+              {(ex.videoKey || ex.videoUrl) && <VideoBox ex={ex} />}
               <div className="mt-3 flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-bold" dir="auto">{ex.name}</h3>

@@ -100,7 +100,7 @@ const dict = {
 
   // forms
   pending: ["مستني ردك", "Pending"],
-  submitted: ["اتبعت", "Submitted"],
+  submitted: ["اتملت", "Submitted"],
   noPending: ["مفيش فورمز مستنية", "No pending forms"],
   noPendingSub: ["الكابتن هيبعتلك فورمز تملاها هنا.", "Your coach will send forms for you to fill out."],
   noSubmitted: ["لسه مبعتش فورمز", "No submitted forms yet"],
@@ -190,7 +190,7 @@ const dict = {
   mealName: ["اسم الوجبة", "Meal name"],
   addFood: ["ضيف صنف", "Add food"],
   qty: ["الكمية", "Qty"],
-  assignedTo: ["متخصصة لـ {n} مشترك", "Assigned to {n}"],
+  assignedTo: ["مخصصة لـ {n} مشترك", "Assigned to {n}"],
   duplicate: ["نسخة", "Duplicate"],
   formTitle: ["عنوان الفورم", "Form title"],
   addQuestion: ["ضيف سؤال", "Add question"],
@@ -202,7 +202,7 @@ const dict = {
   optionsComma: ["الاختيارات (افصل بفاصلة)", "Options (comma separated)"],
   pickExercise: ["اختار تمرين", "Pick an exercise"],
   pickFood: ["اختار صنف", "Pick a food"],
-  days_: ["الأيام", "Days"],
+  days_: ["أيام", "days"],
   confirmDelete: ["متأكد إنك عايز تحذف؟", "Delete this?"],
 
   // auth

@@ -95,23 +95,22 @@ function Library() {
       </button>
       <input ref={bulkRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => { if (e.target.files) bulk(e.target.files); e.target.value = ""; }} />
 
-      <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="mt-5 grid grid-cols-1 gap-2 lg:grid-cols-2">
         {list.map((e) => {
           const has = !!(e.videoKey || e.videoUrl);
           return (
-            <li key={e.id} className="card overflow-hidden p-3">
-              <VideoBox ex={e} />
-              <div className="mt-3 flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="truncate font-bold" dir="auto">{e.name}</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                    <span className="chip py-0.5 text-xs">{muscle(e.muscle)}</span>
-                    <span className={`flex items-center gap-1 ${has ? "text-gold" : "text-muted"}`}>{has ? <Video size={14} /> : <VideoOff size={14} />} {has ? t("hasVideo") : t("noVideoShort")}</span>
-                  </div>
-                  <p className="mt-1 text-xs text-muted">{t("usedIn", { n: used(e.id) })}</p>
-                </div>
-                <button onClick={() => setDraft({ id: e.id, name: e.name, muscle: e.muscle, cue: e.cue ?? "", videoUrl: e.videoUrl ?? "", file: null, videoKey: e.videoKey })} aria-label={t("edit")} className="grid size-9 shrink-0 place-items-center rounded-full border border-line text-muted hover:text-gold"><Pencil size={16} /></button>
-              </div>
+            <li key={e.id}>
+              <button
+                onClick={() => setDraft({ id: e.id, name: e.name, muscle: e.muscle, cue: e.cue ?? "", videoUrl: e.videoUrl ?? "", file: null, videoKey: e.videoKey })}
+                className="card flex w-full items-center gap-3 p-3 text-start hover:border-line-gold"
+              >
+                <span className={`grid size-12 shrink-0 place-items-center rounded-xl ${has ? "bg-gold-soft text-gold" : "bg-card-hi text-muted"}`}>{has ? <Video size={20} /> : <VideoOff size={20} />}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-bold" dir="auto">{e.name}</span>
+                  <span className="mt-0.5 block truncate text-xs text-muted">{muscle(e.muscle)} · {has ? t("hasVideo") : t("noVideoShort")} · {t("usedIn", { n: used(e.id) })}</span>
+                </span>
+                <Pencil size={16} className="shrink-0 text-muted" />
+              </button>
             </li>
           );
         })}
@@ -120,6 +119,7 @@ function Library() {
       <Sheet open={!!draft} onClose={close} title={draft?.id ? t("edit") : t("newExercise")}>
         {draft && (
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); save(); }}>
+            {(() => { const ex = db.exercises.find((x) => x.id === draft.id); return ex && (ex.videoKey || ex.videoUrl) ? <VideoBox ex={ex} /> : null; })()}
             <Field label={t("exerciseName")}><input className="input" dir="auto" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required autoFocus /></Field>
             <Field label={t("muscle")}>
               <select className="input" value={draft.muscle} onChange={(e) => setDraft({ ...draft, muscle: e.target.value as Muscle })}>
