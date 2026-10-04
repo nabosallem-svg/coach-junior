@@ -15,6 +15,7 @@ import { waLink } from "@/lib/wa";
 import { Creds } from "@/components/Creds";
 import { ActivateSheet } from "@/components/Activate";
 import { ProgressPhotos } from "@/components/ProgressPhotos";
+import { setAccountPassword } from "@/lib/accounts";
 
 function ClientDetail() {
   const id = useSearchParams().get("id") ?? "";
@@ -82,7 +83,7 @@ function ClientDetail() {
           {pwEdit === null ? (
             <button onClick={() => setPwEdit(genPassword())} className="mt-3 flex items-center gap-1.5 text-sm font-bold text-gold"><KeyRound size={15} /> {t("resetPassword")}</button>
           ) : (
-            <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const pw = pwEdit.trim(); if (pw.length < 6) return flash(t("minChars")); set({ password: pw }); setPwEdit(null); setNewPw(pw); }}>
+            <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const pw = pwEdit.trim(); if (pw.length < 6) return flash(t("minChars")); setAccountPassword(c.id, pw).then(() => { set({ password: pw }); setPwEdit(null); setNewPw(pw); }, () => flash(t("syncFailed"))); }}>
               <input className="input num min-w-0 flex-1 text-start" dir="ltr" value={pwEdit} onChange={(e) => setPwEdit(e.target.value)} autoFocus />
               <button className="btn-gold shrink-0 px-4">{t("save")}</button>
               <button type="button" onClick={() => setPwEdit(null)} className="btn-quiet shrink-0 px-3">{t("cancel")}</button>

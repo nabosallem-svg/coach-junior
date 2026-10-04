@@ -1,6 +1,6 @@
 # Coach Junior: handoff
 
-> **بالعربي باختصار:** المشروع فيه حاجتين: صفحة الموقع (Landing) في جذر الريبو، ومنصة المشتركين ولوحة الكابتن في فولدر `platform/`. المنصة شغالة دلوقتي على https://coach-junior.vercel.app ببيانات تجريبية محفوظة في المتصفح. الخطوة الجاية الأساسية هي ربط Supabase عشان الحسابات تشتغل من أي موبايل. باسورد الكابتن التجريبي: `junior2026`. كل التفاصيل تحت بالإنجليزي عشان أي AI أو مبرمج يكمل.
+> **بالعربي باختصار:** المشروع فيه حاجتين: صفحة الموقع (Landing) في جذر الريبو، ومنصة المشتركين ولوحة الكابتن في فولدر `platform/`. المنصة شغالة دلوقتي على https://coach-junior.vercel.app ببيانات تجريبية محفوظة في المتصفح. ربط Supabase جاهز في الكود: أول ما تتحط المفاتيح على Vercel الحسابات تشتغل من أي موبايل (خطوات §6). باسورد الكابتن التجريبي: `junior2026`. كل التفاصيل تحت بالإنجليزي عشان أي AI أو مبرمج يكمل.
 
 Repo: `github.com/nabosallem-svg/coach-junior` (default branch `main`). Owner: nabeeh (writes Egyptian Arabic). Coach: كابتن عبد الملك «جونيور», WhatsApp **+20 101 400 7764**.
 
@@ -10,7 +10,7 @@ Repo: `github.com/nabosallem-svg/coach-junior` (default branch `main`). Owner: n
 | --- | --- |
 | `/` (root) | Landing page. `src/index.html` is the source (HTML+CSS+JS in one file), `index.html` is the minified build (`npm run build`). GSAP/ScrollTrigger/Lenis self-hosted in `vendor/`, fonts in `fonts/`, AVIF/WebP photos in `img/`. See root `README.md`. |
 | `platform/` | Trainee app (`/app/*`) and coach panel (`/coach/*`). Next.js 16 (App Router, Turbopack), TypeScript, Tailwind v4, lucide-react. |
-| `platform/supabase/schema.sql` | Draft Postgres schema with RLS and a private `exercise-videos` bucket (not wired yet, see §6). |
+| `platform/supabase/schema.sql` | Supabase schema: `docs` table + RLS + private `media` bucket (wired, see §6). |
 
 ## 2. Run, build, deploy
 
@@ -55,15 +55,26 @@ npx next build && npx next start
 - Pages: `app/page.tsx` login; `app/app/*` trainee (home, nutrition, training, training/session, forms); `app/coach/*` coach (dashboard, clients, clients/view, library, plans + training/nutrition/forms editors). Detail pages use `?id=` so a static export works.
 - Components: `ClientShell`, `CoachShell`, `ExerciseCard`, `Creds`, `Activate`, `ui.tsx` (Sheet, Field, Pills, Segmented, Toast…), `charts.tsx`, `MacroLine`.
 
-## 6. Going live: what's left
+## 6. Going live: Supabase (code is ready, keys pending)
 
-The demo stores everything in the browser, so **a trainee added on the coach's phone can't log in from their own phone yet.** Next step:
+The app has two modes. If the Supabase keys are missing it runs on demo data in the browser, as now. If they are set it switches to live mode: Supabase Auth handles logins, `public.docs` stores the data, and the `media` bucket holds videos and photos.
 
-1. Create a Supabase project, run `supabase/schema.sql`. Update it first: add `owner_id` to `training_plans`/`nutrition_plans`, `rest` on plan exercises (they're inside the JSON days column), and drop the self-sign-up parts of `handle_new_user` (accounts are created by the coach now).
-2. Coach "إضافة مشترك" → a server route with the service key calling `auth.admin.createUser({ phone, password, phone_confirm: true })` + insert into `clients`. Trainees sign in with `signInWithPassword({ phone, password })`. Reset password = `auth.admin.updateUserById`.
-3. Replace `StoreProvider` (`lib/store.tsx`) and `lib/media.ts` with Supabase queries/storage (signed URLs). Pages only use `useStore()` and `useVideoSrc()`, so the swap is contained.
-4. For many/long videos consider Bunny Stream (signed URLs) instead of Supabase storage.
-5. Costs told to the owner: Supabase free → Pro ~$25/mo; Vercel Hobby is non-commercial → Pro ~$20/mo (or Netlify); Bunny ~$1–3/mo; Anthropic key ~ less than a cent per AI food lookup.
+- `lib/supabase.ts`: the client and the `LIVE` flag. Logins are phone + password, stored in Auth as `<last 10 digits>@coach-junior.app` (no SMS provider needed).
+- `lib/sync.ts`: every record is one `docs` row (`coll`, `id`, `client_id`, `data` jsonb). `update()` diffs before and after and upserts or deletes only what changed. Passwords never leave the browser.
+- `lib/accounts.ts` → `app/api/accounts/route.ts` (service key, coach-only): create trainee, reset password, delete.
+- `lib/media.ts`: `videos/<key>` and `photos/<clientId>/<id>.jpg` in the `media` bucket, played through signed URLs.
+- RLS (tested on a local Postgres 16 with a stubbed `auth.uid()`): the coach sees everything. A trainee sees their own client record, food list, assigned plans and those plans' exercises (only while active and in date), and their own logs, weights and photos. A trainee can't write to another trainee's rows.
+
+Setup:
+
+1. Create a Supabase project. In **SQL Editor** run all of `platform/supabase/schema.sql`. It creates the `docs` table, RLS policies and a private `media` bucket.
+2. **Authentication → Users → Add user**: email `coach@coach-junior.app`, the coach's password, "Auto Confirm User" on. Then run:
+   `insert into public.coaches (id) select id from auth.users where email = 'coach@coach-junior.app';`
+3. In Vercel, under **Settings → Environment Variables**, add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` (server only, never `NEXT_PUBLIC_`). Then redeploy. See `platform/.env.example`.
+4. The coach logs in with his password only. His first login copies the starter library (foods, exercises, plan templates). After that he adds trainees as before. `/api/accounts` creates their Supabase login, and they sign in with phone + password from any device.
+
+5. For many/long videos consider Bunny Stream (signed URLs) instead of Supabase storage.
+6. Costs told to the owner: Supabase free → Pro ~$25/mo; Vercel Hobby is non-commercial → Pro ~$20/mo (or Netlify); Bunny ~$1–3/mo; Anthropic key ~ less than a cent per AI food lookup.
 
 ## 7. Status of the owner's recent requests (2026-10-04)
 
@@ -71,7 +82,7 @@ All merged to `main` and live (PRs #6–#19):
 coach-only accounts with own password · full mobile pass and fixes · builder typography/colours · all-Arabic UI · per-trainee plan copies · CSS animations + Windows Arabic font fix · add new food · AI calories (needs `ANTHROPIC_API_KEY`) · video upload asks name + muscle · coach and trainee walkthrough fixes · simpler exercise card with rest · extend vs activate + confirmations · WhatsApp link opens the trainee login, international wa.me numbers.
 
 Open / waiting on the owner:
-- Supabase Project URL + anon key (and service role key for the server route) → §6.
+- Supabase Project URL + anon key + service role key on Vercel, plus the two setup steps in §6.
 - `ANTHROPIC_API_KEY` on Vercel for AI calories.
 - Real coach photos/prices for the landing if not final; a custom domain.
 - Old data in a browser that used an earlier demo version: hard refresh (the DB key version bump resets it).

@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { fmtDate } from "@/lib/calc";
 import type { Client } from "@/lib/types";
+import { deleteAccount } from "@/lib/accounts";
 import { Avatar, Field, Sheet } from "./ui";
 
 export const PACKAGES = [
@@ -85,7 +86,7 @@ export function PendingList({ onActivate }: { onActivate: (c: Client) => void })
             <button onClick={() => onActivate(c)} className="btn-gold min-h-10 px-4 text-sm">{t("activate")}</button>
             <button
               aria-label={t("reject")}
-              onClick={() => { if (confirm(t("confirmDelete"))) update((d) => { d.clients = d.clients.filter((x) => x.id !== c.id); }); }}
+              onClick={() => { if (confirm(t("confirmDelete"))) deleteAccount(c.id).then(() => update((d) => { d.clients = d.clients.filter((x) => x.id !== c.id); }), () => alert(t("syncFailed"))); }}
               className="grid size-10 shrink-0 place-items-center rounded-xl border border-line text-muted hover:text-danger"
             >
               <X size={18} />

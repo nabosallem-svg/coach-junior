@@ -1,12 +1,17 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { DB, ID } from "./types";
 import { makeSeed } from "./seed";
+import { useI18n } from "./i18n";
+import { LIVE, sb, phoneEmail, COACH_EMAIL } from "./supabase";
+import { emptyDB, loadDB, saveDiff, seedIfEmpty } from "./sync";
 
-// Demo backend: the whole database lives in localStorage so the coach side and the
-// client side can be clicked through without a server. Swap this provider for a
-// Supabase-backed one when a project is connected (see supabase/schema.sql).
+// Two backends behind one API:
+// - demo (no Supabase keys): the whole database lives in localStorage so both sides
+//   can be clicked through without a server;
+// - live (NEXT_PUBLIC_SUPABASE_URL + ANON_KEY set): Supabase Auth for logins and the
+//   docs table for data (lib/sync.ts, supabase/schema.sql).
 
 const DB_KEY = "cj-platform-db-v9";
 const SESSION_KEY = "cj-platform-session-v1";
@@ -20,6 +25,10 @@ type Ctx = {
   session: Session;
   setSession: (s: Session) => void;
   reset: () => void;
+  login: (who: "coach" | "client", phone: string, pw: string) => Promise<boolean>;
+  live: boolean;
+  /** last save failed (live only) */
+  syncError: boolean;
 };
 
 const StoreCtx = createContext<Ctx | null>(null);
@@ -42,37 +51,94 @@ function save(key: string, value: unknown) {
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
-  const [db, setDb] = useState<DB>(makeSeed);
+  const [db, setDb] = useState<DB>(LIVE ? emptyDB : makeSeed);
   const [session, setSessionState] = useState<Session>(null);
+  const [syncError, setSyncError] = useState(false);
+  const sessionRef = useRef<Session>(null);
+  sessionRef.current = session;
+
+  // live: who is signed in, then everything RLS lets them read
+  const boot = useCallback(async () => {
+    const { data } = await sb().auth.getSession();
+    const user = data.session?.user;
+    if (!user) {
+      setSessionState(null);
+      setDb(emptyDB());
+      return;
+    }
+    const { data: coach } = await sb().from("coaches").select("id").eq("id", user.id).maybeSingle();
+    if (coach) await seedIfEmpty(makeSeed()).catch(() => {});
+    setDb(await loadDB().catch(() => emptyDB()));
+    setSessionState(coach ? { role: "coach" } : { role: "client", clientId: user.id });
+  }, []);
 
   useEffect(() => {
+    if (LIVE) {
+      boot().finally(() => setReady(true));
+      return;
+    }
     const stored = load<DB>(DB_KEY);
     if (stored) setDb(stored);
     setSessionState(load<Session>(SESSION_KEY));
     setReady(true);
-  }, []);
+  }, [boot]);
 
   const update = useCallback((fn: (draft: DB) => void) => {
     setDb((prev) => {
       const next = structuredClone(prev);
       fn(next);
-      save(DB_KEY, next);
+      if (LIVE) {
+        const s = sessionRef.current;
+        // StrictMode may run this twice; upserts and deletes are idempotent
+        queueMicrotask(() => saveDiff(prev, next, s?.role === "client" ? s.clientId : undefined).then(() => setSyncError(false), () => setSyncError(true)));
+      } else save(DB_KEY, next);
       return next;
     });
   }, []);
 
   const setSession = useCallback((s: Session) => {
     setSessionState(s);
-    save(SESSION_KEY, s);
+    if (LIVE) {
+      if (!s) sb().auth.signOut().then(() => setDb(emptyDB()));
+    } else save(SESSION_KEY, s);
   }, []);
 
+  const login = useCallback(async (who: "coach" | "client", phone: string, pw: string) => {
+    if (LIVE) {
+      const { error } = await sb().auth.signInWithPassword({ email: who === "coach" ? COACH_EMAIL : phoneEmail(phone), password: pw });
+      if (error) return false;
+      await boot();
+      return true;
+    }
+    if (who === "coach") {
+      if (pw !== COACH_DEMO_PASSWORD) return false;
+      setSession({ role: "coach" });
+      return true;
+    }
+    const c = db.clients.find((x) => normPhone(x.phone) === normPhone(phone) && x.password === pw);
+    if (!c) return false;
+    setSession({ role: "client", clientId: c.id });
+    return true;
+  }, [boot, db.clients, setSession]);
+
   const reset = useCallback(() => {
+    if (LIVE) return;
     const fresh = makeSeed();
     setDb(fresh);
     save(DB_KEY, fresh);
   }, []);
 
-  return <StoreCtx.Provider value={{ ready, db, update, session, setSession, reset }}>{children}</StoreCtx.Provider>;
+  return (
+    <StoreCtx.Provider value={{ ready, db, update, session, setSession, reset, login, live: LIVE, syncError }}>
+      {children}
+      {syncError && <SyncBanner />}
+    </StoreCtx.Provider>
+  );
+}
+
+function SyncBanner() {
+  const { t } = useI18n();
+  return <div role="alert" className="fixed inset-x-0 top-0 z-[60] bg-danger px-4 py-2 text-center text-sm font-bold text-white">{t("syncFailed")}</div>;
 }
 
 export function useStore() {

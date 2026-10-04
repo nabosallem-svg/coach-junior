@@ -45,7 +45,7 @@ export function ProgressPhotos({ clientId, canAdd }: { clientId: string; canAdd?
     const made: ProgressPhoto[] = [];
     for (const f of [...files].filter((x) => x.type.startsWith("image/"))) {
       const id = uid("ph");
-      const key = `${id}-${Date.now()}`;
+      const key = `photos/${clientId}/${id}.jpg`;
       await putVideo(key, await shrinkImage(f));
       made.push({ id, clientId, date, pose, key });
     }
