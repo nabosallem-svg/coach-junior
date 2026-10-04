@@ -2,15 +2,18 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Plus, Trash2, Search } from "lucide-react";
+import { Plus, Trash2, Search, Pencil } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { itemMacros, mealMacros, planMacros, unitLabel } from "@/lib/calc";
 import { BuilderHeader } from "@/components/BuilderHeader";
 import { MacroRing } from "@/components/charts";
 import { MacroLine } from "@/components/MacroLine";
-import { Sheet } from "@/components/ui";
-import type { NutritionPlan } from "@/lib/types";
+import { Field, Sheet } from "@/components/ui";
+import type { Food, FoodGroup, NutritionPlan } from "@/lib/types";
+
+type NewFood = { name: string; group: FoodGroup; unit: Food["unit"]; per: string; kcal: string; p: string; c: string; f: string };
+const GROUPS: FoodGroup[] = ["protein", "carb", "fat", "veg", "fruit", "dairy", "supplement"];
 
 function NutritionBuilder() {
   const id = useSearchParams().get("id") ?? "";
@@ -19,11 +22,24 @@ function NutritionBuilder() {
   const plan = db.nutritionPlans.find((p) => p.id === id);
   const [pickFor, setPickFor] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  const [nf, setNf] = useState<NewFood | null>(null);
   if (!plan) return null;
 
   const edit = (fn: (p: NutritionPlan) => void) => update((d) => fn(d.nutritionPlans.find((p) => p.id === id)!));
   const total = planMacros(db, plan.meals);
   const name = (f: { nameAr: string; nameEn: string }) => (lang === "ar" ? f.nameAr : f.nameEn);
+  const closePicker = () => { setPickFor(null); setQ(""); setNf(null); };
+  const addItem = (foodId: string, qty: number) => edit((p) => { p.meals.find((m) => m.id === pickFor)!.items.push({ id: uid("mi"), foodId, qty }); });
+  const saveNew = () => {
+    if (!nf || !nf.name.trim()) return;
+    const n = (v: string) => parseFloat(v) || 0;
+    const per = n(nf.per) || (nf.unit === "g" || nf.unit === "ml" ? 100 : 1);
+    const kcal = n(nf.kcal) || Math.round(4 * n(nf.p) + 4 * n(nf.c) + 9 * n(nf.f));
+    const fid = uid("f");
+    update((d) => { d.foods.push({ id: fid, nameAr: nf.name.trim(), nameEn: nf.name.trim(), group: nf.group, unit: nf.unit, per, kcal, p: n(nf.p), c: n(nf.c), f: n(nf.f) }); });
+    addItem(fid, per);
+    closePicker();
+  };
 
   return (
     <div>
@@ -52,7 +68,10 @@ function NutritionBuilder() {
           return (
             <section key={meal.id} className="card p-4">
               <div className="flex items-center gap-2">
-                <input aria-label={t("mealName")} className="input font-bold" dir="auto" value={meal.name} onChange={(e) => edit((p) => { p.meals[mi].name = e.target.value; })} />
+                <div className="relative min-w-0 flex-1">
+                  <Pencil size={15} className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-gold" />
+                  <input aria-label={t("mealName")} placeholder={t("mealNamePh")} className="input pe-9 text-lg font-bold" dir="auto" value={meal.name} onChange={(e) => edit((p) => { p.meals[mi].name = e.target.value; })} />
+                </div>
                 <button aria-label={t("delete")} onClick={() => { if (confirm(t("confirmDelete"))) edit((p) => { p.meals.splice(mi, 1); }); }} className="grid size-11 shrink-0 place-items-center rounded-xl border border-line text-muted hover:text-danger"><Trash2 size={16} /></button>
               </div>
               <p className="mt-2 text-sm text-muted"><span className="num">{Math.round(mm.kcal)}</span> {t("kcal")} · <MacroLine m={mm} /></p>
@@ -82,24 +101,68 @@ function NutritionBuilder() {
 
       <button onClick={() => edit((p) => p.meals.push({ id: uid("m"), name: `${t("mealName")} ${p.meals.length + 1}`, items: [] }))} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addMeal")}</button>
 
-      <Sheet open={!!pickFor} onClose={() => setPickFor(null)} title={t("pickFood")}>
-        <div className="relative mb-3">
-          <Search size={18} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
-          <input className="input ps-10" value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
-        </div>
-        <ul className="space-y-1.5">
-          {db.foods.filter((f) => !q || f.nameAr.includes(q) || f.nameEn.toLowerCase().includes(q.toLowerCase())).map((f) => (
-            <li key={f.id}>
-              <button
-                onClick={() => { edit((p) => { p.meals.find((m) => m.id === pickFor)!.items.push({ id: uid("mi"), foodId: f.id, qty: f.per }); }); setPickFor(null); setQ(""); }}
-                className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-start hover:bg-card-hi"
-              >
-                <span className="font-bold">{name(f)}</span>
-                <span className="text-sm text-muted"><span className="num">{f.kcal}</span> {t("kcal")} / <span className="num">{f.per}</span> {unitLabel(f.unit, lang)}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+      <Sheet open={!!pickFor} onClose={closePicker} title={nf ? t("newFood") : t("pickFood")}>
+        {nf ? (
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); saveNew(); }}>
+            <Field label={t("foodName")}><input className="input" dir="auto" value={nf.name} onChange={(e) => setNf({ ...nf, name: e.target.value })} required autoFocus /></Field>
+            <Field label={t("foodGroup")}>
+              <select className="input" value={nf.group} onChange={(e) => setNf({ ...nf, group: e.target.value as FoodGroup })}>
+                {GROUPS.map((g) => <option key={g} value={g}>{t(`g_${g}`)}</option>)}
+              </select>
+            </Field>
+            <Field group label={t("macrosPer")}>
+              <div className="flex gap-2">
+                <input className="input num w-24 text-center" inputMode="decimal" placeholder={nf.unit === "g" || nf.unit === "ml" ? "100" : "1"} value={nf.per} onChange={(e) => setNf({ ...nf, per: e.target.value })} />
+                <div className="grid flex-1 grid-cols-4 gap-1.5">
+                  {(["g", "piece", "ml", "scoop"] as Food["unit"][]).map((u) => (
+                    <button type="button" key={u} onClick={() => setNf({ ...nf, unit: u })} className={`h-11 rounded-xl border text-sm font-bold ${nf.unit === u ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>{unitLabel(u, lang)}</button>
+                  ))}
+                </div>
+              </div>
+            </Field>
+            <div className="grid grid-cols-3 gap-2">
+              {(["p", "c", "f"] as const).map((k) => (
+                <Field key={k} label={`${t(k === "p" ? "protein" : k === "c" ? "carbs" : "fat")} (${t("gram")})`}>
+                  <input className="input num text-center" inputMode="decimal" value={nf[k]} onChange={(e) => setNf({ ...nf, [k]: e.target.value })} />
+                </Field>
+              ))}
+            </div>
+            <Field label={t("kcal")}>
+              <input className="input num text-center" inputMode="decimal" placeholder={String(Math.round(4 * (parseFloat(nf.p) || 0) + 4 * (parseFloat(nf.c) || 0) + 9 * (parseFloat(nf.f) || 0)))} value={nf.kcal} onChange={(e) => setNf({ ...nf, kcal: e.target.value })} />
+            </Field>
+            <p className="text-sm text-muted">{t("kcalAuto")}</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button className="btn-gold">{t("addToMeal")}</button>
+              <button type="button" onClick={() => setNf(null)} className="btn-quiet">{t("back")}</button>
+            </div>
+          </form>
+        ) : (
+          <>
+            <div className="relative mb-3">
+              <Search size={18} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
+              <input className="input ps-10" placeholder={t("searchFood")} value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
+            </div>
+            <button
+              onClick={() => setNf({ name: q, group: "protein", unit: "g", per: "", kcal: "", p: "", c: "", f: "" })}
+              className="mb-2 flex w-full items-center gap-2 rounded-xl border border-dashed border-line-gold px-3 py-3 font-bold text-gold hover:bg-gold-soft"
+            >
+              <Plus size={18} /> {q ? t("addNamedFood", { x: q }) : t("newFood")}
+            </button>
+            <ul className="space-y-1.5">
+              {db.foods.filter((f) => !q || f.nameAr.includes(q) || f.nameEn.toLowerCase().includes(q.toLowerCase())).map((f) => (
+                <li key={f.id}>
+                  <button
+                    onClick={() => { addItem(f.id, f.per); closePicker(); }}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-start hover:bg-card-hi"
+                  >
+                    <span className="font-bold">{name(f)}</span>
+                    <span className="text-sm text-muted"><span className="num">{f.kcal}</span> {t("kcal")} / <span className="num">{f.per}</span> {unitLabel(f.unit, lang)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </Sheet>
     </div>
   );
