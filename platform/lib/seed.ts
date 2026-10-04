@@ -166,16 +166,6 @@ export function makeSeed(): DB {
     swaps: [],
     forms: [
       {
-        id: "fm-weekly", title: "متابعة أسبوعية",
-        questions: [
-          { id: "q1", type: "number", label: "وزنك الصبح النهارده (كجم)" },
-          { id: "q2", type: "scale", label: "التزامك بالأكل من 1 لـ 10" },
-          { id: "q3", type: "scale", label: "التزامك بالتمرين من 1 لـ 10" },
-          { id: "q4", type: "choice", label: "نومك كان عامل إزاي؟", options: ["كويس", "متوسط", "وحش"] },
-          { id: "q5", type: "text", label: "أي ملاحظات أو تعب حاسس بيه؟" },
-        ],
-      },
-      {
         id: "fm-start", title: "استمارة البداية", starter: true,
         questions: [
           { id: "s1", type: "number", label: "الطول (سم)" },
@@ -187,7 +177,6 @@ export function makeSeed(): DB {
       },
     ],
     assignments: [
-      { id: "as1", formId: "fm-weekly", clientId: "c1", sentAt: iso(-1), status: "pending" },
       { id: "as2", formId: "fm-start", clientId: "c1", sentAt: iso(-116), status: "submitted", submittedAt: iso(-115), reviewed: true, answers: { s1: "178", s2: "79.5", s3: "متوسط", s4: "مفيش", s5: "الكبدة" } },
       { id: "as3", formId: "fm-start", clientId: "c3", sentAt: iso(-3), status: "pending" },
     ],

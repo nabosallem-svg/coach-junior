@@ -18,7 +18,6 @@ function ClientDetail() {
   const id = useSearchParams().get("id") ?? "";
   const { db, update } = useStore();
   const { t, lang, dir } = useI18n();
-  const [sendOpen, setSendOpen] = useState(false);
   const [viewAs, setViewAs] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [newPw, setNewPw] = useState<string | null>(null);
@@ -107,7 +106,6 @@ function ClientDetail() {
 
       <div className="mb-3 mt-7 flex items-center justify-between">
         <h2 className="label">{t("forms")}</h2>
-        <button onClick={() => setSendOpen(true)} className="flex items-center gap-1.5 text-sm font-bold text-gold"><Send size={15} className="rtl:-scale-x-100" /> {t("sendForm")}</button>
       </div>
       <ul className="card divide-y divide-line">
         {assigns.length === 0 && <li className="p-4 text-muted">—</li>}
@@ -153,24 +151,6 @@ function ClientDetail() {
         })}
       </ul>
 
-      <Sheet open={sendOpen} onClose={() => setSendOpen(false)} title={t("sendForm")}>
-        <ul className="space-y-2">
-          {db.forms.map((f) => (
-            <li key={f.id}>
-              <button
-                className="card w-full p-3 text-start font-bold hover:border-line-gold"
-                onClick={() => {
-                  update((d) => { d.assignments.push({ id: uid("as"), formId: f.id, clientId: id, sentAt: new Date().toISOString(), status: "pending" }); });
-                  setSendOpen(false);
-                  flash(t("formSent"));
-                }}
-              >
-                {f.title} <span className="text-sm font-medium text-muted">· <span className="num">{f.questions.length}</span> {t("question")}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </Sheet>
 
       <Sheet open={!!viewing} onClose={() => setViewAs(null)} title={db.forms.find((f) => f.id === viewing?.formId)?.title ?? ""}>
         {viewing && <FormView form={db.forms.find((f) => f.id === viewing.formId)!} answers={viewing.answers} />}
