@@ -21,6 +21,7 @@ function ClientDetail() {
   const [viewAs, setViewAs] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [newPw, setNewPw] = useState<string | null>(null);
+  const [pwEdit, setPwEdit] = useState<string | null>(null);
   const [act, setAct] = useState(false);
   const c = db.clients.find((x) => x.id === id);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
@@ -75,7 +76,15 @@ function ClientDetail() {
               <button onClick={() => set({ active: !c.active })} className="btn-quiet flex-1">{c.active ? t("pause") : t("resume")}</button>
             )}
           </div>
-          <button onClick={() => { const pw = genPassword(); set({ password: pw }); setNewPw(pw); }} className="mt-2 flex items-center gap-1.5 text-sm font-bold text-gold"><KeyRound size={15} /> {t("resetPassword")}</button>
+          {pwEdit === null ? (
+            <button onClick={() => setPwEdit(genPassword())} className="mt-3 flex items-center gap-1.5 text-sm font-bold text-gold"><KeyRound size={15} /> {t("resetPassword")}</button>
+          ) : (
+            <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const pw = pwEdit.trim(); if (pw.length < 6) return flash(t("minChars")); set({ password: pw }); setPwEdit(null); setNewPw(pw); }}>
+              <input className="input num min-w-0 flex-1 text-start" dir="ltr" value={pwEdit} onChange={(e) => setPwEdit(e.target.value)} autoFocus />
+              <button className="btn-gold shrink-0 px-4">{t("save")}</button>
+              <button type="button" onClick={() => setPwEdit(null)} className="btn-quiet shrink-0 px-3">{t("cancel")}</button>
+            </form>
+          )}
         </section>
 
         <section className="card space-y-3 p-4">
