@@ -176,7 +176,7 @@ export function makeSeed(): DB {
         ],
       },
       {
-        id: "fm-start", title: "استمارة البداية",
+        id: "fm-start", title: "استمارة البداية", starter: true,
         questions: [
           { id: "s1", type: "number", label: "الطول (سم)" },
           { id: "s2", type: "number", label: "الوزن (كجم)" },

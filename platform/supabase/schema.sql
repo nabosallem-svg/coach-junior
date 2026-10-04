@@ -3,9 +3,10 @@
 -- Roles: one coach (profiles.role = 'coach'); clients only see their own rows.
 --
 -- Accounts: trainees sign up themselves (auth.signUp with phone + password and
--- { data: { name, goal } }). The trigger below creates their profile and a
--- PENDING clients row. They can sign in but RLS shows them nothing until the
--- coach activates them (active = true, package dates set). The coach can also
+-- { data: { name, goal } }). The trigger below creates their profile, a
+-- PENDING clients row and sends them the starter forms. They get in straight
+-- away (forms + messages work); plans and videos stay hidden by RLS until the
+-- coach activates them (active = true, package dates, plans). The coach can also
 -- create accounts himself via auth.admin.createUser from a server route.
 -- Supabase stores only a bcrypt hash of the password.
 
@@ -70,6 +71,7 @@ begin
   insert into profiles (id, role, name, phone)
   values (new.id, 'client', coalesce(new.raw_user_meta_data->>'name', ''), new.phone);
   insert into clients (id, goal) values (new.id, new.raw_user_meta_data->>'goal');
+  insert into form_assignments (form_id, client_id) select id, new.id from forms where starter;
   return new;
 end $$;
 create trigger on_auth_user_created after insert on auth.users
@@ -105,6 +107,7 @@ create table public.swaps (
 create table public.forms (
   id uuid primary key default gen_random_uuid(),
   title text not null,
+  starter boolean not null default false,   -- sent to every new sign-up
   questions jsonb not null default '[]'
 );
 

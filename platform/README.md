@@ -29,7 +29,7 @@ There is no backend yet. All data lives in the browser (`localStorage`, uploaded
 
 ## Accounts
 
-Each trainee signs up with their name, phone and their own password. A new sign-up lands in **New sign-ups** on the coach dashboard and sees only a waiting screen until the coach activates it (package + plans). The coach can also add a client himself; the panel then generates a password and sends it on WhatsApp in one tap. "New password" on the client page resets it, and the client can change it from the avatar menu. A paused client can't sign in.
+Each trainee signs up with their name, phone and their own password. They get in straight away, see "your coach is preparing your plan", fill the starting form and can chat with the coach. The sign-up shows under **New sign-ups** on the coach dashboard; activating it (package + training/nutrition plans in one step) makes the plans and videos appear. The coach can also add a client himself; the panel then generates a password and sends it on WhatsApp in one tap. "New password" on the client page resets it, and the client can change it from the avatar menu. A paused client can't sign in.
 
 With Supabase, a server route creates the user with `auth.admin.createUser({ phone, password, phone_confirm: true })` (no SMS cost) and clients sign in with `signInWithPassword`. RLS limits every row to its owner, and a client can only open videos of exercises in their own assigned plan while their subscription is active.
 

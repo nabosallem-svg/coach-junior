@@ -25,7 +25,7 @@ export default function Nutrition() {
   const { db, update } = useStore();
   const { t, lang } = useI18n();
   const me = useMe()!;
-  const plan = db.nutritionPlans.find((p) => p.id === me.nutritionPlanId);
+  const plan = me.active ? db.nutritionPlans.find((p) => p.id === me.nutritionPlanId) : undefined;
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [swapItem, setSwapItem] = useState<MealItem | null>(null);
   const [shop, setShop] = useState(false);

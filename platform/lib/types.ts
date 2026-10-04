@@ -77,7 +77,8 @@ export type Swap = { clientId: ID; itemId: ID; foodId: ID; qty: number };
 
 export type QuestionType = "text" | "number" | "choice" | "scale";
 export type Question = { id: ID; type: QuestionType; label: string; options?: string[] };
-export type FormTemplate = { id: ID; title: string; questions: Question[] };
+/** starter forms are sent automatically to every new sign-up */
+export type FormTemplate = { id: ID; title: string; questions: Question[]; starter?: boolean };
 export type FormAssignment = {
   id: ID;
   formId: ID;

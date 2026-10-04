@@ -31,9 +31,9 @@ const dict = {
 
   // entry
   entryTitle: ["منصة كوتش جونيور", "Coach Junior Platform"],
-  entrySub: ["خطتك، أكلك، تمرينك والمتابعة مع الكوتش في مكان واحد.", "Your plan, meals, workouts and coach check-ins in one place."],
+  entrySub: ["خطتك، أكلك، تمرينك والمتابعة مع الكابتن في مكان واحد.", "Your plan, meals, workouts and coach check-ins in one place."],
   enterClient: ["دخول كمشترك", "Sign in as client"],
-  enterCoach: ["دخول الكوتش", "Coach sign in"],
+  enterCoach: ["دخول الكابتن", "Coach sign in"],
   demoNote: ["نسخة تجريبية ببيانات وهمية. أي تعديل بيتحفظ على الجهاز ده بس.", "Demo with sample data. Changes are saved on this device only."],
   resetDemo: ["رجّع البيانات التجريبية", "Reset demo data"],
   chooseClient: ["اختار المشترك", "Choose a client"],
@@ -43,9 +43,9 @@ const dict = {
   subExpiring: ["اشتراكك قرب يخلص", "Your subscription is ending soon"],
   subExpiringSub: ["فاضل {n} يوم. جدد عشان المتابعة متقفش.", "{n} days left. Renew to keep your coaching going."],
   subExpired: ["اشتراكك خلص", "Your subscription has ended"],
-  subExpiredSub: ["كلم الكوتش عشان تجدد.", "Message your coach to renew."],
+  subExpiredSub: ["كلم الكابتن عشان تجدد.", "Message your coach to renew."],
   pendingFormsCta: ["عندك {n} فورم مستني ردك", "You have {n} form(s) to fill"],
-  unreadCta: ["عندك {n} رسالة جديدة من الكوتش", "{n} new message(s) from your coach"],
+  unreadCta: ["عندك {n} رسالة جديدة من الكابتن", "{n} new message(s) from your coach"],
   renewWa: ["جدد على واتساب", "Renew on WhatsApp"],
   subscription: ["الاشتراك", "Subscription"],
   package: ["الباقة", "Package"],
@@ -61,7 +61,7 @@ const dict = {
   todayWorkout: ["تمرين النهارده", "Today's workout"],
   todayMeals: ["أكل النهارده", "Today's meals"],
   eatenOf: ["{a} من {b} سعرة", "{a} of {b} kcal"],
-  noPlanYet: ["الكوتش لسه بيجهز خطتك", "Your coach is preparing your plan"],
+  noPlanYet: ["الكابتن لسه بيجهز خطتك", "Your coach is preparing your plan"],
   noPlanYetSub: ["هتظهر هنا أول ما تتبعت.", "It will show up here once it's sent."],
 
   // nutrition
@@ -100,7 +100,7 @@ const dict = {
   pending: ["مستني ردك", "Pending"],
   submitted: ["اتبعت", "Submitted"],
   noPending: ["مفيش فورمز مستنية", "No pending forms"],
-  noPendingSub: ["الكوتش هيبعتلك فورمز تملاها هنا.", "Your coach will send forms for you to fill out."],
+  noPendingSub: ["الكابتن هيبعتلك فورمز تملاها هنا.", "Your coach will send forms for you to fill out."],
   noSubmitted: ["لسه مبعتش فورمز", "No submitted forms yet"],
   sentOn: ["اتبعت {d}", "Sent {d}"],
   submittedOn: ["اترد عليه {d}", "Submitted {d}"],
@@ -108,8 +108,8 @@ const dict = {
   required: ["جاوب على كل الأسئلة", "Please answer every question"],
 
   // messages
-  yourCoach: ["الكوتش", "Your coach"],
-  chatWithCoach: ["كلم الكوتش", "Chat with your coach"],
+  yourCoach: ["الكابتن", "Your coach"],
+  chatWithCoach: ["كلم الكابتن", "Chat with your coach"],
   noMessages: ["لسه مفيش رسائل", "No messages yet"],
   noMessagesSub: ["ابعت رسالة للكوتش من تحت.", "Send a message to your coach below."],
   typeMessage: ["اكتب رسالة…", "Type a message…"],
@@ -121,7 +121,7 @@ const dict = {
   library: ["مكتبة الفيديوهات", "Video library"],
   libraryShort: ["الفيديوهات", "Videos"],
   plans: ["الخطط", "Plans"],
-  coachPanel: ["لوحة الكوتش", "Coach panel"],
+  coachPanel: ["لوحة الكابتن", "Coach panel"],
 
   // coach dashboard
   activeClients: ["مشتركين فعالين", "Active clients"],
@@ -207,8 +207,8 @@ const dict = {
   password: ["كلمة السر", "Password"],
   signIn: ["دخول", "Sign in"],
   wrongLogin: ["رقم الموبايل أو كلمة السر غلط", "Wrong phone or password"],
-  accountPaused: ["حسابك موقوف، كلم الكوتش", "Your account is paused, message your coach"],
-  coachPassword: ["كلمة سر الكوتش", "Coach password"],
+  accountPaused: ["حسابك موقوف، كلم الكابتن", "Your account is paused, message your coach"],
+  coachPassword: ["كلمة سر الكابتن", "Coach password"],
   demoAccounts: ["حسابات التجربة", "Demo accounts"],
   credsTitle: ["بيانات دخول المشترك", "Client login details"],
   credsNote: ["ابعتهم للمشترك. كلمة السر مش هتظهر تاني، ولو نسيها اعمل واحدة جديدة.", "Send these to the client. The password won't be shown again; reset it if they forget."],
@@ -244,6 +244,11 @@ const dict = {
   pause: ["إيقاف", "Pause"],
   resume: ["تفعيل", "Activate"],
   paused: ["موقوف", "Paused"],
+  welcome: ["أهلاً {name} 👋", "Welcome {name} 👋"],
+  preparingTitle: ["الكابتن بيجهزلك خطتك", "Your coach is preparing your plan"],
+  preparingSub: ["املأ استمارة البداية عشان الكابتن يعرف مستواك وهدفك، وتقدر تكلمه من الرسائل. أول ما يفعّل اشتراكك هتلاقي التمرين والأكل هنا.", "Fill in the starting form so the coach knows your level and goal, and chat with him in Messages. Once he activates your subscription your training and meals appear here."],
+  fillStartForm: ["املأ استمارة البداية", "Fill the starting form"],
+  starterForm: ["تتبعت لكل مشترك جديد تلقائي", "Sent to every new sign-up automatically"],
   // coach messages
   conversations: ["المحادثات", "Conversations"],
   noConversations: ["مفيش محادثات لسه", "No conversations yet"],

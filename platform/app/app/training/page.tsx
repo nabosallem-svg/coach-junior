@@ -15,7 +15,7 @@ export default function Training() {
   const { db } = useStore();
   const { t, lang, muscle } = useI18n();
   const me = useMe()!;
-  const plan = db.trainingPlans.find((p) => p.id === me.trainingPlanId);
+  const plan = me.active ? db.trainingPlans.find((p) => p.id === me.trainingPlanId) : undefined;
   const myLogs = db.logs.filter((l) => l.clientId === me.id);
   const lastLog = [...myLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
   const defaultDay = plan ? plan.days[(Math.max(-1, plan.days.findIndex((d) => d.id === lastLog?.dayId)) + 1) % plan.days.length]?.id : undefined;

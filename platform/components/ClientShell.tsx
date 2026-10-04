@@ -41,8 +41,8 @@ export function ClientShell({ children }: { children: ReactNode }) {
   }, [ready, session, me, router]);
 
   if (!ready || !me) return null;
-  if (!me.active) {
-    const pending = !!me.pending;
+  if (!me.active && !me.pending) {
+    const pending = false;
     return (
       <div className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
         <img src={asset("/img/logo.webp")} alt="" width={96} height={96} className="mb-6 rounded-full" />

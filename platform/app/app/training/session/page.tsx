@@ -17,7 +17,7 @@ function Session() {
   const me = useMe()!;
   const router = useRouter();
   const params = useSearchParams();
-  const plan = db.trainingPlans.find((p) => p.id === me.trainingPlanId);
+  const plan = me.active ? db.trainingPlans.find((p) => p.id === me.trainingPlanId) : undefined;
   const day = plan?.days.find((d) => d.id === params.get("day")) ?? plan?.days[0];
   const myLogs = db.logs.filter((l) => l.clientId === me.id);
   const [sets, setSets] = useState<Record<string, LoggedSet[]>>(() =>
