@@ -1,0 +1,101 @@
+"use client";
+
+import Link from "next/link";
+import { Users, CalendarClock, MessageSquare, ClipboardCheck, Upload, UserPlus, Dumbbell, ChevronLeft, ChevronRight } from "lucide-react";
+import { useStore } from "@/lib/store";
+import { useI18n } from "@/lib/i18n";
+import { daysLeft, fmtDate } from "@/lib/calc";
+import { Avatar, SectionLabel } from "@/components/ui";
+
+export default function CoachHome() {
+  const { db } = useStore();
+  const { t, lang, dir } = useI18n();
+  const Chevron = dir === "rtl" ? ChevronLeft : ChevronRight;
+  const active = db.clients.filter((c) => c.active && daysLeft(c.subEnd) >= 0);
+  const expiring = db.clients.filter((c) => { const d = daysLeft(c.subEnd); return d <= 7; });
+  const unread = db.messages.filter((m) => m.from === "client" && !m.read);
+  const newForms = db.assignments.filter((a) => a.status === "submitted" && !a.reviewed);
+  const noPlan = db.clients.filter((c) => c.active && (!c.trainingPlanId || !c.nutritionPlanId));
+
+  const stats = [
+    { label: t("activeClients"), n: active.length, icon: Users, href: "/coach/clients" },
+    { label: t("expiringSoon"), n: expiring.length, icon: CalendarClock, href: "/coach/clients" },
+    { label: t("unreadMessages"), n: unread.length, icon: MessageSquare, href: "/coach/messages" },
+    { label: t("formsToReview"), n: newForms.length, icon: ClipboardCheck, href: "/coach/clients" },
+  ];
+
+  type Item = { id: string; clientId: string; text: string; href: string; tone: "red" | "gold" };
+  const attention: Item[] = [
+    ...expiring.map((c) => ({ id: `e${c.id}`, clientId: c.id, text: daysLeft(c.subEnd) >= 0 ? t("daysLeftN", { n: daysLeft(c.subEnd) }) : t("expiredN", { n: -daysLeft(c.subEnd) }), href: `/coach/clients/${c.id}`, tone: "red" as const })),
+    ...[...new Set(unread.map((m) => m.clientId))].map((id) => ({ id: `m${id}`, clientId: id, text: unread.filter((m) => m.clientId === id).at(-1)!.text, href: `/coach/messages/${id}`, tone: "gold" as const })),
+    ...newForms.map((a) => ({ id: `f${a.id}`, clientId: a.clientId, text: `${t("formsToReview")}: ${db.forms.find((f) => f.id === a.formId)?.title}`, href: `/coach/clients/${a.clientId}`, tone: "gold" as const })),
+    ...noPlan.map((c) => ({ id: `p${c.id}`, clientId: c.id, text: t("noPlanAssigned"), href: `/coach/clients/${c.id}`, tone: "gold" as const })),
+  ].filter((it, i, arr) => arr.findIndex((x) => x.clientId === it.clientId) === i);
+
+  const activity = db.logs
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5)
+    .map((l) => ({ l, c: db.clients.find((c) => c.id === l.clientId), d: db.trainingPlans.find((p) => p.id === l.planId)?.days.find((x) => x.id === l.dayId) }));
+
+  return (
+    <div>
+      <h1 className="h1">{t("dashboard")}</h1>
+
+      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map(({ label, n, icon: Icon, href }) => (
+          <Link key={label} href={href} className="card p-4 hover:border-line-gold">
+            <Icon size={20} className="text-gold" />
+            <p className="num mt-3 text-3xl font-black">{n}</p>
+            <p className="text-sm text-muted">{label}</p>
+          </Link>
+        ))}
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <Link href="/coach/library?upload=1" className="btn-gold"><Upload size={18} /> {t("uploadVideo")}</Link>
+        <Link href="/coach/clients?add=1" className="btn-ghost"><UserPlus size={18} /> {t("addClient")}</Link>
+      </div>
+
+      <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+        <div>
+          <SectionLabel>{t("needsAttention")}</SectionLabel>
+          {attention.length === 0 ? (
+            <p className="card p-4 text-muted">{t("allGood")}</p>
+          ) : (
+            <ul className="space-y-2">
+              {attention.map((it) => {
+                const c = db.clients.find((x) => x.id === it.clientId);
+                return (
+                  <li key={it.id}>
+                    <Link href={it.href} className="card flex items-center gap-3 p-3 hover:border-line-gold">
+                      <Avatar name={c?.name ?? "?"} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-bold">{c?.name}</span>
+                        <span className={`block truncate text-sm ${it.tone === "red" ? "text-danger" : "text-muted"}`}>{it.text}</span>
+                      </span>
+                      <Chevron size={18} className="text-muted" />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+        <div>
+          <SectionLabel>{t("recentActivity")}</SectionLabel>
+          <ul className="card divide-y divide-line">
+            {activity.length === 0 && <li className="p-4 text-muted">—</li>}
+            {activity.map(({ l, c, d }) => (
+              <li key={l.id} className="flex items-center gap-3 p-3">
+                <span className="grid size-9 place-items-center rounded-full bg-gold-soft text-gold"><Dumbbell size={16} /></span>
+                <span className="flex-1 text-sm"><b>{c?.name}</b> {t("loggedWorkout", { x: d?.name ?? "" })}</span>
+                <span className="text-xs text-muted">{fmtDate(l.date, lang, { day: "numeric", month: "short" })}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
