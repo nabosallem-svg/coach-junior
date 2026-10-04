@@ -79,7 +79,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
         </header>
       )}
 
-      <main className={workout ? "" : "px-4 pb-32 pt-6"}>{children}</main>
+      <main key={path} className={`anim-page ${workout ? "" : "px-4 pb-32 pt-6"}`}>{children}</main>
 
       {!workout && (
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">

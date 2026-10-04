@@ -42,7 +42,7 @@ export function LineChart({ points, unit = "", height = 200 }: { points: Point[]
         </g>
       ))}
       {points.length > 1 && <path d={area} fill={`url(#${gid})`} />}
-      {points.length > 1 && <path d={path} fill="none" stroke="var(--color-gold)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />}
+      {points.length > 1 && <path d={path} pathLength={1} className="anim-draw" fill="none" stroke="var(--color-gold)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />}
       {points.map((p, i) => (
         <circle key={i} cx={sx(p.x)} cy={sy(p.y)} r={i === points.length - 1 ? 4.5 : 2.5} fill={i === points.length - 1 ? "var(--color-gold)" : "var(--color-bg)"} stroke="var(--color-gold)" strokeWidth="2" />
       ))}
