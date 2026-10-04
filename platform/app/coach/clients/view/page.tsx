@@ -79,7 +79,7 @@ function ClientDetail() {
       const form = intake && db.forms.find((f) => f.id === intake.formId);
       const answers = form ? Object.fromEntries(form.questions.map((q) => [q.label, intake!.answers![q.id] ?? ""])) : {};
       const r = await aiTask<{ name?: string; meals?: { name: string; items: { foodId: string; qty: number }[] }[] }>("mealplan", {
-        client: { goal: c.goal, latestWeightKg: ms.at(-1)?.weight, intake: answers, ...(c.targets && { dailyTargets: { kcal: c.targets.kcal, proteinG: c.targets.p, carbsG: c.targets.c, fatG: c.targets.f } }) },
+        client: { goal: c.goal, latestWeightKg: ms.at(-1)?.weight, intake: answers, ...(needs && { dailyTargets: { kcal: needs.kcal, proteinG: needs.p, carbsG: needs.c, fatG: needs.f } }) },
         foods: db.foods.map((f) => ({ id: f.id, name: lang === "ar" ? f.nameAr : f.nameEn, unit: f.unit, per: f.per, kcal: f.kcal, p: f.p, c: f.c, f: f.f })),
       }, lang);
       const meals = (r.meals ?? []).map((m) => ({ id: uid("m"), name: String(m.name ?? ""), items: (m.items ?? []).filter((it) => db.foods.some((f) => f.id === it.foodId) && Number(it.qty) > 0).map((it) => ({ id: uid("mi"), foodId: it.foodId, qty: Math.round(Number(it.qty) * 10) / 10 })) })).filter((m) => m.items.length);
