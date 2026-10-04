@@ -45,6 +45,7 @@ export default function Entry() {
       const id = uid("c");
       update((d) => {
         d.clients.push({ id, name: name.trim(), phone: phone.trim(), password: pw, goal: goal.trim(), packageName: "", subStart: "", subEnd: "", active: false, pending: true, signedUpAt: new Date().toISOString() });
+        for (const f of d.forms.filter((x) => x.starter)) d.assignments.push({ id: uid("as"), formId: f.id, clientId: id, sentAt: new Date().toISOString(), status: "pending" });
       });
       setSession({ role: "client", clientId: id });
       return router.push("/app");

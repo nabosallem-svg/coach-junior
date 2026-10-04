@@ -35,7 +35,7 @@ export default function ClientHome() {
   const pts = (key: "weight" | "waist") =>
     shown.filter((m) => m[key] != null).map((m) => ({ x: new Date(m.date).getTime(), y: m[key] as number, label: fmtDate(m.date, lang, { day: "numeric", month: "short" }) }));
 
-  const plan = db.trainingPlans.find((p) => p.id === me.trainingPlanId);
+  const plan = me.active ? db.trainingPlans.find((p) => p.id === me.trainingPlanId) : undefined;
   const lastLog = db.logs.filter((l) => l.clientId === me.id).sort((a, b) => b.date.localeCompare(a.date))[0];
   const nextDay = useMemo(() => {
     if (!plan) return undefined;
@@ -43,7 +43,8 @@ export default function ClientHome() {
     return plan.days[(i + 1) % plan.days.length];
   }, [plan, lastLog]);
 
-  const np = db.nutritionPlans.find((p) => p.id === me.nutritionPlanId);
+  const np = me.active ? db.nutritionPlans.find((p) => p.id === me.nutritionPlanId) : undefined;
+  const starter = db.assignments.find((a) => a.clientId === me.id && a.status === "pending" && db.forms.find((f) => f.id === a.formId)?.starter);
   const today = new Date().toISOString().slice(0, 10);
   const total = np ? planMacros(db, np.meals, me.id).kcal : 0;
   const eaten = np
@@ -53,9 +54,20 @@ export default function ClientHome() {
 
   return (
     <div>
-      <h1 className="h1">{t("home")}</h1>
+      <h1 className="h1">{me.pending ? t("welcome", { name: me.name.split(" ")[0] }) : t("home")}</h1>
 
-      {notices.length > 0 && (
+      {me.pending && (
+        <section className="mt-5 rounded-3xl border border-line-gold bg-gold-soft/40 p-5">
+          <h2 className="text-xl font-black text-gold">{t("preparingTitle")}</h2>
+          <p className="mt-2 text-text-2">{t("preparingSub")}</p>
+          <div className="mt-4 grid gap-2">
+            {starter && <Link href={`/app/forms/fill?id=${starter.id}`} className="btn-gold">{t("fillStartForm")}</Link>}
+            <Link href="/app/messages" className="btn-ghost">{t("chatWithCoach")}</Link>
+          </div>
+        </section>
+      )}
+
+      {notices.length > 0 && !me.pending && (
         <>
           <SectionLabel>{t("actionNeeded")}</SectionLabel>
           <div className="space-y-2">
@@ -82,7 +94,7 @@ export default function ClientHome() {
         </>
       )}
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      {!me.pending && <div className="mt-5 grid grid-cols-2 gap-3">
         <Link href="/app/training" className="card p-4 hover:border-line-gold">
           <Dumbbell size={20} className="text-gold" />
           <p className="mt-2 text-sm text-muted">{t("todayWorkout")}</p>
@@ -94,9 +106,9 @@ export default function ClientHome() {
           <p className="font-bold">{np ? t("eatenOf", { a: Math.round(eaten), b: Math.round(total) }) : "—"}</p>
           {np && <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-card-hi"><div className="h-full rounded-full bg-gold" style={{ width: `${Math.min(100, (eaten / (total || 1)) * 100)}%` }} /></div>}
         </Link>
-      </div>
+      </div>}
 
-      <div className="card mt-3 flex items-center justify-between p-4">
+      {!me.pending && <div className="card mt-3 flex items-center justify-between p-4">
         <div>
           <p className="text-sm text-muted">{t("subscription")} · {t("package")} <span className="num">{me.packageName}</span></p>
           <p className="font-bold">{t("endsOn")} {fmtDate(me.subEnd, lang)}</p>
@@ -104,7 +116,7 @@ export default function ClientHome() {
         <span className={`num rounded-full px-3 py-1 text-sm font-bold ${left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>
           {left > 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}
         </span>
-      </div>
+      </div>}
 
       <SectionLabel>{t("progress")}</SectionLabel>
       <Segmented

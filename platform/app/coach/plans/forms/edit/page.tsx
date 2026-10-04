@@ -27,6 +27,11 @@ function FormBuilder() {
         d.assignments = d.assignments.filter((a) => a.formId !== id || a.status === "submitted");
       })} />
 
+      <label className="card mt-4 flex items-center gap-3 p-3">
+        <input type="checkbox" className="size-5 accent-[var(--color-gold)]" checked={!!form.starter} onChange={(e) => edit((f) => { f.starter = e.target.checked; })} />
+        <span className="text-sm font-bold">{t("starterForm")}</span>
+      </label>
+
       <ol className="mt-5 space-y-3">
         {form.questions.map((q, i) => (
           <li key={q.id} className="card space-y-3 p-4">
