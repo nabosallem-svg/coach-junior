@@ -63,7 +63,10 @@ export default function Nutrition() {
 
   return (
     <div>
-      <h1 className="h1">{plan.name}</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="h1 min-w-0" dir="auto">{plan.name}</h1>
+        <button onClick={() => setShop(true)} aria-label={t("shoppingList")} className="btn-ghost size-11 shrink-0 p-0"><ShoppingCart size={20} /></button>
+      </div>
 
       <div className="mt-6 flex items-center gap-5">
         <MacroRing {...total} label={t("kcal")} />
@@ -148,11 +151,6 @@ export default function Nutrition() {
         })}
       </div>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-24 z-20 flex justify-center">
-        <button onClick={() => setShop(true)} className="btn-gold pointer-events-auto min-h-13 rounded-full px-7 text-lg shadow-[0_10px_30px_rgba(0,0,0,.6)]">
-          <ShoppingCart size={20} /> {t("shoppingList")}
-        </button>
-      </div>
 
       <Sheet open={!!swapItem} onClose={() => setSwapItem(null)} title={t("swapTitle")}>
         {swapItem && swapCtx && original && (

@@ -65,8 +65,8 @@ function ClientDetail() {
           </div>
           <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
             <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{c.packageName}</dd></div>
-            <div><dt className="text-muted">{t("start")}</dt><dd className="font-bold">{fmtDate(c.subStart, lang)}</dd></div>
-            <div><dt className="text-muted">{t("end")}</dt><dd className="font-bold">{fmtDate(c.subEnd, lang)}</dd></div>
+            <div><dt className="text-muted">{t("start")}</dt><dd className="font-bold">{fmtDate(c.subStart, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
+            <div><dt className="text-muted">{t("end")}</dt><dd className="font-bold">{fmtDate(c.subEnd, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
           </dl>
           <div className="mt-4 flex gap-2">
             <button onClick={extend} disabled={c.pending} className="btn-gold flex-1"><CalendarPlus size={18} /> {t("oneMonth")}</button>

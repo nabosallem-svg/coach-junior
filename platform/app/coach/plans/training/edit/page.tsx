@@ -40,7 +40,7 @@ function TrainingBuilder() {
       <p className="mt-2 text-sm text-muted">{t("assignedTo", { n: db.clients.filter((c) => c.trainingPlanId === id).length })}</p>
 
       <div className="mt-5 flex items-center gap-2">
-        <div className="min-w-0 flex-1"><Pills value={day?.id ?? ""} onChange={setDayId} options={plan.days.map((d) => ({ value: d.id, label: d.name }))} /></div>
+        <div className="min-w-0 flex-1"><Pills bleed={false} value={day?.id ?? ""} onChange={setDayId} options={plan.days.map((d) => ({ value: d.id, label: d.name }))} /></div>
         <button onClick={addDay} className="btn-ghost shrink-0 px-3"><Plus size={18} /> {t("addDay")}</button>
       </div>
 
