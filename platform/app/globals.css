@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* Same fonts and palette as the Coach Junior landing page; fonts load via next/font in layout.tsx. */
+
+@theme {
+  --color-bg: #0a0a0c;
+  --color-card: #121316;
+  --color-card-hi: #1a1c23;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-gold: #d4af37;
+  --color-gold-hi: #f3c642;
+  --color-gold-soft: rgba(212, 175, 55, 0.1);
+  --color-line-gold: rgba(212, 175, 55, 0.28);
+  --color-text: #f5f6f8;
+  --color-text-2: #c9cbd2;
+  --color-muted: #8b8e99;
+  --color-danger: #ef4444;
+  --color-ok: #4ade80;
+  /* macro colours: gold / silver / bronze */
+  --color-protein: #d4af37;
+  --color-carbs: #c9cbd2;
+  --color-fat: #c07a3a;
+
+  --font-ar: var(--font-cairo-latin), var(--font-cairo-arabic), system-ui, sans-serif;
+  --font-big: var(--font-anton), var(--font-cairo-latin), var(--font-cairo-arabic), Impact, sans-serif;
+}
+
+html { background: var(--color-bg); color-scheme: dark; }
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ar);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+::selection { background: var(--color-gold); color: var(--color-bg); }
+
+@utility card { @apply rounded-2xl border border-line bg-card; }
+@utility btn { @apply inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 font-bold transition-colors disabled:opacity-50; }
+@utility btn-gold { @apply btn bg-gold text-bg hover:bg-gold-hi; }
+@utility btn-ghost { @apply btn border border-line-gold text-gold hover:bg-gold-soft; }
+@utility btn-quiet { @apply btn border border-line text-text-2 hover:bg-card-hi; }
+@utility chip { @apply inline-flex items-center rounded-full border border-line px-3 py-1 text-sm text-text-2; }
+@utility label { @apply text-xs font-bold tracking-[0.14em] text-muted uppercase; }
+@utility input { @apply w-full rounded-xl border border-line bg-card-hi px-3 py-2.5 font-semibold text-text placeholder:font-medium placeholder:text-muted/70 outline-none focus:border-gold; }
+@utility h1 { @apply text-3xl font-black leading-tight; }
+
+/* numbers always LTR so "5-12" and "72.5" don't flip in Arabic */
+.num { direction: ltr; unicode-bidi: isolate; font-variant-numeric: tabular-nums; }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
