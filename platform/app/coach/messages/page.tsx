@@ -22,7 +22,7 @@ export default function CoachMessages() {
       <ul className="card mt-5 divide-y divide-line">
         {convos.map(({ c, last, unread }) => (
           <li key={c.id}>
-            <Link href={`/coach/messages/${c.id}`} className="flex items-center gap-3 p-3 hover:bg-card-hi">
+            <Link href={`/coach/messages/chat?id=${c.id}`} className="flex items-center gap-3 p-3 hover:bg-card-hi">
               <Avatar name={c.name} size={44} />
               <span className="min-w-0 flex-1">
                 <span className="flex justify-between gap-2">

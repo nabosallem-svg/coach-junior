@@ -6,6 +6,7 @@ import { Eye, EyeOff, RotateCcw } from "lucide-react";
 import { useStore, normPhone, COACH_DEMO_PASSWORD } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { Field, Segmented } from "@/components/ui";
+import { asset } from "@/lib/asset";
 
 export default function Entry() {
   const { ready, session, setSession, db, reset } = useStore();
@@ -42,7 +43,7 @@ export default function Entry() {
   return (
     <div className="relative mx-auto flex min-h-dvh max-w-xl flex-col">
       <div className="absolute inset-x-0 top-0 h-[48dvh] overflow-hidden">
-        <img src="/img/hero-1200.webp" srcSet="/img/hero-800.webp 800w, /img/hero-1200.webp 1200w" sizes="(min-width: 576px) 576px, 100vw" alt="" fetchPriority="high" decoding="async" className="size-full object-cover object-top" />
+        <img src={asset("/img/hero-1200.webp")} srcSet={`${asset("/img/hero-800.webp")} 800w, ${asset("/img/hero-1200.webp")} 1200w`} sizes="(min-width: 576px) 576px, 100vw" alt="" fetchPriority="high" decoding="async" className="size-full object-cover object-top" />
         <div className="absolute inset-0 bg-gradient-to-b from-bg/10 via-bg/30 to-bg" />
       </div>
       <button onClick={toggle} className="absolute end-4 top-4 z-10 grid h-10 min-w-10 place-items-center rounded-xl border border-line-gold bg-bg/60 px-2 text-sm font-bold text-gold">
@@ -50,7 +51,7 @@ export default function Entry() {
       </button>
 
       <div className="relative z-10 mt-[24dvh] px-5 pb-[max(2rem,env(safe-area-inset-bottom))]">
-        <img src="/img/logo.webp" alt="Coach Junior" width={88} height={88} className="mb-4 rounded-full" />
+        <img src={asset("/img/logo.webp")} alt="Coach Junior" width={88} height={88} className="mb-4 rounded-full" />
         <h1 className="text-3xl font-black leading-tight">{t("entryTitle")}</h1>
         <p className="mt-2 text-text-2">{t("entrySub")}</p>
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { Plus, Trash2, Search } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
@@ -11,8 +12,8 @@ import { MacroLine } from "@/components/MacroLine";
 import { Sheet } from "@/components/ui";
 import type { NutritionPlan } from "@/lib/types";
 
-export default function NutritionBuilder({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+function NutritionBuilder() {
+  const id = useSearchParams().get("id") ?? "";
   const { db, update } = useStore();
   const { t, lang } = useI18n();
   const plan = db.nutritionPlans.find((p) => p.id === id);
@@ -97,4 +98,8 @@ export default function NutritionBuilder({ params }: { params: Promise<{ id: str
       </Sheet>
     </div>
   );
+}
+
+export default function NutritionBuilderPage() {
+  return <Suspense><NutritionBuilder /></Suspense>;
 }

@@ -13,6 +13,10 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
+## Static demo build
+
+`STATIC_EXPORT=1 BASE_PATH=/coach-junior/platform npm run build` writes a static copy to `out/` that works under that sub-path (used for the GitHub Pages preview). Detail pages take `?id=` query params instead of path segments so they work without a server.
+
 ## Demo mode
 
 There is no backend yet. All data lives in the browser (`localStorage`, uploaded videos in IndexedDB) and starts from `lib/seed.ts`, so both sides can be clicked through on one device. "Reset demo data" on the sign-in page restores the seed.

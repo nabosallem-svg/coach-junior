@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { Plus, Trash2, ChevronUp, ChevronDown, Search, Video, X } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
@@ -8,8 +9,8 @@ import { BuilderHeader } from "@/components/BuilderHeader";
 import { Pills, Sheet } from "@/components/ui";
 import type { TrainingPlan } from "@/lib/types";
 
-export default function TrainingBuilder({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+function TrainingBuilder() {
+  const id = useSearchParams().get("id") ?? "";
   const { db, update } = useStore();
   const { t, muscle } = useI18n();
   const plan = db.trainingPlans.find((p) => p.id === id);
@@ -113,4 +114,8 @@ export default function TrainingBuilder({ params }: { params: Promise<{ id: stri
       </Sheet>
     </div>
   );
+}
+
+export default function TrainingBuilderPage() {
+  return <Suspense><TrainingBuilder /></Suspense>;
 }

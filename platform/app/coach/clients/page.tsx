@@ -50,7 +50,7 @@ function Clients() {
           const unread = db.messages.filter((m) => m.clientId === c.id && m.from === "client" && !m.read).length;
           return (
             <li key={c.id}>
-              <Link href={`/coach/clients/${c.id}`} className="card flex items-center gap-3 p-3 hover:border-line-gold">
+              <Link href={`/coach/clients/view?id=${c.id}`} className="card flex items-center gap-3 p-3 hover:border-line-gold">
                 <Avatar name={c.name} size={44} />
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2 font-bold">{c.name}{unread > 0 && <span className="size-2 rounded-full bg-gold" />}</span>
@@ -101,7 +101,7 @@ function Clients() {
           <button className="btn-gold w-full">{t("add")}</button>
         </form>
       </Sheet>
-      <Creds client={db.clients.find((c) => c.id === created?.id) ?? null} password={created?.pw ?? ""} onClose={() => { const id = created?.id; setCreated(null); router.push(`/coach/clients/${id}`); }} />
+      <Creds client={db.clients.find((c) => c.id === created?.id) ?? null} password={created?.pw ?? ""} onClose={() => { const id = created?.id; setCreated(null); router.push(`/coach/clients/view?id=${id}`); }} />
     </div>
   );
 }

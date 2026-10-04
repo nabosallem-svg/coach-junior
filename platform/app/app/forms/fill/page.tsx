@@ -1,16 +1,16 @@
 "use client";
 
-import { use } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { useMe } from "@/lib/hooks";
 import { FormView } from "@/components/FormView";
 
-export default function FillForm({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+function FillForm() {
+  const id = useSearchParams().get("id") ?? "";
   const { db, update } = useStore();
   const { t, dir } = useI18n();
   const me = useMe()!;
@@ -51,4 +51,8 @@ export default function FillForm({ params }: { params: Promise<{ id: string }> }
       />
     </div>
   );
+}
+
+export default function FillFormPage() {
+  return <Suspense><FillForm /></Suspense>;
 }

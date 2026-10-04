@@ -27,7 +27,7 @@ function Plans() {
       else if (tab === "nutrition") d.nutritionPlans.push({ id, name: t("newPlan"), meals: [{ id: uid("m"), name: t("mealName") + " 1", items: [] }] });
       else d.forms.push({ id, title: t("newForm"), questions: [{ id: uid("q"), type: "text", label: "" }] });
     });
-    router.push(`/coach/plans/${tab}/${id}`);
+    router.push(`/coach/plans/${tab}/edit?id=${id}`);
   };
 
   const duplicate = (id: string) =>
@@ -63,7 +63,7 @@ function Plans() {
       <ul className="mt-4 grid gap-2 lg:grid-cols-2">
         {rows.map(({ id, name, sub, icon: Icon }) => (
           <li key={id} className="card flex items-center gap-3 p-3 hover:border-line-gold">
-            <Link href={`/coach/plans/${tab}/${id}`} className="flex min-w-0 flex-1 items-center gap-3">
+            <Link href={`/coach/plans/${tab}/edit?id=${id}`} className="flex min-w-0 flex-1 items-center gap-3">
               <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gold-soft text-gold"><Icon size={20} /></span>
               <span className="min-w-0">
                 <span className="block truncate font-bold">{name}</span>

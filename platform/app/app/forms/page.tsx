@@ -36,7 +36,7 @@ export default function Forms() {
             const f = db.forms.find((x) => x.id === a.formId);
             return (
               <li key={a.id}>
-                <Link href={`/app/forms/${a.id}`} className="card flex items-center gap-3 p-4 hover:border-line-gold">
+                <Link href={`/app/forms/fill?id=${a.id}`} className="card flex items-center gap-3 p-4 hover:border-line-gold">
                   <span className="grid size-11 place-items-center rounded-full bg-gold-soft text-gold"><ClipboardList size={20} /></span>
                   <span className="flex-1">
                     <span className="block font-bold">{f?.title}</span>

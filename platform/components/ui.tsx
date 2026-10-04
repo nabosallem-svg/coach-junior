@@ -3,11 +3,12 @@
 import { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { asset } from "@/lib/asset";
 
 export function Brand({ small }: { small?: boolean }) {
   return (
     <span className="flex items-center gap-2">
-      <img src="/img/logo-120.webp" alt="" width={small ? 32 : 36} height={small ? 32 : 36} className="rounded-full" />
+      <img src={asset("/img/logo-120.webp")} alt="" width={small ? 32 : 36} height={small ? 32 : 36} className="rounded-full" />
       <span className="font-big text-lg tracking-[0.08em] text-gold">JUNIOR</span>
     </span>
   );

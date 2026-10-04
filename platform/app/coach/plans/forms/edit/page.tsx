@@ -1,6 +1,7 @@
 "use client";
 
-import { use } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
@@ -8,8 +9,8 @@ import { BuilderHeader } from "@/components/BuilderHeader";
 import { Field } from "@/components/ui";
 import type { FormTemplate, QuestionType } from "@/lib/types";
 
-export default function FormBuilder({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+function FormBuilder() {
+  const id = useSearchParams().get("id") ?? "";
   const { db, update } = useStore();
   const { t } = useI18n();
   const form = db.forms.find((f) => f.id === id);
@@ -50,4 +51,8 @@ export default function FormBuilder({ params }: { params: Promise<{ id: string }
       <button onClick={() => edit((f) => f.questions.push({ id: uid("q"), type: "text", label: "" }))} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addQuestion")}</button>
     </div>
   );
+}
+
+export default function FormBuilderPage() {
+  return <Suspense><FormBuilder /></Suspense>;
 }

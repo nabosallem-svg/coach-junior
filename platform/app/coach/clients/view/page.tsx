@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, MessageSquare, Send, CalendarPlus, ClipboardList, Phone, KeyRound } from "lucide-react";
 import { useStore, uid, genPassword } from "@/lib/store";
@@ -11,8 +12,8 @@ import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
 import { Creds } from "@/components/Creds";
 
-export default function ClientDetail({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+function ClientDetail() {
+  const id = useSearchParams().get("id") ?? "";
   const { db, update } = useStore();
   const { t, lang, dir } = useI18n();
   const [sendOpen, setSendOpen] = useState(false);
@@ -50,7 +51,7 @@ export default function ClientDetail({ params }: { params: Promise<{ id: string 
         </div>
         <div className="flex gap-2">
           <a href={`https://wa.me/${c.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener" className="btn-quiet px-3" aria-label={t("phone")}><Phone size={18} /></a>
-          <Link href={`/coach/messages/${c.id}`} className="btn-ghost"><MessageSquare size={18} /> {t("openChat")}</Link>
+          <Link href={`/coach/messages/chat?id=${c.id}`} className="btn-ghost"><MessageSquare size={18} /> {t("openChat")}</Link>
         </div>
       </div>
 
@@ -172,4 +173,8 @@ export default function ClientDetail({ params }: { params: Promise<{ id: string 
       <Toast text={toast} />
     </div>
   );
+}
+
+export default function ClientDetailPage() {
+  return <Suspense><ClientDetail /></Suspense>;
 }
