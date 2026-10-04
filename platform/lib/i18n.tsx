@@ -138,7 +138,7 @@ const dict = {
 
   // coach clients
   addClient: ["إضافة مشترك", "Add client"],
-  addClientNote: ["المشترك بيتضاف بعد ما يدفع. هيدخل برقم موبايله.", "Clients are added after payment and sign in with their phone."],
+  addClientNote: ["اكتب بيانات المشترك والباسورد واختار خطته. هيدخل برقم موبايله والباسورد ده.", "Enter the client, a password and their plans. They sign in with their phone and this password."],
   name: ["الاسم", "Name"],
   phone: ["الموبايل", "Phone"],
   goal: ["الهدف", "Goal"],
@@ -213,7 +213,7 @@ const dict = {
   coachPassword: ["كلمة سر الكابتن", "Coach password"],
   demoAccounts: ["حسابات التجربة", "Demo accounts"],
   credsTitle: ["بيانات دخول المشترك", "Client login details"],
-  credsNote: ["ابعتهم للمشترك. كلمة السر مش هتظهر تاني، ولو نسيها اعمل واحدة جديدة.", "Send these to the client. The password won't be shown again; reset it if they forget."],
+  credsNote: ["ابعتهم للمشترك على الواتس. لو نسي الباسورد اعمله واحد جديد من صفحته.", "Send these to the client. The password won't be shown again; reset it if they forget."],
   sendWa: ["ابعت على واتساب", "Send on WhatsApp"],
   copy: ["نسخ", "Copy"],
   copied: ["اتنسخ", "Copied"],
@@ -226,7 +226,9 @@ const dict = {
   bulkDone: ["اترفع {n} فيديو. عدّل الاسم والعضلة لو محتاج.", "{n} videos uploaded. Edit names and muscles if needed."],
   // signup / activation
   signUp: ["حساب جديد", "Sign up"],
-  noAccount: ["أول مرة؟ اعمل حساب", "New here? Create an account"],
+  noAccount: ["مش معاك حساب؟ كلّم الكابتن على واتساب", "No account? Message the coach on WhatsApp"],
+  noAccountWa: ["عايز أشترك في المنصة", "I want to join the platform"],
+  generate: ["توليد", "Generate"],
   haveAccount: ["عندك حساب؟ ادخل", "Have an account? Sign in"],
   confirmPassword: ["أكد كلمة السر", "Confirm password"],
   pwMismatch: ["كلمتين السر مش زي بعض", "Passwords don't match"],

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
-import { useStore, uid, genPassword } from "@/lib/store";
+import { useStore, uid, genPassword, normPhone } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft } from "@/lib/calc";
 import { Avatar, Field, Sheet } from "@/components/ui";
@@ -20,7 +20,9 @@ function Clients() {
   const params = useSearchParams();
   const [q, setQ] = useState("");
   const [add, setAdd] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", goal: "", pkg: "3+1" });
+  const blank = () => ({ name: "", phone: "", goal: "", pkg: "3+1", pw: genPassword(), tp: "", np: "" });
+  const [form, setForm] = useState(blank);
+  const [err, setErr] = useState("");
   const [act, setAct] = useState<Client | null>(null);
   const [created, setCreated] = useState<{ id: string; pw: string } | null>(null);
   const Chevron = dir === "rtl" ? ChevronLeft : ChevronRight;
@@ -64,24 +66,27 @@ function Clients() {
         })}
       </ul>
 
-      <Sheet open={add} onClose={() => { setAdd(false); router.replace("/coach/clients"); }} title={t("addClient")}>
+      <Sheet open={add} onClose={() => { setAdd(false); setErr(""); router.replace("/coach/clients"); }} title={t("addClient")}>
         <p className="mb-4 text-sm text-muted">{t("addClientNote")}</p>
         <form
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
+            if (form.pw.trim().length < 6) return setErr(t("minChars"));
+            if (db.clients.some((x) => normPhone(x.phone) === normPhone(form.phone))) return setErr(t("phoneUsed"));
+            setErr("");
             const months = PACKAGES.find((p) => p.label === form.pkg)!.months;
             const start = new Date();
             const end = new Date(start);
             end.setMonth(end.getMonth() + months);
             const id = uid("c");
-            const pw = genPassword();
+            const pw = form.pw.trim();
             update((d) => {
-              d.clients.push({ id, name: form.name.trim(), phone: form.phone.trim(), password: pw, goal: form.goal.trim(), packageName: form.pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), active: true });
+              d.clients.push({ id, name: form.name.trim(), phone: form.phone.trim(), password: pw, goal: form.goal.trim(), packageName: form.pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), active: true, trainingPlanId: form.tp || undefined, nutritionPlanId: form.np || undefined });
               const starter = d.forms.find((f) => f.id === "fm-start");
               if (starter) d.assignments.push({ id: uid("as"), formId: starter.id, clientId: id, sentAt: start.toISOString(), status: "pending" });
             });
-            setForm({ name: "", phone: "", goal: "", pkg: "3+1" });
+            setForm(blank());
             setAdd(false);
             setCreated({ id, pw });
           }}
@@ -96,7 +101,26 @@ function Clients() {
               ))}
             </div>
           </Field>
-          <button className="btn-gold w-full">{t("add")}</button>
+          <Field label={t("password")}>
+            <div className="flex gap-2">
+              <input className="input num flex-1 text-start" dir="ltr" value={form.pw} onChange={(e) => setForm({ ...form, pw: e.target.value })} required />
+              <button type="button" onClick={() => setForm({ ...form, pw: genPassword() })} className="btn-quiet shrink-0 whitespace-nowrap px-3 text-sm">{t("generate")}</button>
+            </div>
+          </Field>
+          <Field label={t("trainingPlan")}>
+            <select className="input" value={form.tp} onChange={(e) => setForm({ ...form, tp: e.target.value })}>
+              <option value="">{t("none")}</option>
+              {db.trainingPlans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </Field>
+          <Field label={t("nutritionPlan")}>
+            <select className="input" value={form.np} onChange={(e) => setForm({ ...form, np: e.target.value })}>
+              <option value="">{t("none")}</option>
+              {db.nutritionPlans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </Field>
+          {err && <p className="text-center text-sm font-bold text-danger">{err}</p>}
+          <button className="btn-gold min-h-13 w-full text-lg">{t("add")}</button>
         </form>
       </Sheet>
       <ActivateSheet client={act} onClose={() => setAct(null)} />
