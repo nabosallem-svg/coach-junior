@@ -96,7 +96,7 @@ export default function Entry() {
             {db.clients.slice(0, 3).map((c) => <li key={c.id}>{c.phone} / {c.password}</li>)}
             <li>coach / {COACH_DEMO_PASSWORD}</li>
           </ul>
-          <button onClick={reset} className="mt-3 flex items-center gap-1.5 hover:text-gold"><RotateCcw size={14} /> {t("resetDemo")}</button>
+          <button onClick={() => { if (confirm(t("resetConfirm"))) reset(); }} className="mt-3 flex items-center gap-1.5 hover:text-gold"><RotateCcw size={14} /> {t("resetDemo")}</button>
         </details>}
       </div>
     </div>
