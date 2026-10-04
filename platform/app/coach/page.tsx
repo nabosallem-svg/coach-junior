@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, CalendarClock, ClipboardList, ClipboardCheck, Upload, UserPlus, Dumbbell, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, CalendarClock, ClipboardList, Camera, Upload, UserPlus, Dumbbell, ChevronLeft, ChevronRight } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate } from "@/lib/calc";
@@ -18,20 +18,22 @@ export default function CoachHome() {
   const [toast, setToast] = useState<string | null>(null);
   const active = db.clients.filter((c) => c.active && daysLeft(c.subEnd) >= 0);
   const expiring = db.clients.filter((c) => c.active && daysLeft(c.subEnd) <= 7);
-  const newForms = db.assignments.filter((a) => a.status === "submitted" && !a.reviewed);
+  const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+  const newPhotos = (db.photos ?? []).filter((p) => p.date >= weekAgo);
+  const photoClients = [...new Set(newPhotos.map((p) => p.clientId))];
   const noPlan = db.clients.filter((c) => c.active && (!c.trainingPlanId || !c.nutritionPlanId));
 
   const stats = [
     { label: t("activeClients"), n: active.length, icon: Users, href: "/coach/clients" },
     { label: t("expiringSoon"), n: expiring.length, icon: CalendarClock, href: "/coach/clients" },
     { label: t("noPlanAssigned"), n: noPlan.length, icon: ClipboardList, href: "/coach/clients" },
-    { label: t("formsToReview"), n: newForms.length, icon: ClipboardCheck, href: "/coach/clients" },
+    { label: t("newPhotos"), n: photoClients.length, icon: Camera, href: photoClients.length === 1 ? `/coach/clients/view?id=${photoClients[0]}` : "/coach/clients" },
   ];
 
   type Item = { id: string; clientId: string; text: string; href: string; tone: "red" | "gold" };
   const attention: Item[] = [
     ...expiring.map((c) => ({ id: `e${c.id}`, clientId: c.id, text: daysLeft(c.subEnd) >= 0 ? t("daysLeftN", { n: daysLeft(c.subEnd) }) : t("expiredN", { n: -daysLeft(c.subEnd) }), href: `/coach/clients/view?id=${c.id}`, tone: "red" as const })),
-    ...newForms.map((a) => ({ id: `f${a.id}`, clientId: a.clientId, text: `${t("formsToReview")}: ${db.forms.find((f) => f.id === a.formId)?.title}`, href: `/coach/clients/view?id=${a.clientId}`, tone: "gold" as const })),
+    ...photoClients.map((id) => ({ id: `f${id}`, clientId: id, text: t("sentPhotos"), href: `/coach/clients/view?id=${id}`, tone: "gold" as const })),
     ...noPlan.map((c) => ({ id: `p${c.id}`, clientId: c.id, text: t("noPlanAssigned"), href: `/coach/clients/view?id=${c.id}`, tone: "gold" as const })),
   ].filter((it, i, arr) => arr.findIndex((x) => x.clientId === it.clientId) === i);
 
