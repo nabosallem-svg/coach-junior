@@ -444,6 +444,34 @@ html.lenis,html.lenis body{height:auto}
 @media (max-width:359px){
   .hero .ctas,.final .ctas{grid-template-columns:1fr}
 }
+
+/* programs: 3 image cards */
+.progs{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3)}
+.prog{min-width:0;display:flex;flex-direction:column;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);transition:border-color .3s,box-shadow .35s}
+.prog-media{position:relative;aspect-ratio:4/3;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,var(--card-hi),var(--bg) 75%)}
+.prog-media img{width:100%;height:100%;object-fit:cover}
+.prog-media::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--card) 0%,transparent 45%);pointer-events:none}
+.prog-ic{position:absolute;z-index:2;inset-block-end:var(--s-2);inset-inline-start:var(--s-2);display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--line-gold);color:var(--gold);font-size:24px}
+.prog-body{display:grid;gap:var(--s-1);padding:var(--s-3)}
+.prog h3{font-size:var(--fs-h3);font-weight:900;line-height:1.35}
+.prog p{color:var(--text-2);font-size:var(--fs-base);line-height:1.8}
+.pm-food .plate{position:absolute;inset:50% auto auto 50%;translate:-50% -55%;display:grid;place-items:center;width:46%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,var(--card-hi) 55%,var(--bg) 56% 62%,var(--line-gold) 63% 64%,transparent 65%);box-shadow:0 0 60px var(--gold-soft);color:var(--gold);font-size:64px}
+.pm-food .orb{position:absolute;border-radius:50%;background:var(--gold-soft);border:1px solid var(--line-gold)}
+.pm-food .o1{width:18%;aspect-ratio:1;top:14%;inset-inline-start:12%}
+.pm-food .o2{width:11%;aspect-ratio:1;top:20%;inset-inline-end:14%}
+.pm-food .o3{width:14%;aspect-ratio:1;bottom:22%;inset-inline-end:20%}
+.pm-chat{display:flex;flex-direction:column;justify-content:center;gap:var(--s-1);padding:var(--s-3) var(--s-3) var(--s-6)}
+.pm-chat .bub{max-width:80%;padding:var(--s-1) var(--s-2);border-radius:var(--r-md);font-size:var(--fs-sm);font-weight:700;line-height:1.5}
+.pm-chat .in{align-self:flex-start;background:var(--card-hi);border:1px solid var(--line);border-start-start-radius:var(--r-xs)}
+.pm-chat .out{align-self:flex-end;background:var(--gold);color:var(--ink);border-start-end-radius:var(--r-xs)}
+.pm-chat .typing{display:inline-flex;gap:4px}
+.pm-chat .typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typing 1.2s infinite}
+.pm-chat .typing i:nth-child(2){animation-delay:.2s}.pm-chat .typing i:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,60%,100%{opacity:.3}30%{opacity:1}}
+@media (hover:hover) and (pointer:fine){.prog:hover{border-color:var(--line-gold);box-shadow:var(--shadow-md)}}
+@media (max-width:900px){.progs{grid-template-columns:1fr;max-width:480px;margin-inline:auto}.prog-media{aspect-ratio:16/9}}
+@media (max-width:600px){.progs{gap:var(--s-2)}.prog-body{padding:var(--s-2) var(--s-3) var(--s-3);text-align:center}.prog h3{font-size:var(--fs-lg)}.pm-food .plate{font-size:48px;width:34%}}
+@media (prefers-reduced-motion:reduce){.pm-chat .typing i{animation:none}}
 </style>
 </head>
 <body>
@@ -474,7 +502,7 @@ html.lenis,html.lenis body{height:auto}
   <div class="wrap">
     <a class="brand" href="#top" aria-label="Coach Junior"><img src="img/logo-120.webp" alt="" width="40" height="40" decoding="async"><span class="brand-txt">JUNIOR</span></a>
     <nav class="nav" aria-label="main">
-      <ul><li><a href="#top" data-i="nHome">الرئيسية</a></li><li><a href="#why" data-i="nPrograms">البرامج</a></li><li><a href="#about" data-i="nAbout">عن الكابتن</a></li><li><a href="#plans" data-i="nPlans">الاشتراك</a></li><li><a href="#faq" data-i="nFaq">أسئلة</a></li><li><a href="#contact" data-i="nContact">تواصل</a></li></ul>
+      <ul><li><a href="#top" data-i="nHome">الرئيسية</a></li><li><a href="#programs" data-i="nPrograms">البرامج</a></li><li><a href="#about" data-i="nAbout">عن الكابتن</a></li><li><a href="#plans" data-i="nPlans">الاشتراك</a></li><li><a href="#faq" data-i="nFaq">أسئلة</a></li><li><a href="#contact" data-i="nContact">تواصل</a></li></ul>
     </nav>
     <div class="hdr-end">
       <button class="lang" id="lang" type="button" aria-label="Change language">EN</button>
@@ -521,6 +549,45 @@ html.lenis,html.lenis body{height:auto}
         <figure class="scard"><picture><source type="image/avif" srcset="img/st1-400.avif 400w, img/st1-600.avif 600w, img/st1-900.avif 900w" sizes="(max-width:700px) 34vw, (max-width:1200px) 30vw, 360px"><img src="img/st1.webp" srcset="img/st1-400.webp 400w, img/st1.webp 900w" sizes="(max-width:700px) 34vw, (max-width:1200px) 30vw, 360px" alt="كابتن جونيور على المسرح" data-ia="stageAlt" width="900" height="1500" loading="lazy" decoding="async"></picture></figure>
         <figure class="scard mid"><picture><source type="image/avif" srcset="img/st3-400.avif 400w, img/st3-600.avif 600w, img/st3-900.avif 900w" sizes="(max-width:700px) 34vw, (max-width:1200px) 30vw, 360px"><img src="img/st3.webp" srcset="img/st3-400.webp 400w, img/st3.webp 900w" sizes="(max-width:700px) 34vw, (max-width:1200px) 30vw, 360px" alt="كابتن جونيور على المسرح" data-ia="stageAlt" width="900" height="1500" loading="lazy" decoding="async"></picture></figure>
         <figure class="scard"><picture><source type="image/avif" srcset="img/st2-400.avif 400w, img/st2-600.avif 600w, img/st2-900.avif 900w" sizes="(max-width:700px) 34vw, (max-width:1200px) 30vw, 360px"><img src="img/st2.webp" srcset="img/st2-400.webp 400w, img/st2.webp 900w" sizes="(max-width:700px) 34vw, (max-width:1200px) 30vw, 360px" alt="كابتن جونيور على المسرح" data-ia="stageAlt" width="900" height="1500" loading="lazy" decoding="async"></picture></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROGRAMS ============ -->
+  <section class="sec" id="programs">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv" data-i="progK">البرامج</span>
+        <h2 class="title" data-i="progT">برنامجك التدريبي <span class="g">بيشمل</span></h2>
+      </div>
+      <div class="progs">
+        <article class="prog">
+          <div class="prog-media">
+            <picture>
+              <source type="image/avif" srcset="img/prog-train-480.avif 480w, img/prog-train-800.avif 800w" sizes="(max-width:900px) calc(100vw - 32px), 380px">
+              <img src="img/prog-train-800.webp" srcset="img/prog-train-480.webp 480w, img/prog-train-800.webp 800w" sizes="(max-width:900px) calc(100vw - 32px), 380px" alt="" width="800" height="600" loading="lazy" decoding="async">
+            </picture>
+            <span class="prog-ic"><svg class="ic" aria-hidden="true"><use href="#i-gym"/></svg></span>
+          </div>
+          <div class="prog-body"><h3 data-i="pr1T">نظام تدريبي مخصص</h3><p data-i="pr1P">البرنامج التدريبي يقدم بناء على اختبارات تقيس القوة و المستوى التدريبي و مراعاة الاصابات بأحدث الأساليب العلمية و يتم تغييره باستمرار</p></div>
+        </article>
+        <article class="prog">
+          <div class="prog-media pm-food" aria-hidden="true">
+            <span class="plate"><svg class="ic"><use href="#i-food"/></svg></span>
+            <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>
+            <span class="prog-ic"><svg class="ic"><use href="#i-food"/></svg></span>
+          </div>
+          <div class="prog-body"><h3 data-i="pr2T">نظام غذائي باختيارك</h3><p data-i="pr2P">نظام مرن يساعدك للوصول لهدفك على حسب طبيعة يومك و احتياج جسمك من العناصر الغذائية بمكونات صحية من اختيارك</p></div>
+        </article>
+        <article class="prog">
+          <div class="prog-media pm-chat" aria-hidden="true">
+            <span class="bub in" data-i="chat1">تمرين النهارده خلص 💪</span>
+            <span class="bub out" data-i="chat2">عاش يا بطل، بكرة نزود الوزن</span>
+            <span class="bub in typing"><i></i><i></i><i></i></span>
+            <span class="prog-ic"><svg class="ic"><use href="#i-chat"/></svg></span>
+          </div>
+          <div class="prog-body"><h3 data-i="pr3T">متابعة يومية عن طريق واتساب</h3><p data-i="pr3P">متابعة النتائج و رد يومي على الاستفسارات علشان تكون متشجع و متحمس في رحلتك معانا</p></div>
+        </article>
       </div>
     </div>
   </section>
@@ -656,7 +723,7 @@ html.lenis,html.lenis body{height:auto}
   <div class="wrap">
     <div class="fg">
       <div><a class="brand" href="#top" aria-label="Coach Junior"><img src="img/logo-120.webp" alt="" width="40" height="40" loading="lazy" decoding="async"><span class="brand-txt">JUNIOR</span></a></div>
-      <div><h4 data-i="fLinks">روابط</h4><ul><li><a href="#why" data-i="nPrograms">البرامج</a></li><li><a href="#plans" data-i="nPlans">الاشتراك</a></li><li><a href="#faq" data-i="nFaq">أسئلة</a></li></ul></div>
+      <div><h4 data-i="fLinks">روابط</h4><ul><li><a href="#programs" data-i="nPrograms">البرامج</a></li><li><a href="#plans" data-i="nPlans">الاشتراك</a></li><li><a href="#faq" data-i="nFaq">أسئلة</a></li></ul></div>
       <div><h4 data-i="nContact">تواصل</h4><ul><li><a class="wa" href="https://wa.me/201014007764" target="_blank" rel="noopener" dir="ltr">WhatsApp: +20 10 1400 7764</a></li></ul></div>
     </div>
     <div class="bot"><span dir="ltr">© 2026 Coach Junior</span><span data-i="disc">استشير دكتور قبل أي مجهود عنيف لو عندك مشكلة صحية.</span></div>
@@ -696,6 +763,7 @@ html.lenis,html.lenis body{height:auto}
       nHome:'الرئيسية', nPrograms:'البرامج', nAbout:'عن الكابتن', nPlans:'الاشتراك', nFaq:'أسئلة', nContact:'تواصل',
       heroLine:'ابدأ رحلة التحول مع لاعب بطولات', whatsapp:'واتساب', s2:'وتستلم خطتك', s3:'متابعة واتساب',
       stageT:'على <span class="g">المسرح</span>', stageAlt:'كابتن جونيور على المسرح',
+      progK:'البرامج', progT:'برنامجك التدريبي <span class="g">بيشمل</span>', pr1T:'نظام تدريبي مخصص', pr1P:'البرنامج التدريبي يقدم بناء على اختبارات تقيس القوة و المستوى التدريبي و مراعاة الاصابات بأحدث الأساليب العلمية و يتم تغييره باستمرار', pr2T:'نظام غذائي باختيارك', pr2P:'نظام مرن يساعدك للوصول لهدفك على حسب طبيعة يومك و احتياج جسمك من العناصر الغذائية بمكونات صحية من اختيارك', pr3T:'متابعة يومية عن طريق واتساب', pr3P:'متابعة النتائج و رد يومي على الاستفسارات علشان تكون متشجع و متحمس في رحلتك معانا', chat1:'تمرين النهارده خلص 💪', chat2:'عاش يا بطل، بكرة نزود الوزن',
       whyK:'ليه تشترك؟', whyT:'كل اللي محتاجه في <span class="g">مكان واحد</span>', v1:'تطوير في شكل جسمك وصحتك', v2:'برامج مرنة على مقاسك', v3:'تحول طبيعي 100%',
       ft1:'نظام تمرين مخصص', ft2:'نظام أكل مرن', ft3:'متابعة واتساب يومية', ft4:'فيديو لكل تمرين',
       aboutK:'عن الكابتن', aboutT:'كابتن <span class="nw">عبد الملك</span> <span class="g">«جونيور»</span>', aboutP:'لاعب بطولات كمال أجسام مصري، وقف على المسرح برقم 312، ودلوقتي بينقل نفس النظام اللي طبقه على نفسه لكل متدرب معاه.',
@@ -716,6 +784,7 @@ html.lenis,html.lenis body{height:auto}
       nHome:'Home', nPrograms:'Programs', nAbout:'About', nPlans:'Plans', nFaq:'FAQ', nContact:'Contact',
       heroLine:'Start your transformation with a stage competitor', whatsapp:'WhatsApp', s2:'To get your plan', s3:'WhatsApp support',
       stageT:'On <span class="g">stage</span>', stageAlt:'Coach Junior on stage',
+      progK:'Programs', progT:'Your program <span class="g">includes</span>', pr1T:'A custom training plan', pr1P:'Built on tests of your strength and training level, with any injuries in mind, using up-to-date methods and updated continuously.', pr2T:'A nutrition plan you choose', pr2P:'A flexible plan that gets you to your goal around your daily routine and your body\'s needs, with healthy foods you pick.', pr3T:'Daily WhatsApp follow-up', pr3P:'Results tracking and daily answers to your questions, so you stay motivated throughout your journey with us.', chat1:'Workout done today 💪', chat2:'Great job champ, more weight tomorrow',
       whyK:'Why join?', whyT:'Everything you <span class="g">need</span>', v1:'A better body and better health', v2:'Flexible plans built for you', v3:'100% natural transformation',
       ft1:'Custom training', ft2:'Flexible nutrition', ft3:'Daily WhatsApp follow-up', ft4:'Video for every exercise',
       aboutK:'About the coach', aboutT:'Coach Abdelmalek <span class="g">"Junior"</span>', aboutP:'Egyptian bodybuilding competitor. He stepped on stage as #312. Now he coaches every client with the same system he used on himself.',
@@ -927,6 +996,9 @@ html.lenis,html.lenis body{height:auto}
       }
 
       // why: 3D pop-in cards, icons spin in; idle float/wobble only while visible
+      gsap.from('.prog', { y: 60, opacity: 0, duration: .9, stagger: .15, ease: 'power3.out', scrollTrigger: once('.progs', 'top 85%') });
+      gsap.from('.prog-media img, .pm-food .plate', { scale: 1.25, duration: 1.4, stagger: .15, ease: 'power3.out', scrollTrigger: once('.progs', 'top 85%') });
+      gsap.from('.pm-chat .bub', { y: 16, opacity: 0, duration: .5, stagger: .35, delay: .5, ease: 'back.out(1.7)', scrollTrigger: once('.progs', 'top 85%') });
       gsap.from('.value', { y: 70, rotateX: -35, opacity: 0, transformPerspective: 800, transformOrigin: 'top center', duration: 1, stagger: .15, ease: 'back.out(1.6)', scrollTrigger: once('.values', 'top 85%') });
       gsap.from('.value i', { scale: 0, rotate: -180, duration: .8, stagger: .15, delay: .3, ease: 'back.out(2.5)', scrollTrigger: once('.values', 'top 85%') });
       gsap.from('.feat', { y: 80, scale: .7, opacity: 0, duration: .9, stagger: .12, ease: 'back.out(1.8)', scrollTrigger: once('.feats', 'top 88%') });
