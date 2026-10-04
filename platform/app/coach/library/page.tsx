@@ -10,8 +10,15 @@ import { VideoBox } from "@/components/VideoBox";
 import { Field, Pills, Sheet, Toast } from "@/components/ui";
 import type { Exercise, Muscle } from "@/lib/types";
 
-type Draft = { id?: string; name: string; muscle: Muscle; cue: string; videoUrl: string; file: File | null; videoKey?: string; removeVideo?: boolean };
-const empty: Draft = { name: "", muscle: "chest", cue: "", videoUrl: "", file: null };
+type Draft = { id?: string; name: string; muscle: Muscle | ""; cue: string; videoUrl: string; file: File | null; videoKey?: string; removeVideo?: boolean };
+type Pending = { id: string; key: string; file: string; name: string; muscle: Muscle | "" };
+const empty: Draft = { name: "", muscle: "", cue: "", videoUrl: "", file: null };
+
+/** phone/screen-recorder file names are noise; only keep a file name that looks like a real exercise name */
+const niceName = (file: string) => {
+  const n = file.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
+  return /screen ?record|^img|^vid|whatsapp|^\d|\d{4}.\d{2}.\d{2}|^mov|^pxl|^trim/i.test(n) ? "" : n;
+};
 
 function Library() {
   const { db, update } = useStore();
@@ -26,23 +33,37 @@ function Library() {
   const [drag, setDrag] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  // several videos at once: one exercise per file, named after the file
+  const defaultMuscle = (filter === "all" ? "" : filter) as Muscle | "";
+  const [pending, setPending] = useState<Pending[] | null>(null);
+  const [tried, setTried] = useState(false);
+
+  // several videos at once: store them, then ask for each one's name and muscle before they go in the library
   const bulk = async (files: FileList | File[]) => {
     const vids = [...files].filter((f) => f.type.startsWith("video/"));
     if (!vids.length) return;
+    if (vids.length === 1) return setDraft({ ...empty, name: niceName(vids[0].name), muscle: defaultMuscle, file: vids[0] });
     setBusy(true);
-    const made: Exercise[] = [];
+    const list: Pending[] = [];
     for (const f of vids) {
       const id = uid("ex");
-      const videoKey = `${id}-${Date.now()}`;
-      await putVideo(videoKey, f);
-      made.push({ id, name: f.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim(), muscle: (filter === "all" ? "chest" : filter) as Muscle, videoKey });
+      const key = `${id}-${Date.now()}`;
+      await putVideo(key, f);
+      list.push({ id, key, file: f.name, name: niceName(f.name), muscle: defaultMuscle });
     }
-    update((d) => { d.exercises.unshift(...made); });
     setBusy(false);
-    setToast(t("bulkDone", { n: made.length }));
-    setTimeout(() => setToast(null), 3000);
+    setTried(false);
+    setPending(list);
   };
+  const savePending = () => {
+    if (!pending) return;
+    setTried(true);
+    if (pending.some((p) => !p.name.trim() || !p.muscle)) return;
+    update((d) => { d.exercises.unshift(...pending.map((p) => ({ id: p.id, name: p.name.trim(), muscle: p.muscle as Muscle, videoKey: p.key }))); });
+    setToast(t("bulkDone", { n: pending.length }));
+    setTimeout(() => setToast(null), 3000);
+    setPending(null);
+  };
+  const cancelPending = () => { pending?.forEach((p) => deleteVideo(p.key).catch(() => {})); setPending(null); };
 
   useEffect(() => { if (params.get("upload")) setDraft({ ...empty }); }, [params]);
 
@@ -51,7 +72,7 @@ function Library() {
   const close = () => { setDraft(null); router.replace("/coach/library"); };
 
   const save = async () => {
-    if (!draft || !draft.name.trim()) return;
+    if (!draft || !draft.name.trim() || !draft.muscle) return;
     setBusy(true);
     const id = draft.id ?? uid("ex");
     let videoKey = draft.removeVideo ? undefined : draft.videoKey;
@@ -62,7 +83,7 @@ function Library() {
     } else if (draft.removeVideo && draft.videoKey) {
       await deleteVideo(draft.videoKey).catch(() => {});
     }
-    const ex: Exercise = { id, name: draft.name.trim(), muscle: draft.muscle, cue: draft.cue.trim() || undefined, videoKey, videoUrl: draft.removeVideo ? undefined : draft.videoUrl.trim() || undefined };
+    const ex: Exercise = { id, name: draft.name.trim(), muscle: draft.muscle as Muscle, cue: draft.cue.trim() || undefined, videoKey, videoUrl: draft.removeVideo ? undefined : draft.videoUrl.trim() || undefined };
     update((d) => {
       const i = d.exercises.findIndex((e) => e.id === id);
       if (i >= 0) d.exercises[i] = ex; else d.exercises.unshift(ex);
@@ -75,7 +96,7 @@ function Library() {
     <div>
       <div className="flex items-center justify-between gap-3">
         <h1 className="h1">{t("libraryShort")}</h1>
-        <button className="btn-gold shrink-0" onClick={() => setDraft({ ...empty })}><Upload size={18} /> {t("uploadVideo")}</button>
+        <button className="btn-gold shrink-0" onClick={() => setDraft({ ...empty, muscle: defaultMuscle })}><Upload size={18} /> {t("uploadVideo")}</button>
       </div>
 
       <div className="mt-5">
@@ -122,7 +143,8 @@ function Library() {
             {(() => { const ex = db.exercises.find((x) => x.id === draft.id); return ex && (ex.videoKey || ex.videoUrl) ? <VideoBox ex={ex} /> : null; })()}
             <Field label={t("exerciseName")}><input className="input" dir="auto" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required autoFocus /></Field>
             <Field label={t("muscle")}>
-              <select className="input" value={draft.muscle} onChange={(e) => setDraft({ ...draft, muscle: e.target.value as Muscle })}>
+              <select className="input" required value={draft.muscle} onChange={(e) => setDraft({ ...draft, muscle: e.target.value as Muscle })}>
+                <option value="" disabled>{t("pickMuscle")}</option>
                 {MUSCLES.map((m) => <option key={m} value={m}>{muscle(m)}</option>)}
               </select>
             </Field>
@@ -166,6 +188,28 @@ function Library() {
               )}
             </div>
           </form>
+        )}
+      </Sheet>
+      <Sheet open={!!pending} onClose={cancelPending} title={t("nameVideos", { n: pending?.length ?? 0 })}>
+        {pending && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted">{t("nameVideosNote")}</p>
+            {pending.map((p, i) => (
+              <div key={p.key} className="card space-y-2 p-3">
+                <p className="truncate text-xs text-muted" dir="ltr">{p.file}</p>
+                <input className={`input ${tried && !p.name.trim() ? "border-danger" : ""}`} dir="auto" placeholder={t("exerciseName")} value={p.name} onChange={(e) => setPending(pending.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+                <select className={`input ${tried && !p.muscle ? "border-danger" : ""}`} value={p.muscle} onChange={(e) => setPending(pending.map((x, j) => (j === i ? { ...x, muscle: e.target.value as Muscle } : x)))}>
+                  <option value="" disabled>{t("pickMuscle")}</option>
+                  {MUSCLES.map((m) => <option key={m} value={m}>{muscle(m)}</option>)}
+                </select>
+              </div>
+            ))}
+            {tried && pending.some((p) => !p.name.trim() || !p.muscle) && <p className="text-center text-sm font-bold text-danger">{t("fillAll")}</p>}
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={savePending} className="btn-gold">{t("save")}</button>
+              <button onClick={cancelPending} className="btn-quiet">{t("cancel")}</button>
+            </div>
+          </div>
         )}
       </Sheet>
       <Toast text={toast} />
