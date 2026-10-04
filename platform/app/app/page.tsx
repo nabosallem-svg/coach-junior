@@ -118,6 +118,13 @@ export default function ClientHome() {
         </span>
       </div>}
 
+      {all.length === 0 ? (
+        <button onClick={() => setLogOpen(true)} className="card mt-5 flex w-full items-center gap-3 p-4 text-start hover:border-line-gold">
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gold-soft text-gold"><Plus size={20} /></span>
+          <span className="font-bold">{t("firstWeigh")}</span>
+        </button>
+      ) : (
+        <>
       <SectionLabel>{t("progress")}</SectionLabel>
       <Segmented
         value={range}
@@ -155,6 +162,9 @@ export default function ClientHome() {
           <p className="num mb-4 text-3xl font-black">{shown.filter((m) => m.waist).at(-1)?.waist} <span className="text-xl">{t("cm")}</span></p>
           <LineChart points={pts("waist")} unit={t("cm")} height={160} />
         </div>
+      )}
+
+        </>
       )}
 
       <Sheet open={logOpen} onClose={() => setLogOpen(false)} title={t("addReading")}>

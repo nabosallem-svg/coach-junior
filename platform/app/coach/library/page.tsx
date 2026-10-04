@@ -128,7 +128,7 @@ function Library() {
                 <span className={`grid size-12 shrink-0 place-items-center rounded-xl ${has ? "bg-gold-soft text-gold" : "bg-card-hi text-muted"}`}>{has ? <Video size={20} /> : <VideoOff size={20} />}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-bold" dir="auto">{e.name}</span>
-                  <span className="mt-0.5 block truncate text-xs text-muted">{muscle(e.muscle)} · {has ? t("hasVideo") : t("noVideoShort")} · {t("usedIn", { n: used(e.id) })}</span>
+                  <span className="mt-0.5 block truncate text-xs text-muted">{muscle(e.muscle)} · {has ? t("hasVideo") : t("noVideoShort")} · {used(e.id) ? t("usedIn", { n: used(e.id) }) : t("notUsed")}</span>
                 </span>
                 <Pencil size={16} className="shrink-0 text-muted" />
               </button>

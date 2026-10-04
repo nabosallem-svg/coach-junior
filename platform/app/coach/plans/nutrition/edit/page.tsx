@@ -67,12 +67,12 @@ function NutritionBuilder() {
         <p className="mt-2 text-sm text-muted">{t("templateNote", { n: db.clients.filter((c) => c.nutritionPlanId === id).length })}</p>
       )}
 
-      <div className="card mt-5 flex items-center gap-5 p-4">
+      <div className="card mt-5 flex items-center gap-3 p-4">
         <MacroRing {...total} label={t("kcal")} />
         <div className="grid flex-1 grid-cols-3 gap-2 text-center">
-          <div><p className="num whitespace-nowrap text-2xl font-black text-carbs">{Math.round(total.c)}<span className="text-base font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("carbs")}</p></div>
-          <div><p className="num whitespace-nowrap text-2xl font-black text-fat">{Math.round(total.f)}<span className="text-base font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("fat")}</p></div>
-          <div><p className="num whitespace-nowrap text-2xl font-black text-protein">{Math.round(total.p)}<span className="text-base font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("protein")}</p></div>
+          <div><p className="num whitespace-nowrap text-xl font-black text-carbs">{Math.round(total.c)}<span className="text-xs font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("carbs")}</p></div>
+          <div><p className="num whitespace-nowrap text-xl font-black text-fat">{Math.round(total.f)}<span className="text-xs font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("fat")}</p></div>
+          <div><p className="num whitespace-nowrap text-xl font-black text-protein">{Math.round(total.p)}<span className="text-xs font-medium text-muted"> {t("gram")}</span></p><p className="text-sm text-muted">{t("protein")}</p></div>
         </div>
       </div>
 
