@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { Bell, Home, Salad, Dumbbell, ClipboardList, LogOut, CreditCard, MessageCircle } from "lucide-react";
+import { Home, Salad, Dumbbell, ClipboardList, LogOut, CreditCard, MessageCircle, Scale, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { clientNotices, useMe, type Notice } from "@/lib/hooks";
+import { useMe } from "@/lib/hooks";
+import { traineeNotices, type Notice } from "@/lib/notify";
+import { BellButton, useSeen } from "./Bell";
+import { PushToggle } from "./PushToggle";
 import { Avatar, Brand, Field, Sheet, Splash } from "./ui";
 import { asset } from "@/lib/asset";
 import { COACH_WA, waLink } from "@/lib/wa";
@@ -18,11 +21,14 @@ const tabs = [
   { href: "/app/training", icon: Dumbbell, key: "training" },
 ] as const;
 
-export function noticeText(n: Notice, t: ReturnType<typeof useI18n>["t"]) {
+export function noticeText(n: Pick<Notice, "kind" | "n">, t: ReturnType<typeof useI18n>["t"]) {
   if (n.kind === "sub") return n.n > 0 ? [t("subExpiring"), t("subExpiringSub", { n: n.n })] : [t("subExpired"), t("subExpiredSub")];
+  if (n.kind === "workout") return [t("ntWorkout"), t("ntWorkoutSub")];
+  if (n.kind === "weigh") return [t("ntWeigh"), t("ntWeighSub")];
+  if (n.kind === "plan") return [t("ntPlan"), t("ntPlanSub")];
   return [t("pendingFormsCta", { n: n.n }), ""];
 }
-export const noticeIcon = { sub: CreditCard, form: ClipboardList };
+export const noticeIcon = { sub: CreditCard, form: ClipboardList, workout: Dumbbell, weigh: Scale, plan: Sparkles };
 
 export function ClientShell({ children }: { children: ReactNode }) {
   const { ready, session, setSession, db, update } = useStore();
@@ -31,6 +37,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const [bell, setBell] = useState(false);
+  const [seen, markSeen] = useSeen(me?.id ?? "x");
   const [menu, setMenu] = useState(false);
   const [pw, setPw] = useState("");
 
@@ -71,7 +78,9 @@ export function ClientShell({ children }: { children: ReactNode }) {
       </div>
     );
   }
-  const notices = clientNotices(db, me.id);
+  const notices = traineeNotices(db, me.id);
+  const unseen = notices.filter((n) => !seen.has(n.key)).length;
+  const openBell = () => { setBell(true); markSeen(notices.map((n) => n.key)); };
   const workout = path.startsWith("/app/training/session");
 
   return (
@@ -86,12 +95,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
             <button onClick={toggle} className="grid h-10 min-w-10 place-items-center rounded-xl border border-line-gold px-2 text-sm font-bold text-gold">
               {t("langToggle")}
             </button>
-            <button onClick={() => setBell(true)} aria-label={t("notifications")} className="relative grid size-10 place-items-center text-text-2">
-              <Bell size={24} />
-              {notices.length > 0 && (
-                <span className="num absolute end-0.5 top-0.5 grid size-5 place-items-center rounded-full bg-gold text-xs font-black text-bg">{notices.length}</span>
-              )}
-            </button>
+            <BellButton count={unseen} onClick={openBell} label={t("notifications")} />
           </div>
         </header>
       )}
@@ -133,7 +137,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
               const [a, b] = noticeText(n, t);
               const Icon = noticeIcon[n.kind];
               return (
-                <li key={n.kind}>
+                <li key={n.key}>
                   <Link href={n.href} onClick={() => setBell(false)} className="card flex items-center gap-3 p-3">
                     <span className="grid size-10 place-items-center rounded-full bg-gold-soft text-gold"><Icon size={18} /></span>
                     <span><span className="block font-bold">{a}</span>{b && <span className="text-sm text-muted">{b}</span>}</span>
@@ -143,6 +147,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
             })}
           </ul>
         )}
+        <PushToggle />
       </Sheet>
 
       <Sheet open={menu} onClose={() => setMenu(false)} title={me.name}>

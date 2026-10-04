@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
-import { LayoutDashboard, Users, Clapperboard, ClipboardList, LogOut } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { LayoutDashboard, Users, Clapperboard, ClipboardList, LogOut, CalendarClock, Camera, ClipboardCheck, Hourglass } from "lucide-react";
+import { coachNotices } from "@/lib/notify";
+import { BellButton, useSeen } from "./Bell";
+import { PushToggle } from "./PushToggle";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { Brand, Splash } from "./ui";
+import { Avatar, Brand, Sheet, Splash } from "./ui";
 
 const nav = [
   { href: "/coach", icon: LayoutDashboard, key: "dashboard" },
@@ -20,6 +23,8 @@ export function CoachShell({ children }: { children: ReactNode }) {
   const { t, toggle } = useI18n();
   const path = usePathname();
   const router = useRouter();
+  const [bell, setBell] = useState(false);
+  const [seen, markSeen] = useSeen("coach");
 
   useEffect(() => {
     if (ready && session?.role !== "coach") router.replace("/");
@@ -29,12 +34,19 @@ export function CoachShell({ children }: { children: ReactNode }) {
   const unread = db.clients.filter((c) => c.pending).length;
   const isOn = (href: string) => (href === "/coach" ? path === "/coach" : path.startsWith(href));
   const logout = () => { setSession(null); router.replace("/"); };
+  const notes = coachNotices(db);
+  const unseen = notes.filter((n) => !seen.has(n.key)).length;
+  const openBell = () => { setBell(true); markSeen(notes.map((n) => n.key)); };
+  const noteIcon = { waiting: Hourglass, expiring: CalendarClock, photos: Camera, form: ClipboardCheck };
+  const noteText = (n: (typeof notes)[number]) =>
+    n.kind === "waiting" || n.kind === "form" ? (n.n >= 7 ? t("planLate", { n: n.n }) : t("planWaiting", { n: n.n, left: 7 - n.n })) : n.kind === "photos" ? t("sentPhotos") : n.n >= 0 ? t("daysLeftN", { n: n.n }) : t("expiredN", { n: -n.n });
+  const bellButton = <BellButton count={unseen} onClick={openBell} label={t("notifications")} size={20} />;
 
   return (
     <div className="min-h-dvh lg:flex">
       {/* desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-52 shrink-0 flex-col border-e border-line bg-card/40 p-3 lg:flex">
-        <div className="mb-6 px-2 pt-2"><Brand small /><p className="mt-1 text-xs text-muted">{t("coachPanel")}</p></div>
+        <div className="mb-6 flex items-start justify-between px-2 pt-2"><div><Brand small /><p className="mt-1 text-xs text-muted">{t("coachPanel")}</p></div>{bellButton}</div>
         <ul className="space-y-1">
           {nav.map(({ href, icon: Icon, key }) => (
             <li key={href}>
@@ -55,6 +67,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-bg/90 px-4 backdrop-blur lg:hidden">
           <Brand small />
           <div className="flex items-center gap-2">
+            {bellButton}
             <button onClick={toggle} className="grid h-10 min-w-10 place-items-center rounded-xl border border-line-gold px-2 text-sm font-bold text-gold">{t("langToggle")}</button>
             <button onClick={logout} aria-label={t("logout")} className="grid size-10 place-items-center rounded-xl border border-line text-muted"><LogOut size={18} /></button>
           </div>
@@ -83,6 +96,27 @@ export function CoachShell({ children }: { children: ReactNode }) {
           })}
         </ul>
       </nav>
+      <Sheet open={bell} onClose={() => setBell(false)} title={t("notifications")}>
+        {notes.length === 0 ? (
+          <p className="py-6 text-center text-muted">{t("noNotifications")}</p>
+        ) : (
+          <ul className="space-y-2">
+            {notes.map((n) => {
+              const c = db.clients.find((x) => x.id === n.clientId);
+              const Icon = noteIcon[n.kind];
+              return (
+                <li key={n.key}>
+                  <Link href={`/coach/clients/view?id=${n.clientId}`} onClick={() => setBell(false)} className="card flex items-center gap-3 p-3">
+                    <Avatar name={c?.name ?? ""} />
+                    <span className="min-w-0 flex-1"><span className="block font-bold">{c?.name}</span><span className={`flex items-center gap-1 text-sm ${n.kind === "waiting" || n.kind === "expiring" ? "text-danger" : "text-gold"}`}><Icon size={14} /> {noteText(n)}</span></span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <PushToggle />
+      </Sheet>
     </div>
   );
 }

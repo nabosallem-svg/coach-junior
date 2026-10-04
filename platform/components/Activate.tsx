@@ -35,7 +35,7 @@ export function ActivateSheet({ client, onClose, onDone }: { client: Client | nu
           end.setMonth(end.getMonth() + PACKAGES.find((p) => p.label === pkg)!.months);
           update((d) => {
             const c = d.clients.find((x) => x.id === client.id)!;
-            Object.assign(c, { active: true, pending: false, packageName: pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), trainingPlanId: tp || c.trainingPlanId, nutritionPlanId: np || c.nutritionPlanId });
+            Object.assign(c, { active: true, pending: false, packageName: pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), trainingPlanId: tp || c.trainingPlanId, nutritionPlanId: np || c.nutritionPlanId, ...((tp || np) && { planAt: start.toISOString() }) });
           });
           onDone?.();
           onClose();
