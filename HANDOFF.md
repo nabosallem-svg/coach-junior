@@ -23,7 +23,7 @@ npx next build && npx next start
 - **Live platform:** Vercel project `coach-junior` on the owner's account (`vercel.com/nabeeh2`), **Root Directory = `platform`**, auto-deploys every push to `main`.
 - **Static copy (optional):** `STATIC_EXPORT=1 BASE_PATH=/some/path npx next build` writes `out/`. It drops the API route (`pageExtensions: ["tsx"]`), so AI macros don't work there.
 - Env vars (Vercel → Settings → Environment Variables):
-  - `ANTHROPIC_API_KEY`: turns on the "احسب السعرات تلقائي" button (route `app/api/macros/route.ts`, model `claude-haiku-4-5-20251001`). Without it the button says AI isn't set up and the form stays manual. **Not set yet.**
+  - `GEMINI_API_KEY`: AI via `lib/ai.ts` (model `gemini-flash-latest`, falls back to `gemini-flash-lite-latest` when busy). Powers "احسب السعرات تلقائي" for new foods (`/api/macros`) and the trainee's "صوّر وجبتك" meal-photo estimate on the nutrition page (`/api/meal`). `ANTHROPIC_API_KEY` still works as a fallback if Gemini isn't set. Without either key the buttons say AI isn't set up.
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`: for the Supabase step. **Not provided yet.**
 
 ## 3. Style rules
@@ -83,6 +83,6 @@ coach-only accounts with own password · full mobile pass and fixes · builder t
 
 Open / waiting on the owner:
 - Supabase Project URL + anon key + service role key on Vercel, plus the two setup steps in §6.
-- `ANTHROPIC_API_KEY` on Vercel for AI calories.
+- `GEMINI_API_KEY` on Vercel for AI calories and meal photos.
 - Real coach photos/prices for the landing if not final; a custom domain.
 - Old data in a browser that used an earlier demo version: hard refresh (the DB key version bump resets it).

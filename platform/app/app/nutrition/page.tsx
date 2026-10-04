@@ -8,6 +8,7 @@ import { useMe } from "@/lib/hooks";
 import { effectiveItem, itemMacros, mealMacros, planMacros, swapOptions, unitLabel } from "@/lib/calc";
 import { MacroRing } from "@/components/charts";
 import { MacroLine } from "@/components/MacroLine";
+import { MealScan } from "@/components/MealScan";
 import { Divider, Empty, Sheet } from "@/components/ui";
 import type { MealItem } from "@/lib/types";
 
@@ -84,6 +85,8 @@ export default function Nutrition() {
           ))}
         </div>
       </div>
+
+      <MealScan />
 
       <Divider>{t("meals")}</Divider>
 
