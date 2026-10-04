@@ -24,7 +24,7 @@ export function FormView({ form, answers, onSubmit }: { form: FormTemplate; answ
       {form.questions.map((q, i) => (
         <fieldset key={q.id} className="card p-4">
           <legend className="sr-only">{q.label}</legend>
-          <p className="mb-3 font-bold"><span className="num me-1.5 text-gold">{i + 1}.</span>{q.label}</p>
+          <p className="mb-3 flex gap-2 font-bold"><span className="num grid size-6 shrink-0 place-items-center rounded-full bg-gold-soft text-xs text-gold">{i + 1}</span><span>{q.label}</span></p>
           {ro ? (
             <p className="text-text-2">{answers?.[q.id] || "—"}</p>
           ) : q.type === "text" ? (

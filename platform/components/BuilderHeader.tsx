@@ -14,7 +14,7 @@ export function BuilderHeader({ backTab, value, onChange, onDelete, label }: { b
     <>
       <Link href={`/coach/plans?tab=${backTab}`} className="mb-4 inline-flex items-center gap-1.5 text-muted hover:text-text"><Back size={18} /> {t("plans")}</Link>
       <div className="flex items-center gap-2">
-        <input aria-label={label} className="min-w-0 flex-1 border-b border-line bg-transparent py-1 text-3xl font-black outline-none focus:border-gold" dir="auto" value={value} onChange={(e) => onChange(e.target.value)} />
+        <input aria-label={label} className="min-w-0 flex-1 border-b border-line bg-transparent py-1 text-2xl font-black outline-none focus:border-gold" dir="auto" value={value} onChange={(e) => onChange(e.target.value)} />
         <button
           aria-label={t("delete")}
           onClick={() => { if (confirm(t("confirmDelete"))) { onDelete(); router.replace(`/coach/plans?tab=${backTab}`); } }}

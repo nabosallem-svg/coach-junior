@@ -48,15 +48,13 @@ function ClientDetail() {
     <div>
       <Link href="/coach/clients" className="mb-4 inline-flex items-center gap-1.5 text-muted hover:text-text"><Back size={18} /> {t("clients")}</Link>
 
-      <div className="flex flex-wrap items-center gap-4">
-        <Avatar name={c.name} size={60} />
-        <div className="flex-1">
-          <h1 className="text-2xl font-black">{c.name}</h1>
-          <p className="text-muted">{c.goal}</p>
+      <div className="flex items-center gap-3">
+        <Avatar name={c.name} size={56} />
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-2xl font-black">{c.name}</h1>
+          <p className="truncate text-muted">{c.goal}</p>
         </div>
-        <div className="flex gap-2">
-          <a href={waLink(c.phone)} target="_blank" rel="noopener" className="btn-ghost"><MessageCircle size={18} /> {t("whatsapp")}</a>
-        </div>
+        <a href={waLink(c.phone)} target="_blank" rel="noopener" aria-label={t("whatsapp")} className="grid size-12 shrink-0 place-items-center rounded-full border border-line-gold text-gold hover:bg-gold-soft"><MessageCircle size={20} /></a>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -65,7 +63,7 @@ function ClientDetail() {
             <h2 className="font-bold">{t("subscription")}</h2>
             <span className={`num rounded-full px-2.5 py-1 text-xs font-bold ${c.pending || !c.active ? "bg-card-hi text-muted" : left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>{c.pending ? t("requests") : !c.active ? t("paused") : left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}</span>
           </div>
-          <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
+          <dl className="mt-3 grid grid-cols-[auto_1fr_1fr] gap-5 text-sm">
             <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{c.packageName}</dd></div>
             <div><dt className="text-muted">{t("start")}</dt><dd className="font-bold">{fmtDate(c.subStart, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
             <div><dt className="text-muted">{t("end")}</dt><dd className="font-bold">{fmtDate(c.subEnd, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
@@ -137,7 +135,7 @@ function ClientDetail() {
             <p className="num text-3xl font-black">{ms.at(-1)!.weight} <span className="text-lg">{t("kg")}</span></p>
             <LineChart points={ms.map((m) => ({ x: new Date(m.date).getTime(), y: m.weight, label: fmtDate(m.date, lang, { day: "numeric", month: "short" }) }))} height={180} />
           </>
-        ) : <p className="text-muted">—</p>}
+        ) : <p className="text-muted">{t("noWeightYet")}</p>}
       </div>
 
       <div className="mb-3 mt-7 flex items-center justify-between">
