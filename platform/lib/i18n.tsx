@@ -370,6 +370,7 @@ const dict = {
   password: ["كلمة السر", "Password"],
   signIn: ["دخول", "Sign in"],
   wrongLogin: ["رقم الموبايل أو كلمة السر غلط", "Wrong phone or password"],
+  wrongCoachPw: ["كلمة السر غلط", "Wrong password"],
   accountPaused: ["حسابك موقوف، كلم الكابتن", "Your account is paused, message your coach"],
   coachPassword: ["كلمة سر الكابتن", "Coach password"],
   demoAccounts: ["حسابات التجربة", "Demo accounts"],
