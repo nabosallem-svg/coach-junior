@@ -51,7 +51,7 @@ npx next build && npx next start
 ## 5. Code map (`platform/`)
 
 - `lib/types.ts`: data model. `Client` (phone, demo `password`, package, `subStart/subEnd`, `active`, `trainingPlanId`, `nutritionPlanId`), `Exercise` (muscle, cue, `videoKey` in IndexedDB or `videoUrl`), `TrainingPlan` → days → `PlanExercise` (`sets[]` of reps/rir, `rest`, `note`), `Food` (macros per `per` × `unit`), `NutritionPlan` → meals → items, `Swap`, `WorkoutLog`, `Measurement`, `FormTemplate`/`FormAssignment`.
-- `lib/store.tsx`: **demo backend.** Whole DB in `localStorage` key `cj-platform-db-v10` (bump the version when the seed changes), session in `cj-platform-session-v1`. `useStore()` gives `db`, `update(fn)`, `session`, `setSession`, `reset`. `uid()`, `normPhone()`, `genPassword()`.
+- `lib/store.tsx`: **demo backend.** Whole DB in `localStorage` key `cj-platform-db-v11` (bump the version when the seed changes), session in `cj-platform-session-v1`. `useStore()` gives `db`, `update(fn)`, `session`, `setSession`, `reset`. `uid()`, `normPhone()`, `genPassword()`.
 - `lib/media.ts`: uploaded videos in IndexedDB. `lib/seed.ts`: demo data (3 trainees `01000000001/ahmed123`, `…02/mohamed123`, `…03/youssef123`, Arabic exercises, templates "علوي وسفلي - 4 أيام", "فول بادي - 3 أيام", "تنشيف - 4 وجبات", "سكيني فات - 4 وجبات"; food values checked against USDA, cooked weights).
 - `lib/plans.ts` (`personalize`), `lib/calc.ts` (macros, swaps, dates), `lib/wa.ts` (`waLink`, converts 01x → 201x), `lib/hooks.ts`.
 - Pages: `app/page.tsx` login; `app/app/*` trainee (home, nutrition, training, training/session, forms); `app/coach/*` coach (dashboard, clients, clients/view, library, plans + training/nutrition/forms editors). Detail pages use `?id=` so a static export works.

@@ -168,14 +168,19 @@ measurements.push(
   { id: "ms-c2a", clientId: "c2", date: isoDate(-28), weight: 64.0 },
   { id: "ms-c2b", clientId: "c2", date: isoDate(-14), weight: 65.1 },
   { id: "ms-c2c", clientId: "c2", date: isoDate(-1), weight: 66.0 },
+  ...[91.5, 90.6, 89.8, 89.1, 88.3, 87.9].map((w, i) => ({ id: `ms-c4${i}`, clientId: "c4", date: isoDate(-7 * (5 - i)), weight: w })),
+  { id: "ms-c5a", clientId: "c5", date: isoDate(-60), weight: 83.0 },
+  { id: "ms-c5b", clientId: "c5", date: isoDate(-35), weight: 81.4 },
 );
 
 export function makeSeed(): DB {
   return {
     clients: [
       { id: "c1", name: "أحمد سامي", phone: "+201000000001", password: "ahmed123", goal: "سكيني فات: تنشيف وبناء عضل", packageName: "3+1", subStart: isoDate(-116), subEnd: isoDate(4), trainingPlanId: "tp-ul", nutritionPlanId: "np-recomp", active: true },
-      { id: "c2", name: "محمد علي", phone: "+201000000002", password: "mohamed123", goal: "تضخيم", packageName: "6+1", subStart: isoDate(-30), subEnd: isoDate(180), trainingPlanId: "tp-ul", active: true },
+      { id: "c2", name: "محمد علي", phone: "+201000000002", password: "mohamed123", goal: "تضخيم", packageName: "6+1", subStart: isoDate(-30), subEnd: isoDate(180), trainingPlanId: "tp-ul", nutritionPlanId: "np-skinnyfat", active: true },
       { id: "c3", name: "يوسف حسن", phone: "+201000000003", password: "youssef123", goal: "لياقة عامة", packageName: "1", subStart: isoDate(-3), subEnd: isoDate(27), active: true },
+      { id: "c4", name: "كريم مصطفى", phone: "+201000000004", password: "karim123", goal: "تنشيف", packageName: "6+1", subStart: isoDate(-40), subEnd: isoDate(170), trainingPlanId: "tp-fb", nutritionPlanId: "np-recomp", active: true },
+      { id: "c5", name: "عمر خالد", phone: "+201000000005", password: "omar123", goal: "تضخيم", packageName: "1", subStart: isoDate(-65), subEnd: isoDate(-5), trainingPlanId: "tp-fb", active: false },
     ],
     measurements,
     exercises,
@@ -188,6 +193,12 @@ export function makeSeed(): DB {
           pe3: [{ weight: "60", reps: "11", done: true }, { weight: "60", reps: "10", done: true }, { weight: "55", reps: "11", done: true }],
         },
       },
+      {
+        id: "log2", clientId: "c1", planId: "tp-ul", dayId: "d2", date: iso(-1),
+        sets: { pe7: [{ weight: "80", reps: "10", done: true }, { weight: "80", reps: "9", done: true }, { weight: "80", reps: "8", done: true }] },
+      },
+      { id: "log3", clientId: "c4", planId: "tp-fb", dayId: "fb1", date: iso(-2), sets: { fb01: [{ weight: "70", reps: "10", done: true }, { weight: "70", reps: "10", done: true }, { weight: "70", reps: "9", done: true }] } },
+      { id: "log4", clientId: "c4", planId: "tp-fb", dayId: "fb2", date: iso(0), sets: { fb11: [{ weight: "90", reps: "8", done: true }, { weight: "90", reps: "8", done: true }, { weight: "90", reps: "7", done: true }] } },
     ],
     foods,
     nutritionPlans,
@@ -211,6 +222,8 @@ export function makeSeed(): DB {
     assignments: [
       { id: "as2", formId: "fm-start", clientId: "c1", sentAt: iso(-116), status: "submitted", submittedAt: iso(-115), reviewed: true, answers: { s6: "ذكر", s7: "27", s1: "178", s2: "79.5", s8: "تمرين 3-5 أيام", s9: "تنشيف", s3: "متوسط", s4: "مفيش", s5: "الكبدة" } },
       { id: "as3", formId: "fm-start", clientId: "c3", sentAt: iso(-3), status: "pending" },
+      { id: "as4", formId: "fm-start", clientId: "c2", sentAt: iso(-30), status: "submitted", submittedAt: iso(-29), reviewed: true, answers: { s6: "ذكر", s7: "22", s1: "175", s2: "64", s8: "تمرين 3-5 أيام", s9: "تضخيم", s3: "مبتدئ", s4: "مفيش", s5: "السمك" } },
+      { id: "as5", formId: "fm-start", clientId: "c4", sentAt: iso(-40), status: "submitted", submittedAt: iso(-39), reviewed: true, answers: { s6: "ذكر", s7: "31", s1: "182", s2: "91.5", s8: "تمرين 1-3 أيام", s9: "تنشيف", s3: "متوسط", s4: "خشونة بسيطة في الركبة", s5: "مفيش" } },
     ],
     messages: [
       { id: "msg1", clientId: "c1", from: "coach", text: "أهلاً يا أحمد، نزلتلك الخطة الجديدة. ابدأ بيها من بكره وابعتلي أوزانك أول أسبوع.", at: iso(-2), read: true },
