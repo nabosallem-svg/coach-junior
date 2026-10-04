@@ -8,7 +8,7 @@ import { uid } from "./store";
 // which uses the Supabase service key on the server.
 
 async function call(body: Record<string, string>) {
-  const { data } = await sb().auth.getSession();
+  const { data } = await (await sb()).auth.getSession();
   const res = await fetch("/api/accounts", { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${data.session?.access_token ?? ""}` }, body: JSON.stringify(body) });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(json.error ?? "failed");
@@ -32,6 +32,6 @@ export async function deleteAccount(id: string) {
 /** the trainee changing their own password */
 export async function changeOwnPassword(password: string) {
   if (!LIVE) return;
-  const { error } = await sb().auth.updateUser({ password });
+  const { error } = await (await sb()).auth.updateUser({ password });
   if (error) throw error;
 }

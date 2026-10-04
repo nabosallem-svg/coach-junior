@@ -19,7 +19,7 @@ const toBase64 = (b: Blob) => new Promise<string>((res) => { const r = new FileR
 export async function photoForAi(key: string) {
   let blob: Blob | undefined;
   if (LIVE) {
-    const { data } = await sb().storage.from("media").download(key);
+    const { data } = await (await sb()).storage.from("media").download(key);
     blob = data ?? undefined;
   } else blob = await getVideo(key);
   if (!blob) return null;

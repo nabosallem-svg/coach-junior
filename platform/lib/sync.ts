@@ -35,7 +35,7 @@ export async function loadDB(): Promise<DB> {
   const db = emptyDB() as unknown as Record<string, unknown[]>;
   // page through in case the coach has many rows
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await sb().from("docs").select("coll,data").range(from, from + 999);
+    const { data, error } = await (await sb()).from("docs").select("coll,data").range(from, from + 999);
     if (error) throw error;
     for (const r of data) (db[r.coll] ??= []).push(r.data);
     if (data.length < 1000) break;
@@ -49,18 +49,18 @@ export async function saveDiff(prev: DB, next: DB, me?: ID) {
   for (const [k, r] of b) if (JSON.stringify(a.get(k)?.data) !== JSON.stringify(r.data)) up.push(r);
   const gone = [...a.keys()].filter((k) => !b.has(k)).map((k) => a.get(k)!);
   if (up.length) {
-    const { error } = await sb().from("docs").upsert(up);
+    const { error } = await (await sb()).from("docs").upsert(up);
     if (error) throw error;
   }
   for (const r of gone) {
-    const { error } = await sb().from("docs").delete().eq("coll", r.coll).eq("id", r.id);
+    const { error } = await (await sb()).from("docs").delete().eq("coll", r.coll).eq("id", r.id);
     if (error) throw error;
   }
 }
 
 /** first coach login on an empty project: copy the starter library (foods, exercises, plan templates) */
 export async function seedIfEmpty(seed: DB) {
-  const { count } = await sb().from("docs").select("id", { count: "exact", head: true });
+  const { count } = await (await sb()).from("docs").select("id", { count: "exact", head: true });
   if (count) return false;
   const lib: DB = { ...emptyDB(), foods: seed.foods, exercises: seed.exercises.map(({ videoKey: _v, ...e }) => e), trainingPlans: seed.trainingPlans.filter((p) => !p.ownerId), nutritionPlans: seed.nutritionPlans.filter((p) => !p.ownerId), forms: seed.forms };
   await saveDiff(emptyDB(), lib);

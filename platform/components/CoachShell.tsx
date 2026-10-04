@@ -6,7 +6,7 @@ import { useEffect, type ReactNode } from "react";
 import { LayoutDashboard, Users, Clapperboard, ClipboardList, LogOut } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { Brand } from "./ui";
+import { Brand, Splash } from "./ui";
 
 const nav = [
   { href: "/coach", icon: LayoutDashboard, key: "dashboard" },
@@ -24,7 +24,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (ready && session?.role !== "coach") router.replace("/");
   }, [ready, session, router]);
-  if (!ready || session?.role !== "coach") return null;
+  if (!ready || session?.role !== "coach") return <Splash />;
 
   const unread = db.clients.filter((c) => c.pending).length;
   const isOn = (href: string) => (href === "/coach" ? path === "/coach" : path.startsWith(href));

@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Live mode switches on when both public keys are set on Vercel; without them the
 // app keeps running on the demo data in the browser.
@@ -9,8 +9,9 @@ const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 export const LIVE = !!(URL && KEY);
 
 let client: SupabaseClient | null = null;
-export function sb() {
-  if (!client) client = createClient(URL!, KEY!);
+/** loaded on first use, so the demo (and the first paint) never downloads the Supabase SDK */
+export async function sb() {
+  if (!client) client = (await import("@supabase/supabase-js")).createClient(URL!, KEY!);
   return client;
 }
 
