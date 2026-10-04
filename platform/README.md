@@ -2,7 +2,7 @@
 
 Client app and coach panel for كابتن جونيور. Same look as the landing page (gold on near-black, Cairo + Anton, Arabic RTL with an English toggle), mobile first.
 
-- **Client** (`/app`): home with subscription status, weight/waist progress and today's workout and meals; nutrition plan with macros, food swap at equal calories, meal check-off and a weekly shopping list; training plan by day with exercise videos, sets/reps/tempo/RIR, previous numbers and a "start this day" logger; the starter form; a WhatsApp tab to the coach.
+- **Client** (`/app`): home with subscription status, weight/waist progress and today's workout and meals; nutrition plan with macros, food swap at equal calories, meal check-off and a weekly shopping list; training plan by day with exercise videos, sets/reps/RIR, previous numbers and a "start this day" logger; the starter form; a WhatsApp tab to the coach.
 - **Coach** (`/coach`): dashboard (who needs attention), clients (add with a password and plans, send login on WhatsApp, extend / pause, personal plan copies, see logged workouts), video library (drag in several videos at once, or upload one / paste a link), training / nutrition plan builders and form builder.
 
 ## Run

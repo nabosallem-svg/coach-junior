@@ -38,7 +38,7 @@ export type Exercise = {
   videoUrl?: string;
 };
 
-export type SetSpec = { reps: string; tempo?: string; rir?: string };
+export type SetSpec = { reps: string; rir?: string };
 /** rest = seconds between sets */
 export type PlanExercise = { id: ID; exerciseId: ID; note?: string; rest?: string; sets: SetSpec[] };
 export type TrainingDay = { id: ID; name: string; exercises: PlanExercise[] };

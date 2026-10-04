@@ -9,19 +9,19 @@ const RESTS = ["60", "90", "120", "180"];
 
 /**
  * One exercise in the coach's plan builder. Default view sets everything for all sets at once
- * (sets count, reps, rest); tempo/RIR and per-set values are opt-in.
+ * (sets count, reps, rest); RIR and per-set values are opt-in.
  */
 export function ExerciseCard({ pe, ex, index, count, onChange, onMove, onDelete }: {
   pe: PlanExercise; ex?: Exercise; index: number; count: number;
   onChange: (fn: (pe: PlanExercise) => void) => void; onMove: (dir: -1 | 1) => void; onDelete: () => void;
 }) {
   const { t, muscle } = useI18n();
-  const same = pe.sets.every((s) => s.reps === pe.sets[0]?.reps && (s.tempo ?? "") === (pe.sets[0]?.tempo ?? "") && (s.rir ?? "") === (pe.sets[0]?.rir ?? ""));
+  const same = pe.sets.every((s) => s.reps === pe.sets[0]?.reps && (s.rir ?? "") === (pe.sets[0]?.rir ?? ""));
   const [perSet, setPerSet] = useState(!same);
-  const [extra, setExtra] = useState(!!(pe.sets[0]?.tempo || pe.sets[0]?.rir));
+  const [extra, setExtra] = useState(!!pe.sets[0]?.rir);
   const [help, setHelp] = useState(false);
   const first = pe.sets[0] ?? { reps: "" };
-  const all = (k: "reps" | "tempo" | "rir", v: string) => onChange((p) => { p.sets.forEach((s) => { s[k] = v; }); });
+  const all = (k: "reps" | "rir", v: string) => onChange((p) => { p.sets.forEach((s) => { s[k] = v; }); });
   const setCount = (n: number) => onChange((p) => {
     n = Math.min(Math.max(n, 1), 10);
     while (p.sets.length < n) p.sets.push({ ...(p.sets.at(-1) ?? { reps: "8-12" }) });
@@ -75,7 +75,7 @@ export function ExerciseCard({ pe, ex, index, count, onChange, onMove, onDelete 
       {/* optional extras */}
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" onClick={() => setExtra(!extra)} className={`flex min-h-9 items-center gap-1 rounded-full border px-3 text-sm font-bold ${extra ? "border-gold text-gold" : "border-line text-muted"}`}>
-          <ChevronDown size={15} className={extra ? "rotate-180" : ""} /> {t("tempoRir")}
+          <ChevronDown size={15} className={extra ? "rotate-180" : ""} /> {t("rir")}
         </button>
         <button type="button" onClick={() => setPerSet(!perSet)} className={`flex min-h-9 items-center gap-1 rounded-full border px-3 text-sm font-bold ${perSet ? "border-gold text-gold" : "border-line text-muted"}`}>
           <ChevronDown size={15} className={perSet ? "rotate-180" : ""} /> {t("perSetDetails")}
@@ -85,24 +85,22 @@ export function ExerciseCard({ pe, ex, index, count, onChange, onMove, onDelete 
       {extra && !perSet && (
         <div className="mt-3 rounded-xl bg-card-hi/60 p-3">
           <div className="grid grid-cols-2 gap-3">
-            <label><span className="mb-1.5 block text-sm font-bold text-text-2">{t("tempo")}</span><input dir="ltr" className={field} placeholder="3-1-1" value={first.tempo ?? ""} onChange={(e) => all("tempo", e.target.value)} /></label>
             <label><span className="mb-1.5 block text-sm font-bold text-text-2">{t("rir")}</span><input dir="ltr" inputMode="numeric" className={field} placeholder="1" value={first.rir ?? ""} onChange={(e) => all("rir", e.target.value)} /></label>
           </div>
           <button type="button" onClick={() => setHelp(!help)} className="mt-2 flex items-center gap-1 text-xs font-bold text-muted"><HelpCircle size={14} /> {t("whatIsThis")}</button>
-          {help && <p className="mt-1 text-sm leading-relaxed text-text-2">{t("tempoRirHelp")}</p>}
+          {help && <p className="mt-1 text-sm leading-relaxed text-text-2">{t("rirHelp")}</p>}
         </div>
       )}
 
       {perSet && (
         <div className="mt-3 space-y-2">
-          <div className="grid grid-cols-[2rem_1fr_1fr_1fr_2rem] gap-2 text-center text-[13px] font-bold text-text-2">
-            <span>{t("set")}</span><span>{t("reps")}</span><span>{t("tempo")}</span><span>{t("rir")}</span><span />
+          <div className="grid grid-cols-[2rem_1fr_1fr_2rem] gap-2 text-center text-[13px] font-bold text-text-2">
+            <span>{t("set")}</span><span>{t("reps")}</span><span>{t("rir")}</span><span />
           </div>
           {pe.sets.map((s, si) => (
-            <div key={si} className="grid grid-cols-[2rem_1fr_1fr_1fr_2rem] items-center gap-2">
+            <div key={si} className="grid grid-cols-[2rem_1fr_1fr_2rem] items-center gap-2">
               <span className="num mx-auto grid size-7 place-items-center rounded-full bg-card-hi text-sm font-bold text-text-2">{si + 1}</span>
               <input dir="ltr" className="input num h-11 bg-bg px-1 py-0 text-center font-bold" value={s.reps} placeholder="8-12" onChange={(e) => onChange((p) => { p.sets[si].reps = e.target.value; })} />
-              <input dir="ltr" className="input num h-11 bg-bg px-1 py-0 text-center font-bold" value={s.tempo ?? ""} placeholder="3-1-1" onChange={(e) => onChange((p) => { p.sets[si].tempo = e.target.value; })} />
               <input dir="ltr" className="input num h-11 bg-bg px-1 py-0 text-center font-bold" value={s.rir ?? ""} placeholder="1" onChange={(e) => onChange((p) => { p.sets[si].rir = e.target.value; })} />
               <button type="button" aria-label={t("delete")} disabled={pe.sets.length === 1} onClick={() => onChange((p) => { p.sets.splice(si, 1); })} className="grid size-8 place-items-center text-muted hover:text-danger disabled:opacity-30"><X size={16} /></button>
             </div>

@@ -35,7 +35,7 @@ create table public.exercises (
 create table public.training_plans (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  days jsonb not null default '[]'   -- [{id,name,exercises:[{id,exerciseId,note,sets:[{reps,tempo,rir}]}]}]
+  days jsonb not null default '[]'   -- [{id,name,exercises:[{id,exerciseId,note,sets:[{reps,rir}]}]}]
 );
 
 create table public.foods (
