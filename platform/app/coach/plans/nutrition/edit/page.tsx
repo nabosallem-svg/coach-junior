@@ -7,6 +7,7 @@ import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { itemMacros, mealMacros, planMacros, swapOptions, unitLabel } from "@/lib/calc";
 import { TargetBars } from "@/components/TargetBars";
+import { clientTargets } from "@/lib/intake";
 import { BuilderHeader } from "@/components/BuilderHeader";
 import { MacroRing } from "@/components/charts";
 import { MacroLine } from "@/components/MacroLine";
@@ -79,7 +80,8 @@ function NutritionBuilder() {
       </div>
 
       {plan.ownerId && (() => {
-        const target = db.clients.find((c) => c.id === plan.ownerId)?.targets;
+        const owner = db.clients.find((c) => c.id === plan.ownerId);
+        const target = owner && clientTargets(db, owner);
         return (
           <div className="card mt-3 p-4">
             <p className="mb-3 text-sm font-bold text-gold">{t("vsTarget")}</p>
