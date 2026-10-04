@@ -145,9 +145,9 @@ measurements.push(
 export function makeSeed(): DB {
   return {
     clients: [
-      { id: "c1", name: "أحمد سامي", phone: "+201000000001", goal: "تنشيف مع الحفاظ على العضل", packageName: "3+1", subStart: isoDate(-116), subEnd: isoDate(4), trainingPlanId: "tp-ul", nutritionPlanId: "np-recomp", active: true },
-      { id: "c2", name: "محمد علي", phone: "+201000000002", goal: "تضخيم", packageName: "6+1", subStart: isoDate(-30), subEnd: isoDate(180), trainingPlanId: "tp-ul", active: true },
-      { id: "c3", name: "يوسف حسن", phone: "+201000000003", goal: "لياقة عامة", packageName: "1", subStart: isoDate(-3), subEnd: isoDate(27), active: true },
+      { id: "c1", name: "أحمد سامي", phone: "+201000000001", password: "ahmed123", goal: "تنشيف مع الحفاظ على العضل", packageName: "3+1", subStart: isoDate(-116), subEnd: isoDate(4), trainingPlanId: "tp-ul", nutritionPlanId: "np-recomp", active: true },
+      { id: "c2", name: "محمد علي", phone: "+201000000002", password: "mohamed123", goal: "تضخيم", packageName: "6+1", subStart: isoDate(-30), subEnd: isoDate(180), trainingPlanId: "tp-ul", active: true },
+      { id: "c3", name: "يوسف حسن", phone: "+201000000003", password: "youssef123", goal: "لياقة عامة", packageName: "1", subStart: isoDate(-3), subEnd: isoDate(27), active: true },
     ],
     measurements,
     exercises,

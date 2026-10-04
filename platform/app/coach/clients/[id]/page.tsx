@@ -2,13 +2,14 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, MessageSquare, Send, CalendarPlus, ClipboardList, Phone } from "lucide-react";
-import { useStore, uid } from "@/lib/store";
+import { ArrowRight, ArrowLeft, MessageSquare, Send, CalendarPlus, ClipboardList, Phone, KeyRound } from "lucide-react";
+import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate } from "@/lib/calc";
 import { LineChart } from "@/components/charts";
 import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
+import { Creds } from "@/components/Creds";
 
 export default function ClientDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -17,6 +18,7 @@ export default function ClientDetail({ params }: { params: Promise<{ id: string 
   const [sendOpen, setSendOpen] = useState(false);
   const [viewAs, setViewAs] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [newPw, setNewPw] = useState<string | null>(null);
   const c = db.clients.find((x) => x.id === id);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
   if (!c) return null;
@@ -67,6 +69,7 @@ export default function ClientDetail({ params }: { params: Promise<{ id: string 
             <button onClick={extend} className="btn-gold flex-1"><CalendarPlus size={18} /> {t("oneMonth")}</button>
             <button onClick={() => set({ active: !c.active })} className="btn-quiet flex-1">{c.active ? t("active") : t("inactive")}</button>
           </div>
+          <button onClick={() => { const pw = genPassword(); set({ password: pw }); setNewPw(pw); }} className="mt-2 flex items-center gap-1.5 text-sm font-bold text-gold"><KeyRound size={15} /> {t("resetPassword")}</button>
         </section>
 
         <section className="card space-y-3 p-4">
@@ -165,6 +168,7 @@ export default function ClientDetail({ params }: { params: Promise<{ id: string 
       <Sheet open={!!viewing} onClose={() => setViewAs(null)} title={db.forms.find((f) => f.id === viewing?.formId)?.title ?? ""}>
         {viewing && <FormView form={db.forms.find((f) => f.id === viewing.formId)!} answers={viewing.answers} />}
       </Sheet>
+      <Creds client={newPw ? c : null} password={newPw ?? ""} onClose={() => setNewPw(null)} />
       <Toast text={toast} />
     </div>
   );

@@ -6,6 +6,8 @@ export type Client = {
   id: ID;
   name: string;
   phone: string;
+  /** demo only: with Supabase the password lives in Supabase Auth (hashed), never in this table */
+  password: string;
   goal: string;
   /** package label, e.g. "3+1 months" */
   packageName: string;

@@ -7,7 +7,7 @@ import { Bell, Home, Salad, Dumbbell, ClipboardList, MessageSquare, LogOut, Cred
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { clientNotices, useMe, type Notice } from "@/lib/hooks";
-import { Avatar, Brand, Sheet } from "./ui";
+import { Avatar, Brand, Field, Sheet } from "./ui";
 
 const tabs = [
   { href: "/app", icon: Home, key: "home" },
@@ -25,19 +25,22 @@ export function noticeText(n: Notice, t: ReturnType<typeof useI18n>["t"]) {
 export const noticeIcon = { sub: CreditCard, form: ClipboardList, msg: MessageCircle };
 
 export function ClientShell({ children }: { children: ReactNode }) {
-  const { ready, session, setSession, db } = useStore();
+  const { ready, session, setSession, db, update } = useStore();
   const { t, toggle } = useI18n();
   const me = useMe();
   const path = usePathname();
   const router = useRouter();
   const [bell, setBell] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [pw, setPw] = useState("");
 
   useEffect(() => {
-    if (ready && (!session || session.role !== "client" || !me)) router.replace("/");
-  }, [ready, session, me, router]);
+    if (!ready) return;
+    if (me && !me.active) setSession(null);
+    if (!session || session.role !== "client" || !me || !me.active) router.replace("/");
+  }, [ready, session, me, router, setSession]);
 
-  if (!ready || !me) return null;
+  if (!ready || !me || !me.active) return null;
   const notices = clientNotices(db, me.id);
   const workout = path.startsWith("/app/training/session");
 
@@ -109,6 +112,21 @@ export function ClientShell({ children }: { children: ReactNode }) {
       </Sheet>
 
       <Sheet open={menu} onClose={() => setMenu(false)} title={me.name}>
+        <form
+          className="mb-4 space-y-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (pw.length < 6) return;
+            update((d) => { d.clients.find((x) => x.id === me.id)!.password = pw; });
+            setPw("");
+            setMenu(false);
+          }}
+        >
+          <Field label={t("changePassword")}>
+            <input className="input text-start" dir="ltr" type="password" autoComplete="new-password" placeholder={t("minChars")} value={pw} onChange={(e) => setPw(e.target.value)} />
+          </Field>
+          <button disabled={pw.length < 6} className="btn-ghost w-full">{t("save")}</button>
+        </form>
         <button
           className="btn-quiet w-full"
           onClick={() => {

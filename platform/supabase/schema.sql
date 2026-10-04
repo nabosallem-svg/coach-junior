@@ -1,6 +1,12 @@
 -- Coach Junior platform: Supabase schema (Postgres + RLS).
 -- Run in the Supabase SQL editor once a project exists. Mirrors lib/types.ts.
 -- Roles: one coach (profiles.role = 'coach'); clients only see their own rows.
+--
+-- Accounts: the coach creates each client from the panel. A server route calls
+-- supabase.auth.admin.createUser({ phone, password, phone_confirm: true }) with the
+-- service-role key (no SMS needed), then inserts profiles + clients rows.
+-- Clients sign in with signInWithPassword({ phone, password }); Supabase stores
+-- only a bcrypt hash. "New password" in the panel = auth.admin.updateUserById.
 
 create table public.profiles (
   id uuid primary key references auth.users on delete cascade,
@@ -137,7 +143,17 @@ create policy own_profile on profiles for select using (id = auth.uid());
 create policy own_client on clients for select using (id = auth.uid());
 
 -- library and plans: readable by an active client (plans only when assigned)
-create policy active_read on exercises for select using (exists (select 1 from clients where id = auth.uid() and active and sub_end >= current_date));
+-- a client sees an exercise (and its video) only if it is in HIS assigned plan
+-- and his subscription is running
+create or replace function public.client_has_exercise(ex_id uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from clients c join training_plans p on p.id = c.training_plan_id
+    where c.id = auth.uid() and c.active and c.sub_end >= current_date
+      and jsonb_path_exists(p.days, '$[*].exercises[*].exerciseId ? (@ == $id)', jsonb_build_object('id', ex_id::text))
+  )
+$$;
+create policy plan_read on exercises for select using (client_has_exercise(id));
 create policy active_read on foods for select using (auth.uid() is not null);
 create policy assigned_read on training_plans for select using (exists (select 1 from clients where id = auth.uid() and training_plan_id = training_plans.id));
 create policy assigned_read on nutrition_plans for select using (exists (select 1 from clients where id = auth.uid() and nutrition_plan_id = nutrition_plans.id));
@@ -153,11 +169,12 @@ create policy own_read on messages for select using (client_id = auth.uid());
 create policy own_send on messages for insert with check (client_id = auth.uid() and sender = 'client');
 create policy own_mark_read on messages for update using (client_id = auth.uid()) with check (client_id = auth.uid());
 
--- Storage: create a PRIVATE bucket 'exercise-videos'. Coach uploads; clients get
--- short-lived signed URLs (createSignedUrl) only while their subscription is active.
+-- Storage: PRIVATE bucket 'exercise-videos', objects named '<exercise_id>/<file>'.
+-- Coach uploads; a client can only get a short-lived signed URL for videos of
+-- exercises in his own plan while his subscription is active.
 insert into storage.buckets (id, name, public) values ('exercise-videos', 'exercise-videos', false) on conflict do nothing;
 create policy coach_videos on storage.objects for all using (bucket_id = 'exercise-videos' and is_coach()) with check (bucket_id = 'exercise-videos' and is_coach());
 create policy client_videos on storage.objects for select using (
   bucket_id = 'exercise-videos'
-  and exists (select 1 from clients where id = auth.uid() and active and sub_end >= current_date)
+  and public.client_has_exercise((split_part(name, '/', 1))::uuid)
 );

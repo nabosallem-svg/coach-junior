@@ -7,7 +7,7 @@ import { useStore, uid } from "@/lib/store";
 import { useI18n, MUSCLES } from "@/lib/i18n";
 import { putVideo, deleteVideo } from "@/lib/media";
 import { VideoBox } from "@/components/VideoBox";
-import { Field, Pills, Sheet } from "@/components/ui";
+import { Field, Pills, Sheet, Toast } from "@/components/ui";
 import type { Exercise, Muscle } from "@/lib/types";
 
 type Draft = { id?: string; name: string; muscle: Muscle; cue: string; videoUrl: string; file: File | null; videoKey?: string; removeVideo?: boolean };
@@ -22,6 +22,27 @@ function Library() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const bulkRef = useRef<HTMLInputElement>(null);
+  const [drag, setDrag] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  // several videos at once: one exercise per file, named after the file
+  const bulk = async (files: FileList | File[]) => {
+    const vids = [...files].filter((f) => f.type.startsWith("video/"));
+    if (!vids.length) return;
+    setBusy(true);
+    const made: Exercise[] = [];
+    for (const f of vids) {
+      const id = uid("ex");
+      const videoKey = `${id}-${Date.now()}`;
+      await putVideo(videoKey, f);
+      made.push({ id, name: f.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim(), muscle: (filter === "all" ? "chest" : filter) as Muscle, videoKey });
+    }
+    update((d) => { d.exercises.unshift(...made); });
+    setBusy(false);
+    setToast(t("bulkDone", { n: made.length }));
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => { if (params.get("upload")) setDraft({ ...empty }); }, [params]);
 
@@ -60,6 +81,19 @@ function Library() {
       <div className="mt-5">
         <Pills value={filter} onChange={setFilter} options={[{ value: "all", label: t("all") }, ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m) }))]} />
       </div>
+
+      <button
+        type="button"
+        onClick={() => bulkRef.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => { e.preventDefault(); setDrag(false); bulk(e.dataTransfer.files); }}
+        className={`mt-5 flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-6 text-center font-bold transition-colors ${drag ? "border-gold bg-gold-soft text-gold" : "border-line-gold text-gold hover:bg-gold-soft"}`}
+      >
+        <Upload size={28} />
+        <span>{busy ? t("uploading") : t("dropVideos")}</span>
+      </button>
+      <input ref={bulkRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => { if (e.target.files) bulk(e.target.files); e.target.value = ""; }} />
 
       <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((e) => {
@@ -134,6 +168,7 @@ function Library() {
           </form>
         )}
       </Sheet>
+      <Toast text={toast} />
     </div>
   );
 }

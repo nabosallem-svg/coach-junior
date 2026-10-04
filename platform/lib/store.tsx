@@ -8,7 +8,7 @@ import { makeSeed } from "./seed";
 // client side can be clicked through without a server. Swap this provider for a
 // Supabase-backed one when a project is connected (see supabase/schema.sql).
 
-const DB_KEY = "cj-platform-db-v1";
+const DB_KEY = "cj-platform-db-v2";
 const SESSION_KEY = "cj-platform-session-v1";
 
 export type Session = { role: "coach" } | { role: "client"; clientId: ID } | null;
@@ -79,6 +79,21 @@ export function useStore() {
   const ctx = useContext(StoreCtx);
   if (!ctx) throw new Error("useStore outside StoreProvider");
   return ctx;
+}
+
+/** demo coach password; with Supabase the coach is a normal auth user with role = coach */
+export const COACH_DEMO_PASSWORD = "junior2026";
+
+/** last 10 digits, so 010..., +2010... and 2010... all match */
+export const normPhone = (p: string) => p.replace(/\D/g, "").slice(-10);
+
+/** readable password the coach can send on WhatsApp: no 0/O/1/l */
+export function genPassword() {
+  const a = "abcdefghjkmnpqrstuvwxyz", d = "23456789";
+  let s = "";
+  for (let i = 0; i < 4; i++) s += a[Math.floor(Math.random() * a.length)];
+  for (let i = 0; i < 4; i++) s += d[Math.floor(Math.random() * d.length)];
+  return s;
 }
 
 export const uid = (prefix = "id") => `${prefix}-${Math.random().toString(36).slice(2, 9)}${Date.now().toString(36).slice(-3)}`;

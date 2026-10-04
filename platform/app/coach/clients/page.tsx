@@ -4,10 +4,11 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
-import { useStore, uid } from "@/lib/store";
+import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft } from "@/lib/calc";
 import { Avatar, Field, Sheet } from "@/components/ui";
+import { Creds } from "@/components/Creds";
 
 const PACKAGES = [
   { label: "1", months: 1 },
@@ -24,6 +25,7 @@ function Clients() {
   const [q, setQ] = useState("");
   const [add, setAdd] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", goal: "", pkg: "3+1" });
+  const [created, setCreated] = useState<{ id: string; pw: string } | null>(null);
   const Chevron = dir === "rtl" ? ChevronLeft : ChevronRight;
 
   useEffect(() => { if (params.get("add")) setAdd(true); }, [params]);
@@ -75,13 +77,15 @@ function Clients() {
             const end = new Date(start);
             end.setMonth(end.getMonth() + months);
             const id = uid("c");
+            const pw = genPassword();
             update((d) => {
-              d.clients.push({ id, name: form.name.trim(), phone: form.phone.trim(), goal: form.goal.trim(), packageName: form.pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), active: true });
+              d.clients.push({ id, name: form.name.trim(), phone: form.phone.trim(), password: pw, goal: form.goal.trim(), packageName: form.pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), active: true });
               const starter = d.forms.find((f) => f.id === "fm-start");
               if (starter) d.assignments.push({ id: uid("as"), formId: starter.id, clientId: id, sentAt: start.toISOString(), status: "pending" });
             });
             setForm({ name: "", phone: "", goal: "", pkg: "3+1" });
-            router.push(`/coach/clients/${id}`);
+            setAdd(false);
+            setCreated({ id, pw });
           }}
         >
           <Field label={t("name")}><input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
@@ -97,6 +101,7 @@ function Clients() {
           <button className="btn-gold w-full">{t("add")}</button>
         </form>
       </Sheet>
+      <Creds client={db.clients.find((c) => c.id === created?.id) ?? null} password={created?.pw ?? ""} onClose={() => { const id = created?.id; setCreated(null); router.push(`/coach/clients/${id}`); }} />
     </div>
   );
 }
