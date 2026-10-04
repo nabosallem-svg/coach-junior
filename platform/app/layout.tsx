@@ -4,9 +4,9 @@ import localFont from "next/font/local";
 import { asset } from "@/lib/asset";
 
 // two families so each file keeps its own script (Latin first, Arabic falls through)
-const cairoLatin = localFont({ src: "../public/fonts/cairo-latin.woff2", weight: "500 900", variable: "--font-cairo-latin", display: "swap" });
-const cairoArabic = localFont({ src: "../public/fonts/cairo-arabic.woff2", weight: "500 900", variable: "--font-cairo-arabic", display: "swap" });
-const anton = localFont({ src: "../public/fonts/anton-latin.woff2", weight: "400", variable: "--font-anton", display: "swap" });
+const cairoLatin = localFont({ src: "../public/fonts/cairo-latin.woff2", weight: "500 900", variable: "--font-cairo-latin", display: "swap", adjustFontFallback: false });
+const cairoArabic = localFont({ src: "../public/fonts/cairo-arabic.woff2", weight: "500 900", variable: "--font-cairo-arabic", display: "swap", adjustFontFallback: false });
+const anton = localFont({ src: "../public/fonts/anton-latin.woff2", weight: "400", variable: "--font-anton", display: "swap", adjustFontFallback: false });
 import { StoreProvider } from "@/lib/store";
 import { I18nProvider } from "@/lib/i18n";
 

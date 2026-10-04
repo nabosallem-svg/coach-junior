@@ -59,7 +59,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
             <button onClick={logout} aria-label={t("logout")} className="grid size-10 place-items-center rounded-xl border border-line text-muted"><LogOut size={18} /></button>
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 lg:px-8 lg:pb-12">{children}</main>
+        <main key={path} className="anim-page mx-auto max-w-5xl px-4 pb-32 pt-6 lg:px-8 lg:pb-12">{children}</main>
       </div>
 
       {/* phone bottom nav */}
