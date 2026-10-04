@@ -65,3 +65,19 @@ export const unitLabel = (u: Food["unit"], lang: "ar" | "en") =>
 export function prevSets(logs: WorkoutLog[], peId: string) {
   return logs.filter((l) => l.sets[peId]?.some((s) => s.done)).sort((a, b) => b.date.localeCompare(a.date))[0]?.sets[peId];
 }
+
+export type Activity = "sedentary" | "light" | "moderate" | "high" | "athlete";
+export type Goal = "cut" | "maintain" | "bulk";
+const ACTIVITY: Record<Activity, number> = { sedentary: 1.2, light: 1.375, moderate: 1.55, high: 1.725, athlete: 1.9 };
+const GOAL: Record<Goal, number> = { cut: 0.8, maintain: 1, bulk: 1.1 };
+
+/** Mifflin-St Jeor BMR -> TDEE -> goal calories; protein 2 g/kg (cut) or 1.8, fat 25% of calories, rest carbs */
+export function targets(i: { sex: "m" | "f"; age: number; heightCm: number; weightKg: number; activity: Activity; goal: Goal }) {
+  const bmr = Math.round(10 * i.weightKg + 6.25 * i.heightCm - 5 * i.age + (i.sex === "m" ? 5 : -161));
+  const tdee = Math.round(bmr * ACTIVITY[i.activity]);
+  const kcal = Math.round((tdee * GOAL[i.goal]) / 10) * 10;
+  const p = Math.round(i.weightKg * (i.goal === "cut" ? 2 : 1.8));
+  const f = Math.round((kcal * 0.25) / 9);
+  const c = Math.max(0, Math.round((kcal - p * 4 - f * 9) / 4));
+  return { bmr, tdee, kcal, p, c, f };
+}

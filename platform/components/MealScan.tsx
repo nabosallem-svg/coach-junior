@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, PencilLine } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { shrinkImage } from "@/lib/media";
 import { Sheet } from "./ui";
@@ -17,15 +17,20 @@ export function MealScan() {
   const [state, setState] = useState<"idle" | "busy" | "fail" | "nokey" | "notfood">("idle");
   const [photo, setPhoto] = useState<string | null>(null);
   const [res, setRes] = useState<Result | null>(null);
+  const [typing, setTyping] = useState(false);
+  const [text, setText] = useState("");
 
   const pick = async (f?: File) => {
     if (!f) return;
-    setRes(null);
-    setState("busy");
     const small = await shrinkImage(f, 1024);
     setPhoto(URL.createObjectURL(small));
+    send({ image: await toBase64(small), mime: small.type || "image/jpeg" });
+  };
+  const send = async (payload: Record<string, string>) => {
+    setRes(null);
+    setState("busy");
     try {
-      const r = await fetch("/api/meal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ image: await toBase64(small), mime: small.type || "image/jpeg", lang }) });
+      const r = await fetch("/api/meal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...payload, lang }) });
       if (r.status === 503 || r.status === 404) return setState("nokey");
       if (!r.ok) return setState("fail");
       const j: Result = await r.json();
@@ -34,17 +39,26 @@ export function MealScan() {
       setState("idle");
     } catch { setState("fail"); }
   };
-  const close = () => { setPhoto(null); setRes(null); setState("idle"); };
+  const close = () => { setPhoto(null); setTyping(false); setRes(null); setState("idle"); };
 
   return (
     <>
       <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />
-      <button onClick={() => fileRef.current?.click()} className="card mt-5 flex w-full items-center gap-3 p-4 text-start hover:border-line-gold">
-        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gold-soft text-gold"><Camera size={20} /></span>
-        <span><span className="block font-bold">{t("scanMeal")}</span><span className="text-sm text-muted">{t("scanMealSub")}</span></span>
-      </button>
-      <Sheet open={!!photo} onClose={close} title={t("scanMeal")}>
+      <div className="card mt-5 p-4">
+        <button onClick={() => fileRef.current?.click()} className="flex w-full items-center gap-3 text-start">
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gold-soft text-gold"><Camera size={20} /></span>
+          <span><span className="block font-bold">{t("scanMeal")}</span><span className="text-sm text-muted">{t("scanMealSub")}</span></span>
+        </button>
+        <button onClick={() => { setText(""); setTyping(true); }} className="mt-3 flex items-center gap-1.5 text-sm font-bold text-gold"><PencilLine size={15} /> {t("mealText")}</button>
+      </div>
+      <Sheet open={!!photo || typing} onClose={close} title={typing ? t("mealText") : t("scanMeal")}>
         {photo && <img src={photo} alt="" className="max-h-56 w-full rounded-2xl object-cover" />}
+        {typing && (
+          <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) send({ text }); }} className="space-y-2">
+            <textarea className="input min-h-20" dir="auto" placeholder={t("mealTextHint")} value={text} onChange={(e) => setText(e.target.value)} autoFocus />
+            <button disabled={!text.trim() || state === "busy"} className="btn-gold w-full">{t("calcIt")}</button>
+          </form>
+        )}
         {state === "busy" && <p className="mt-4 flex items-center justify-center gap-2 font-bold text-gold"><Loader2 size={18} className="animate-spin" /> {t("scanBusy")}</p>}
         {state === "fail" && <p className="mt-4 text-center font-bold text-danger">{t("aiFailed")}</p>}
         {state === "nokey" && <p className="mt-4 text-center text-muted">{t("scanNoKey")}</p>}

@@ -3,11 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound, Pencil, Sparkles, Loader2, FileText, Images, Utensils } from "lucide-react";
+import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound, Pencil, Sparkles, Loader2, FileText, Images, Utensils, Calculator } from "lucide-react";
 import { personalize, type PlanKind } from "@/lib/plans";
 import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { daysLeft, fmtDate } from "@/lib/calc";
+import { daysLeft, fmtDate, targets, type Activity, type Goal } from "@/lib/calc";
 import { LineChart } from "@/components/charts";
 import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
@@ -29,6 +29,8 @@ function ClientDetail() {
   const [act, setAct] = useState(false);
   const [ai, setAi] = useState<{ title: string; text?: string; busy?: boolean; err?: string; wa?: boolean } | null>(null);
   const [drafting, setDrafting] = useState(false);
+  const [calc, setCalc] = useState<{ sex: "m" | "f"; age: string; height: string; weight: string; activity: Activity; goal: Goal } | null>(null);
+  const [tgt, setTgt] = useState<ReturnType<typeof targets> | null>(null);
   const router = useRouter();
   const c = db.clients.find((x) => x.id === id);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
@@ -65,6 +67,14 @@ function ClientDetail() {
     const imgs = (await Promise.all([...pick(older), ...pick(newer)].map((p) => photoForAi(p.key)))).filter(Boolean) as { mime: string; data: string }[];
     return aiTask("photos", { olderDate: photoDates[1], newerDate: photoDates[0], poses }, lang, imgs);
   });
+  const intakeAnswer = (word: string) => {
+    const a = assigns.find((x) => x.status === "submitted" && x.answers);
+    const q = a && db.forms.find((f) => f.id === a.formId)?.questions.find((qq) => qq.label.includes(word));
+    return (q && a?.answers?.[q.id]) || "";
+  };
+  const openCalc = () => setCalc({ sex: "m", age: "", height: intakeAnswer("الطول"), weight: String(ms.at(-1)?.weight ?? intakeAnswer("الوزن")), activity: "moderate", goal: /تنشيف|cut/i.test(c.goal) ? "cut" : /تضخيم|bulk/i.test(c.goal) ? "bulk" : "maintain" });
+  const calcResult = calc && +calc.age > 0 && +calc.height > 0 && +calc.weight > 0 ? targets({ sex: calc.sex, age: +calc.age, heightCm: +calc.height, weightKg: +calc.weight, activity: calc.activity, goal: calc.goal }) : null;
+
   const draftMeals = async () => {
     setDrafting(true);
     try {
@@ -72,7 +82,7 @@ function ClientDetail() {
       const form = intake && db.forms.find((f) => f.id === intake.formId);
       const answers = form ? Object.fromEntries(form.questions.map((q) => [q.label, intake!.answers![q.id] ?? ""])) : {};
       const r = await aiTask<{ name?: string; meals?: { name: string; items: { foodId: string; qty: number }[] }[] }>("mealplan", {
-        client: { goal: c.goal, latestWeightKg: ms.at(-1)?.weight, intake: answers },
+        client: { goal: c.goal, latestWeightKg: ms.at(-1)?.weight, intake: answers, ...(tgt && { dailyTargets: { kcal: tgt.kcal, proteinG: tgt.p, carbsG: tgt.c, fatG: tgt.f } }) },
         foods: db.foods.map((f) => ({ id: f.id, name: lang === "ar" ? f.nameAr : f.nameEn, unit: f.unit, per: f.per, kcal: f.kcal, p: f.p, c: f.c, f: f.f })),
       }, lang);
       const meals = (r.meals ?? []).map((m) => ({ id: uid("m"), name: String(m.name ?? ""), items: (m.items ?? []).filter((it) => db.foods.some((f) => f.id === it.foodId) && Number(it.qty) > 0).map((it) => ({ id: uid("mi"), foodId: it.foodId, qty: Math.round(Number(it.qty) * 10) / 10 })) })).filter((m) => m.items.length);
@@ -110,6 +120,7 @@ function ClientDetail() {
       </div>
 
       <div className="no-scrollbar -mx-4 mt-4 flex gap-2 overflow-x-auto px-4">
+        <button onClick={openCalc} className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><Calculator size={16} /> {t("calcNeeds")}</button>
         <button onClick={() => runAi(t("aiSummary"), () => aiTask("summary", facts(), lang))} className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><FileText size={16} /> {t("aiSummary")}</button>
         <button onClick={() => runAi(t("aiWa"), () => aiTask("wa", facts(), lang), true)} className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><MessageCircle size={16} /> {t("aiWa")}</button>
       </div>
@@ -256,6 +267,39 @@ function ClientDetail() {
 
       <Sheet open={!!viewing} onClose={() => setViewAs(null)} title={db.forms.find((f) => f.id === viewing?.formId)?.title ?? ""}>
         {viewing && <FormView form={db.forms.find((f) => f.id === viewing.formId)!} answers={viewing.answers} />}
+      </Sheet>
+      <Sheet open={!!calc} onClose={() => setCalc(null)} title={t("calcNeeds")}>
+        {calc && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              {(["m", "f"] as const).map((s) => <button key={s} type="button" onClick={() => setCalc({ ...calc, sex: s })} className={`h-10 rounded-xl border text-sm font-bold ${calc.sex === s ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>{t(s === "m" ? "male" : "female")}</button>)}
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {([["age", "age"], ["height", "heightCm"], ["weight", "weight"]] as const).map(([k, l]) => (
+                <Field key={k} label={t(l)}><input className="input num text-center" inputMode="decimal" value={calc[k]} onChange={(e) => setCalc({ ...calc, [k]: e.target.value })} /></Field>
+              ))}
+            </div>
+            <Field label={t("activityLevel")}>
+              <select className="input" value={calc.activity} onChange={(e) => setCalc({ ...calc, activity: e.target.value as Activity })}>
+                {(["sedentary", "light", "moderate", "high", "athlete"] as Activity[]).map((a) => <option key={a} value={a}>{t(`act_${a}`)}</option>)}
+              </select>
+            </Field>
+            <div className="grid grid-cols-3 gap-2">
+              {(["cut", "maintain", "bulk"] as Goal[]).map((g) => <button key={g} type="button" onClick={() => setCalc({ ...calc, goal: g })} className={`h-10 rounded-xl border text-sm font-bold ${calc.goal === g ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>{t(`goal_${g}`)}</button>)}
+            </div>
+            {calcResult ? (
+              <>
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  {[{ v: calcResult.kcal, l: t("kcal"), c: "text-gold" }, { v: calcResult.p, l: t("protein"), c: "text-protein" }, { v: calcResult.c, l: t("carbs"), c: "text-carbs" }, { v: calcResult.f, l: t("fat"), c: "text-fat" }].map((x) => (
+                    <div key={x.l} className="rounded-xl bg-card-hi p-2"><p className={`num text-xl font-black ${x.c}`}>{x.v}</p><p className="text-xs text-muted">{x.l}</p></div>
+                  ))}
+                </div>
+                <p className="num text-center text-sm text-muted">BMR {calcResult.bmr} · TDEE {calcResult.tdee}</p>
+                <button onClick={() => { setTgt(calcResult); setCalc(null); flash(t("targetsSaved")); }} className="btn-gold w-full">{t("useForDraft")}</button>
+              </>
+            ) : <p className="text-center text-sm text-muted">{t("fillToCalc")}</p>}
+          </div>
+        )}
       </Sheet>
       <Sheet open={!!ai} onClose={() => setAi(null)} title={ai?.title ?? ""}>
         {ai?.busy && <p className="flex items-center justify-center gap-2 py-6 font-bold text-gold"><Loader2 size={18} className="animate-spin" /> {t("aiBusy")}</p>}
