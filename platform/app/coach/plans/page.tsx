@@ -23,7 +23,7 @@ function Plans() {
   const create = () => {
     const id = uid(tab === "forms" ? "fm" : tab === "training" ? "tp" : "np");
     update((d) => {
-      if (tab === "training") d.trainingPlans.push({ id, name: t("newPlan"), days: [{ id: uid("d"), name: "Day 1", exercises: [] }] });
+      if (tab === "training") d.trainingPlans.push({ id, name: t("newPlan"), days: [{ id: uid("d"), name: `${t("days")} 1`, exercises: [] }] });
       else if (tab === "nutrition") d.nutritionPlans.push({ id, name: t("newPlan"), meals: [{ id: uid("m"), name: t("mealName") + " 1", items: [] }] });
       else d.forms.push({ id, title: t("newForm"), questions: [{ id: uid("q"), type: "text", label: "" }] });
     });
