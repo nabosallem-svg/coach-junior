@@ -33,21 +33,21 @@ export function CoachShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh lg:flex">
       {/* desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-e border-line bg-card/40 p-4 lg:flex">
-        <div className="mb-8 px-2 pt-2"><Brand /><p className="mt-1 text-sm text-muted">{t("coachPanel")}</p></div>
+      <aside className="sticky top-0 hidden h-dvh w-52 shrink-0 flex-col border-e border-line bg-card/40 p-3 lg:flex">
+        <div className="mb-6 px-2 pt-2"><Brand small /><p className="mt-1 text-xs text-muted">{t("coachPanel")}</p></div>
         <ul className="space-y-1">
           {nav.map(({ href, icon: Icon, key }) => (
             <li key={href}>
-              <Link href={href} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 font-bold transition-colors ${isOn(href) ? "bg-gold-soft text-gold" : "text-text-2 hover:bg-card-hi"}`}>
-                <Icon size={20} /> <span className="flex-1">{t(key)}</span>
+              <Link href={href} className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-bold transition-colors ${isOn(href) ? "bg-gold-soft text-gold" : "text-text-2 hover:bg-card-hi"}`}>
+                <Icon size={18} /> <span className="flex-1">{t(key)}</span>
                 {key === "clients" && unread > 0 && <span className="num grid size-6 place-items-center rounded-full bg-gold text-xs font-black text-bg">{unread}</span>}
               </Link>
             </li>
           ))}
         </ul>
         <div className="mt-auto flex gap-2">
-          <button onClick={toggle} className="btn-ghost px-4">{t("langToggle")}</button>
-          <button onClick={logout} className="btn-quiet flex-1 whitespace-nowrap px-3"><LogOut size={18} /> {t("logout")}</button>
+          <button onClick={toggle} className="grid h-10 min-w-10 place-items-center rounded-xl border border-line-gold px-2 text-sm font-bold text-gold">{t("langToggle")}</button>
+          <button onClick={logout} className="flex h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-line px-2 text-sm font-bold text-text-2 hover:bg-card-hi"><LogOut size={16} /> {t("logout")}</button>
         </div>
       </aside>
 
