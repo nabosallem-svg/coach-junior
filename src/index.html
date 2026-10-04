@@ -9,10 +9,17 @@
   var d = document.documentElement;
   d.classList.add('js');
   try { if (localStorage.getItem('lang') === 'en') { d.lang = 'en'; d.dir = 'ltr'; } } catch(e){}
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    d.classList.add('m');
-    setTimeout(function(){ if (!d.classList.contains('mo')) d.classList.remove('m'); }, 3000);
-  }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // phones/tablets: CSS-only motion (no GSAP download, nothing on the main thread while scrolling)
+  if (matchMedia('(max-width: 900px), (hover: none), (pointer: coarse)').matches) { d.classList.add('lite'); return; }
+  d.classList.add('m');
+  setTimeout(function(){ if (!d.classList.contains('mo')) d.classList.remove('m'); }, 3000);
+  ['vendor/gsap.min.js', 'vendor/ScrollTrigger.min.js'].forEach(function(src, i){
+    var sc = document.createElement('script'); sc.src = src; sc.async = false;
+    sc.onerror = function(){ d.classList.remove('m'); };
+    if (i) sc.onload = function(){ window.__moReady = true; if (window.__mo) window.__mo(); };
+    document.head.appendChild(sc);
+  });
 })();
 </script>
 <!-- LCP: hero photo. imagesrcset/imagesizes must match the hero <source> exactly. -->
@@ -23,9 +30,7 @@
 <link rel="icon" type="image/png" href="img/icon-64.png">
 <!-- Self-hosted fonts (no third-party round trips); font-display:swap below. Only the Arabic body font is preloaded. -->
 <link rel="preload" href="fonts/cairo-arabic.woff2" as="font" type="font/woff2" crossorigin>
-<!-- Motion libraries: self-hosted, deferred (never block content or the core script). Lenis is loaded on desktop only, from the motion block. -->
-<script defer src="vendor/gsap.min.js" onerror="document.documentElement.classList.remove('m')"></script>
-<script defer src="vendor/ScrollTrigger.min.js" onerror="document.documentElement.classList.remove('m')"></script>
+<!-- Motion libraries (gsap, ScrollTrigger, Lenis) are injected on desktop only by the head script above; phones use CSS motion. -->
 <style>
 /* =====================================================================
    0. FONTS
@@ -470,6 +475,25 @@ html.lenis,html.lenis body{height:auto}
 .price .was{flex-basis:100%;color:var(--muted);font-size:var(--fs-md);font-weight:700;text-decoration:line-through;text-decoration-color:rgba(var(--red-rgb),.8);text-decoration-thickness:2px;direction:ltr}
 .plan .off{align-self:flex-start;display:inline-flex;gap:var(--s-0);padding:0 var(--s-1);line-height:24px;background:rgba(var(--red-rgb),.14);border:1px solid rgba(var(--red-rgb),.45);border-radius:var(--r-pill);color:#ff8a8a;font-size:var(--fs-xs);font-weight:800;margin-bottom:calc(-1 * var(--s-2))}
 @media (max-width:600px){.plan .off{align-self:center}}
+
+/* ===== phones: lite motion (CSS only, compositor-friendly) ===== */
+.lite #embers,.lite .stage .grain{display:none}
+.lite .value::before,.lite .feat::before{animation:none;opacity:.35}
+.lite .feat i::after{animation-iteration-count:2}
+.lite .hdr.solid{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(var(--bg-rgb),.96)}
+.lite .scard,.lite .plan,.lite .scard.mid{box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.lite #heroImg img{animation:liteZoom 1.2s cubic-bezier(.2,.7,.2,1) both}
+.lite .hero h1 .ln>span{animation:liteRise .9s cubic-bezier(.2,.8,.2,1) both}
+.lite .hero h1 .ln:nth-child(2)>span{animation-delay:.12s}
+.lite .hero .in{animation:liteUp .7s cubic-bezier(.2,.7,.2,1) both}
+.lite .hero .line{animation-delay:.35s}.lite .hero .ctas{animation-delay:.5s}
+.lite .lr{opacity:0;transform:translate3d(0,28px,0);transition:opacity .6s ease,transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 90ms)}
+.lite .lr.in{opacity:1;transform:none}
+.lite #stageRow .scard.lr{transform:translate3d(0,48px,0) scale(.94)}
+.lite #stageRow .scard.lr.in{transform:none}
+@keyframes liteZoom{from{transform:scale(1.12)}to{transform:none}}
+@keyframes liteRise{from{transform:translateY(110%)}to{transform:none}}
+@keyframes liteUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -847,6 +871,17 @@ html.lenis,html.lenis body{height:auto}
     $$('main > section, footer').forEach(function(s){ io.observe(s); });
   }
 
+  // phones: CSS reveals triggered by IntersectionObserver (compositor-only opacity/transform)
+  if (root.classList.contains('lite')) {
+    var groups = [['.sec-head .kicker, .title:not(.hero *)'], ['#stageRow .scard'], ['.prog'], ['.value'], ['.feat'], ['.about .pic, .about p, .badges'], ['.toggle, .plan'], ['.step'], ['#faq details'], ['.final .ctas, .final p']];
+    var revs = [];
+    groups.forEach(function(g){ $$(g[0]).forEach(function(el, k){ if (el.closest('.hero')) return; el.classList.add('lr'); el.style.setProperty('--i', k % 4); revs.push(el); }); });
+    if ('IntersectionObserver' in window) {
+      var rio = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
+      revs.forEach(function(el){ rio.observe(el); });
+    } else revs.forEach(function(el){ el.classList.add('in'); });
+  }
+
   // duration toggle: price = monthly x paid months
   $$('.toggle button').forEach(function(b){
     b.addEventListener('click', function(){
@@ -900,7 +935,9 @@ html.lenis,html.lenis body{height:auto}
      3. Motion (GSAP + ScrollTrigger + Lenis, all deferred).
         Only GSAP hides things, so if anything here fails, content stays visible.
      ------------------------------------------------------------------ */
-  document.addEventListener('DOMContentLoaded', function(){
+  var moStarted = false;
+  window.__mo = function(){
+    if (moStarted) return; moStarted = true;
     if (REDUCE || !window.gsap || !window.ScrollTrigger) { root.classList.remove('m'); return; }
     gsap.registerPlugin(ScrollTrigger);
     root.classList.add('mo');
@@ -1046,7 +1083,8 @@ html.lenis,html.lenis body{height:auto}
 
     addEventListener('load', function(){ ScrollTrigger.refresh(); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ ScrollTrigger.refresh(); });
-  });
+  };
+  if (window.__moReady) window.__mo();
 })();
 </script>
 </body>
