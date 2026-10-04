@@ -30,7 +30,6 @@ function ClientDetail() {
   const [ai, setAi] = useState<{ title: string; text?: string; busy?: boolean; err?: string; wa?: boolean } | null>(null);
   const [drafting, setDrafting] = useState(false);
   const [calc, setCalc] = useState<{ sex: "m" | "f"; age: string; height: string; weight: string; activity: Activity; goal: Goal } | null>(null);
-  const [tgt, setTgt] = useState<ReturnType<typeof targets> | null>(null);
   const router = useRouter();
   const c = db.clients.find((x) => x.id === id);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
@@ -82,7 +81,7 @@ function ClientDetail() {
       const form = intake && db.forms.find((f) => f.id === intake.formId);
       const answers = form ? Object.fromEntries(form.questions.map((q) => [q.label, intake!.answers![q.id] ?? ""])) : {};
       const r = await aiTask<{ name?: string; meals?: { name: string; items: { foodId: string; qty: number }[] }[] }>("mealplan", {
-        client: { goal: c.goal, latestWeightKg: ms.at(-1)?.weight, intake: answers, ...(tgt && { dailyTargets: { kcal: tgt.kcal, proteinG: tgt.p, carbsG: tgt.c, fatG: tgt.f } }) },
+        client: { goal: c.goal, latestWeightKg: ms.at(-1)?.weight, intake: answers, ...(c.targets && { dailyTargets: { kcal: c.targets.kcal, proteinG: c.targets.p, carbsG: c.targets.c, fatG: c.targets.f } }) },
         foods: db.foods.map((f) => ({ id: f.id, name: lang === "ar" ? f.nameAr : f.nameEn, unit: f.unit, per: f.per, kcal: f.kcal, p: f.p, c: f.c, f: f.f })),
       }, lang);
       const meals = (r.meals ?? []).map((m) => ({ id: uid("m"), name: String(m.name ?? ""), items: (m.items ?? []).filter((it) => db.foods.some((f) => f.id === it.foodId) && Number(it.qty) > 0).map((it) => ({ id: uid("mi"), foodId: it.foodId, qty: Math.round(Number(it.qty) * 10) / 10 })) })).filter((m) => m.items.length);
@@ -295,7 +294,7 @@ function ClientDetail() {
                   ))}
                 </div>
                 <p className="num text-center text-sm text-muted">BMR {calcResult.bmr} · TDEE {calcResult.tdee}</p>
-                <button onClick={() => { setTgt(calcResult); setCalc(null); flash(t("targetsSaved")); }} className="btn-gold w-full">{t("useForDraft")}</button>
+                <button onClick={() => { const { kcal, p, c: cc, f } = calcResult; update((d) => { const x = d.clients.find((y) => y.id === c.id); if (x) x.targets = { kcal, p, c: cc, f }; }); setCalc(null); flash(t("targetsSaved")); }} className="btn-gold w-full">{t("useForDraft")}</button>
               </>
             ) : <p className="text-center text-sm text-muted">{t("fillToCalc")}</p>}
           </div>

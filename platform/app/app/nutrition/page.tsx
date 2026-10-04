@@ -9,6 +9,7 @@ import { effectiveItem, itemMacros, mealMacros, planMacros, swapOptions, unitLab
 import { MacroRing } from "@/components/charts";
 import { MacroLine } from "@/components/MacroLine";
 import { MealScan } from "@/components/MealScan";
+import { TargetBars } from "@/components/TargetBars";
 import { Divider, Empty, Sheet } from "@/components/ui";
 import type { MealItem } from "@/lib/types";
 
@@ -85,6 +86,17 @@ export default function Nutrition() {
           ))}
         </div>
       </div>
+
+      {(() => {
+        const eaten = planMacros(db, plan.meals.map((m) => ({ ...m, items: m.items.filter((it) => db.eaten.includes(`${today}:${it.id}`)) })), me.id);
+        const target = me.targets ?? { kcal: total.kcal, p: total.p, c: total.c, f: total.f };
+        return (
+          <div className="card mt-6 p-4">
+            <p className="mb-3 font-bold">{t("todayEaten")}</p>
+            <TargetBars have={eaten} target={target} left />
+          </div>
+        );
+      })()}
 
       <MealScan />
 

@@ -16,6 +16,8 @@ export type Client = {
   trainingPlanId?: ID;
   nutritionPlanId?: ID;
   active: boolean;
+  /** daily calories + macros the coach set (calculator on the trainee page) */
+  targets?: { kcal: number; p: number; c: number; f: number };
   /** signed up by themselves and waiting for the coach to activate them */
   pending?: boolean;
   signedUpAt?: string;

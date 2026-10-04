@@ -2,10 +2,11 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Plus, Trash2, Search, Pencil, Sparkles, Loader2 } from "lucide-react";
+import { Plus, Trash2, Search, Pencil, Sparkles, Loader2, ArrowLeftRight } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { itemMacros, mealMacros, planMacros, unitLabel } from "@/lib/calc";
+import { itemMacros, mealMacros, planMacros, swapOptions, unitLabel } from "@/lib/calc";
+import { TargetBars } from "@/components/TargetBars";
 import { BuilderHeader } from "@/components/BuilderHeader";
 import { MacroRing } from "@/components/charts";
 import { MacroLine } from "@/components/MacroLine";
@@ -24,6 +25,7 @@ function NutritionBuilder() {
   const [q, setQ] = useState("");
   const [nf, setNf] = useState<NewFood | null>(null);
   const [ai, setAi] = useState<"idle" | "busy" | "nokey" | "fail">("idle");
+  const [swap, setSwap] = useState<{ mi: number; ii: number } | null>(null);
   if (!plan) return null;
 
   const edit = (fn: (p: NutritionPlan) => void) => update((d) => fn(d.nutritionPlans.find((p) => p.id === id)!));
@@ -76,6 +78,16 @@ function NutritionBuilder() {
         </div>
       </div>
 
+      {plan.ownerId && (() => {
+        const target = db.clients.find((c) => c.id === plan.ownerId)?.targets;
+        return (
+          <div className="card mt-3 p-4">
+            <p className="mb-3 text-sm font-bold text-gold">{t("vsTarget")}</p>
+            {target ? <TargetBars have={total} target={target} /> : <p className="text-sm text-muted">{t("noTargetYet")}</p>}
+          </div>
+        );
+      })()}
+
       <div className="mt-5 space-y-3">
         {plan.meals.map((meal, mi) => {
           const mm = mealMacros(db, meal);
@@ -102,6 +114,7 @@ function NutritionBuilder() {
                       </span>
                       <input aria-label={t("qty")} className="input num w-20 px-2 py-2 text-center" inputMode="decimal" value={it.qty} onChange={(e) => edit((p) => { p.meals[mi].items[ii].qty = parseFloat(e.target.value) || 0; })} />
                       <span className="w-10 text-sm text-muted">{unitLabel(food.unit, lang)}</span>
+                      <button aria-label={t("swapFood")} title={t("swapFood")} onClick={() => setSwap({ mi, ii })} className="grid size-8 place-items-center text-gold"><ArrowLeftRight size={15} /></button>
                       <button aria-label={t("delete")} onClick={() => edit((p) => { p.meals[mi].items.splice(ii, 1); })} className="grid size-8 place-items-center text-muted hover:text-danger"><Trash2 size={15} /></button>
                     </li>
                   );
@@ -114,6 +127,27 @@ function NutritionBuilder() {
       </div>
 
       <button onClick={() => edit((p) => p.meals.push({ id: uid("m"), name: `${t("mealName")} ${p.meals.length + 1}`, items: [] }))} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addMeal")}</button>
+
+      <Sheet open={!!swap} onClose={() => setSwap(null)} title={t("swapTitle")}>
+        {swap && (() => {
+          const it = plan.meals[swap.mi]?.items[swap.ii];
+          const food = it && db.foods.find((f) => f.id === it.foodId);
+          if (!it || !food) return null;
+          const opts = swapOptions(db, food, it.qty);
+          return opts.length ? (
+            <ul className="space-y-1.5">
+              {opts.map((o) => (
+                <li key={o.food.id}>
+                  <button onClick={() => { edit((p) => { const x = p.meals[swap.mi].items[swap.ii]; x.foodId = o.food.id; x.qty = o.qty; }); setSwap(null); }} className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-start hover:bg-card-hi">
+                    <span><span className="block font-bold">{name(o.food)}</span><span className="text-sm text-muted"><span className="num">{o.qty}</span> {unitLabel(o.food.unit, lang)}</span></span>
+                    <span className="text-end text-sm"><span className="num block">{Math.round(o.macros.kcal)} {t("kcal")}</span><MacroLine m={o.macros} /></span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="text-sm text-muted">{t("noSwaps")}</p>;
+        })()}
+      </Sheet>
 
       <Sheet open={!!pickFor} onClose={closePicker} title={nf ? t("newFood") : t("pickFood")}>
         {nf ? (
