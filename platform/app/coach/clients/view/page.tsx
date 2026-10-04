@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound, Pencil, Sparkles, Loader2, FileText, Images, Utensils, Calculator, Plus } from "lucide-react";
 import { personalize, type PlanKind } from "@/lib/plans";
@@ -36,6 +36,9 @@ function ClientDetail() {
   const [calc, setCalc] = useState<{ sex: "m" | "f"; age: string; height: string; weight: string; activity: Activity; goal: Goal } | null>(null);
   const router = useRouter();
   const c = db.clients.find((x) => x.id === id);
+  // opening the trainee's page counts as seeing their new form answers (clears the dashboard item)
+  const unseen = db.assignments.some((a) => a.clientId === id && a.status === "submitted" && !a.reviewed);
+  useEffect(() => { if (unseen) update((d) => { d.assignments.forEach((a) => { if (a.clientId === id && a.status === "submitted") a.reviewed = true; }); }); }, [unseen, id, update]);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
   if (!c) return null;
 

@@ -68,8 +68,11 @@ const dict = {
   vsTarget: ["مقارنة بهدفه اليومي", "Against the daily target"],
   noTargetYet: ["احسب احتياجه من صفحة المشترك عشان تقارن بالهدف", "Calculate the needs on the trainee page to compare with a target"],
   eatenOf: ["{a} من {b} سعرة", "{a} of {b} kcal"],
-  noPlanYet: ["الكابتن لسه بيجهز خطتك", "Your coach is preparing your plan"],
-  noPlanYetSub: ["هتظهر هنا أول ما تتبعت.", "It will show up here once it's sent."],
+  noPlanYet: ["استنى الكابتن يجهزلك خطتك", "Your coach is preparing your plan"],
+  noPlanYetSub: ["وصلته إجاباتك، وهتظهر خطتك هنا أول ما يخلّصها.", "Your answers reached the coach; your plan shows here once it is ready."],
+  welcomeName: ["أهلاً يا {name} 👋", "Welcome, {name} 👋"],
+  starterFirst: ["قبل ما نبدأ، املا فورم البداية (دقيقتين). الكابتن هيجهزلك خطة التمرين والأكل على حسب إجاباتك.", "Before we start, fill the starter form (2 minutes). Your coach builds your training and meal plan from your answers."],
+  fillStarter: ["املا فورم البداية", "Fill the starter form"],
 
   // nutrition
   carbs: ["كارب", "Carbs"],
@@ -252,6 +255,7 @@ const dict = {
   todoCount: ["عندك {n} حاجات النهارده", "{n} things for today"],
   todayList: ["مستنياك النهارده", "For today"],
   workoutsThisWeek: ["تمرين اتسجل الأسبوع ده", "Workouts this week"],
+  formArrived: ["ملا فورم البداية، جهّزله خطته", "Filled the starter form, set up the plan"],
   formNotFilled: ["لسه مامَلاش فورم البداية", "Hasn't filled the starter form"],
   noWorkoutDays: ["ماتمرنش من {n} يوم", "No workout for {n} days"],
   noWorkoutYet: ["لسه ماسجلش أي تمرين", "No workout logged yet"],
@@ -373,7 +377,7 @@ const dict = {
   changePassword: ["غيّر كلمة السر", "Change password"],
   newPassword: ["كلمة السر الجديدة", "New password"],
   minChars: ["6 حروف على الأقل", "At least 6 characters"],
-  waCreds: ["أهلاً {name}، ده حسابك على منصة كوتش جونيور:\nالرابط: {url}\nالموبايل: {phone}\nكلمة السر: {pw}", "Hi {name}, here is your Coach Junior account:\nLink: {url}\nPhone: {phone}\nPassword: {pw}"],
+  waCreds: ["أهلاً {name}، ده حسابك على منصة كوتش جونيور:\nالرابط: {url}\nالموبايل: {phone}\nكلمة السر: {pw}\n\nأول ما تدخل املا فورم البداية، وأنا هجهزلك خطتك على حسب إجاباتك 💪", "Hi {name}, here is your Coach Junior account:\nLink: {url}\nPhone: {phone}\nPassword: {pw}\n\nFill the starter form first and I will build your plan from it 💪"],
   dropVideos: ["اسحب الفيديوهات هنا أو دوس واختار (ينفع كذا فيديو مرة واحدة)", "Drop videos here or tap to choose (several at once)"],
   bulkDone: ["اترفع {n} فيديو. عدّل الاسم والعضلة لو محتاج.", "{n} videos uploaded. Edit names and muscles if needed."],
   // signup / activation

@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { DB, ID } from "./types";
-import { makeSeed } from "./seed";
+import { makeSeed, seedExercises } from "./seed";
 import { useI18n } from "./i18n";
 import { LIVE, sb, phoneEmail, COACH_EMAIL } from "./supabase";
 import { emptyDB, loadDB, saveDiff, seedIfEmpty } from "./sync";
@@ -84,6 +84,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (stored) {
       // plans made before the fix were named "Day 1"
       stored.trainingPlans?.forEach((p) => p.days.forEach((d) => { d.name = d.name.replace(/^Day (\d+)$/, "يوم $1"); }));
+      // exercises added to the seed later show up in older demo data too
+      const have = new Set(stored.exercises.map((e) => e.id));
+      stored.exercises.push(...seedExercises.filter((e) => !have.has(e.id)));
       setDb(stored);
     }
     setSessionState(load<Session>(SESSION_KEY));

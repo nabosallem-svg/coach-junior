@@ -130,7 +130,7 @@ function TrainingBuilder() {
                 <li key={e.id}>
                   <button onClick={() => { addEx(e.id); closePicker(); }} className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-start hover:bg-card-hi">
                     <span className="font-bold" dir="auto">{e.name}</span>
-                    <span className="flex items-center gap-2 text-sm text-muted">{(e.videoKey || e.videoUrl) && <Video size={14} className="text-gold" />}{muscle(e.muscle)}</span>
+                    <span className="flex shrink-0 items-center gap-2 text-sm text-muted">{e.videoKey || e.videoUrl ? <Video size={14} className="text-gold" /> : <span className="rounded-full border border-line px-2 py-0.5 text-[11px]">{t("noVideoShort")}</span>}{muscle(e.muscle)}</span>
                   </button>
                 </li>
               ))}

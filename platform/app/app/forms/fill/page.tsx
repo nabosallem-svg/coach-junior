@@ -44,7 +44,7 @@ function FillForm() {
                     d.measurements.push({ id: `ms-${id}`, clientId: me.id, date: today, weight: w });
                   }
                 });
-                router.replace("/app/forms");
+                router.replace(form.starter ? "/app" : "/app/forms");
               }
             : undefined
         }
