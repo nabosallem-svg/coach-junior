@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
-import { LayoutDashboard, Users, Clapperboard, ClipboardList, MessageSquare, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Clapperboard, ClipboardList, LogOut } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { Brand } from "./ui";
@@ -13,7 +13,6 @@ const nav = [
   { href: "/coach/clients", icon: Users, key: "clients" },
   { href: "/coach/library", icon: Clapperboard, key: "libraryShort" },
   { href: "/coach/plans", icon: ClipboardList, key: "plans" },
-  { href: "/coach/messages", icon: MessageSquare, key: "messages" },
 ] as const;
 
 export function CoachShell({ children }: { children: ReactNode }) {
@@ -27,7 +26,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
   }, [ready, session, router]);
   if (!ready || session?.role !== "coach") return null;
 
-  const unread = db.messages.filter((m) => m.from === "client" && !m.read).length;
+  const unread = db.clients.filter((c) => c.pending).length;
   const isOn = (href: string) => (href === "/coach" ? path === "/coach" : path.startsWith(href));
   const logout = () => { setSession(null); router.replace("/"); };
 
@@ -41,7 +40,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
             <li key={href}>
               <Link href={href} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 font-bold transition-colors ${isOn(href) ? "bg-gold-soft text-gold" : "text-text-2 hover:bg-card-hi"}`}>
                 <Icon size={20} /> <span className="flex-1">{t(key)}</span>
-                {key === "messages" && unread > 0 && <span className="num grid size-6 place-items-center rounded-full bg-gold text-xs font-black text-bg">{unread}</span>}
+                {key === "clients" && unread > 0 && <span className="num grid size-6 place-items-center rounded-full bg-gold text-xs font-black text-bg">{unread}</span>}
               </Link>
             </li>
           ))}
@@ -73,7 +72,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
                 <Link href={href} className="flex flex-col items-center gap-1" aria-current={on ? "page" : undefined}>
                   <span className={`relative grid h-9 w-14 place-items-center rounded-full ${on ? "bg-gold-soft text-gold" : "text-muted"}`}>
                     <Icon size={22} />
-                    {key === "messages" && unread > 0 && <span className="num absolute -top-1 end-1 grid size-5 place-items-center rounded-full bg-gold text-[10px] font-black text-bg">{unread}</span>}
+                    {key === "clients" && unread > 0 && <span className="num absolute -top-1 end-1 grid size-5 place-items-center rounded-full bg-gold text-[10px] font-black text-bg">{unread}</span>}
                   </span>
                   <span className={`text-[11px] font-bold ${on ? "text-gold" : "text-muted"}`}>{t(key)}</span>
                 </Link>

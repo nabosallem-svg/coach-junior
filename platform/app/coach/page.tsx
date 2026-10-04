@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, CalendarClock, MessageSquare, ClipboardCheck, Upload, UserPlus, Dumbbell, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, CalendarClock, ClipboardList, ClipboardCheck, Upload, UserPlus, Dumbbell, ChevronLeft, ChevronRight } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate } from "@/lib/calc";
@@ -18,21 +18,19 @@ export default function CoachHome() {
   const [toast, setToast] = useState<string | null>(null);
   const active = db.clients.filter((c) => c.active && daysLeft(c.subEnd) >= 0);
   const expiring = db.clients.filter((c) => c.active && daysLeft(c.subEnd) <= 7);
-  const unread = db.messages.filter((m) => m.from === "client" && !m.read);
   const newForms = db.assignments.filter((a) => a.status === "submitted" && !a.reviewed);
   const noPlan = db.clients.filter((c) => c.active && (!c.trainingPlanId || !c.nutritionPlanId));
 
   const stats = [
     { label: t("activeClients"), n: active.length, icon: Users, href: "/coach/clients" },
     { label: t("expiringSoon"), n: expiring.length, icon: CalendarClock, href: "/coach/clients" },
-    { label: t("unreadMessages"), n: unread.length, icon: MessageSquare, href: "/coach/messages" },
+    { label: t("noPlanAssigned"), n: noPlan.length, icon: ClipboardList, href: "/coach/clients" },
     { label: t("formsToReview"), n: newForms.length, icon: ClipboardCheck, href: "/coach/clients" },
   ];
 
   type Item = { id: string; clientId: string; text: string; href: string; tone: "red" | "gold" };
   const attention: Item[] = [
     ...expiring.map((c) => ({ id: `e${c.id}`, clientId: c.id, text: daysLeft(c.subEnd) >= 0 ? t("daysLeftN", { n: daysLeft(c.subEnd) }) : t("expiredN", { n: -daysLeft(c.subEnd) }), href: `/coach/clients/view?id=${c.id}`, tone: "red" as const })),
-    ...[...new Set(unread.map((m) => m.clientId))].map((id) => ({ id: `m${id}`, clientId: id, text: unread.filter((m) => m.clientId === id).at(-1)!.text, href: `/coach/messages/chat?id=${id}`, tone: "gold" as const })),
     ...newForms.map((a) => ({ id: `f${a.id}`, clientId: a.clientId, text: `${t("formsToReview")}: ${db.forms.find((f) => f.id === a.formId)?.title}`, href: `/coach/clients/view?id=${a.clientId}`, tone: "gold" as const })),
     ...noPlan.map((c) => ({ id: `p${c.id}`, clientId: c.id, text: t("noPlanAssigned"), href: `/coach/clients/view?id=${c.id}`, tone: "gold" as const })),
   ].filter((it, i, arr) => arr.findIndex((x) => x.clientId === it.clientId) === i);
