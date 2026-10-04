@@ -152,8 +152,8 @@ export default function ClientHome() {
       {pts("waist").length > 1 && (
         <div className="card mt-3 p-5">
           <p className="text-text-2">{t("waist")}</p>
-          <p className="num mb-4 text-3xl font-black">{shown.filter((m) => m.waist).at(-1)?.waist} <span className="text-xl">cm</span></p>
-          <LineChart points={pts("waist")} unit="cm" height={160} />
+          <p className="num mb-4 text-3xl font-black">{shown.filter((m) => m.waist).at(-1)?.waist} <span className="text-xl">{t("cm")}</span></p>
+          <LineChart points={pts("waist")} unit={t("cm")} height={160} />
         </div>
       )}
 

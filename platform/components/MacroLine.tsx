@@ -1,11 +1,17 @@
-import type { Macros } from "@/lib/calc";
+"use client";
 
+import type { Macros } from "@/lib/calc";
+import { useI18n } from "@/lib/i18n";
+
+/** carbs / fat / protein in grams; letters and unit follow the UI language */
 export function MacroLine({ m, className = "" }: { m: Macros; className?: string }) {
+  const { t } = useI18n();
+  const g = (key: "mC" | "mF" | "mP", v: number) => <bdi>{t(key)} {Math.round(v)}{t("gram")}</bdi>;
   return (
-    <span className={`num inline-flex gap-2 ${className}`}>
-      <span className="text-carbs">C {Math.round(m.c)}g</span>
-      <span className="text-fat">F {Math.round(m.f)}g</span>
-      <span className="text-protein">P {Math.round(m.p)}g</span>
+    <span className={`inline-flex gap-2 ${className}`}>
+      <span className="text-carbs">{g("mC", m.c)}</span>
+      <span className="text-fat">{g("mF", m.f)}</span>
+      <span className="text-protein">{g("mP", m.p)}</span>
     </span>
   );
 }
