@@ -8,7 +8,7 @@ import { makeSeed } from "./seed";
 // client side can be clicked through without a server. Swap this provider for a
 // Supabase-backed one when a project is connected (see supabase/schema.sql).
 
-const DB_KEY = "cj-platform-db-v7";
+const DB_KEY = "cj-platform-db-v8";
 const SESSION_KEY = "cj-platform-session-v1";
 
 export type Session = { role: "coach" } | { role: "client"; clientId: ID } | null;
