@@ -13,7 +13,7 @@ import { emptyDB, loadDB, saveDiff, seedIfEmpty } from "./sync";
 // - live (NEXT_PUBLIC_SUPABASE_URL + ANON_KEY set): Supabase Auth for logins and the
 //   docs table for data (lib/sync.ts, supabase/schema.sql).
 
-const DB_KEY = "cj-platform-db-v11";
+const DB_KEY = "cj-platform-db-v12";
 const SESSION_KEY = "cj-platform-session-v1";
 
 export type Session = { role: "coach" } | { role: "client"; clientId: ID } | null;

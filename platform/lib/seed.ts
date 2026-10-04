@@ -24,7 +24,8 @@ const exercises: Exercise[] = [
   { id: "ex-calf", name: "سمانة واقف", muscle: "calves" },
 ];
 
-const s = (n: number, reps: string, rir = "1") => Array.from({ length: n }, () => ({ reps, rir }));
+// RIR stays opt-in in the builder, so the demo plans leave it out
+const s = (n: number, reps: string, _rir?: string) => Array.from({ length: n }, () => ({ reps }));
 
 const trainingPlans: TrainingPlan[] = [
   {
