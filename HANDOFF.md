@@ -24,6 +24,7 @@ npx next build && npx next start
 - **Static copy (optional):** `STATIC_EXPORT=1 BASE_PATH=/some/path npx next build` writes `out/`. It drops the API route (`pageExtensions: ["tsx"]`), so AI macros don't work there.
 - Env vars (Vercel → Settings → Environment Variables):
   - `GEMINI_API_KEY`: AI via `lib/ai.ts` (model `gemini-flash-latest`, falls back to `gemini-flash-lite-latest` when busy). Powers "احسب السعرات تلقائي" for new foods (`/api/macros`) and the trainee's "صوّر وجبتك" meal-photo estimate on the nutrition page (`/api/meal`). `ANTHROPIC_API_KEY` still works as a fallback if Gemini isn't set. Without either key the buttons say AI isn't set up.
+    Also `/api/ai` (one route, task-based prompts; client helper `lib/aiTasks.ts`): coach trainee page → "ملخص الأسبوع", "رسالة واتس جاهزة" (editable, opens WhatsApp), "قارن آخر صورتين", "اعمل مسودة أكل بالذكاء الاصطناعي" (creates a personal nutrition plan from the intake form using only the coach's foods, then opens the editor); trainee workout → "مش لاقي الجهاز؟" picks a replacement from the coach's library. Live RLS lets active trainees read the whole exercise library for this.
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`: for the Supabase step. **Not provided yet.**
 
 ## 3. Style rules

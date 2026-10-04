@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound, Pencil, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound, Pencil, Sparkles, Loader2, FileText, Images, Utensils } from "lucide-react";
 import { personalize, type PlanKind } from "@/lib/plans";
 import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
@@ -16,6 +16,7 @@ import { Creds } from "@/components/Creds";
 import { ActivateSheet } from "@/components/Activate";
 import { ProgressPhotos } from "@/components/ProgressPhotos";
 import { setAccountPassword } from "@/lib/accounts";
+import { aiTask, photoForAi } from "@/lib/aiTasks";
 
 function ClientDetail() {
   const id = useSearchParams().get("id") ?? "";
@@ -26,6 +27,8 @@ function ClientDetail() {
   const [newPw, setNewPw] = useState<string | null>(null);
   const [pwEdit, setPwEdit] = useState<string | null>(null);
   const [act, setAct] = useState(false);
+  const [ai, setAi] = useState<{ title: string; text?: string; busy?: boolean; err?: string; wa?: boolean } | null>(null);
+  const [drafting, setDrafting] = useState(false);
   const router = useRouter();
   const c = db.clients.find((x) => x.id === id);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
@@ -38,6 +41,51 @@ function ClientDetail() {
   const viewing = assigns.find((a) => a.id === viewAs);
   const flash = (s: string) => { setToast(s); setTimeout(() => setToast(null), 2200); };
   const set = (patch: Partial<typeof c>) => update((d) => { Object.assign(d.clients.find((x) => x.id === id)!, patch); });
+
+  // Gemini helpers: each sends only what the task needs and shows the answer in one sheet
+  const lastLog = logs[0]?.date;
+  const facts = () => ({
+    name: c.name, goal: c.goal, active: c.active, daysLeftInSubscription: left,
+    weights: ms.slice(-8).map((m) => ({ date: m.date, kg: m.weight })),
+    workoutsLast7Days: logs.filter((l) => Date.now() - new Date(l.date).getTime() < 7 * 864e5).length,
+    workoutsPrev7Days: logs.filter((l) => { const a = Date.now() - new Date(l.date).getTime(); return a >= 7 * 864e5 && a < 14 * 864e5; }).length,
+    daysSinceLastWorkout: lastLog ? Math.floor((Date.now() - new Date(lastLog).getTime()) / 864e5) : null,
+  });
+  const runAi = async (title: string, run: () => Promise<{ text: string }>, wa = false) => {
+    setAi({ title, busy: true, wa });
+    try { const r = await run(); setAi({ title, text: r.text, wa }); }
+    catch (e) { setAi({ title, err: (e as Error).message === "nokey" ? t("scanNoKey") : t("aiFailed") }); }
+  };
+  const photos = (db.photos ?? []).filter((p) => p.clientId === id).sort((a, b) => b.date.localeCompare(a.date));
+  const photoDates = [...new Set(photos.map((p) => p.date))];
+  const comparePhotos = () => runAi(t("aiComparePhotos"), async () => {
+    const newer = photos.filter((p) => p.date === photoDates[0]), older = photos.filter((p) => p.date === photoDates[1]);
+    const poses = newer.map((p) => p.pose).filter((ps) => older.some((o) => o.pose === ps)).slice(0, 2);
+    const pick = (list: typeof photos) => (poses.length ? poses.map((ps) => list.find((p) => p.pose === ps)!) : list.slice(0, 1));
+    const imgs = (await Promise.all([...pick(older), ...pick(newer)].map((p) => photoForAi(p.key)))).filter(Boolean) as { mime: string; data: string }[];
+    return aiTask("photos", { olderDate: photoDates[1], newerDate: photoDates[0], poses }, lang, imgs);
+  });
+  const draftMeals = async () => {
+    setDrafting(true);
+    try {
+      const intake = assigns.find((a) => a.status === "submitted" && a.answers);
+      const form = intake && db.forms.find((f) => f.id === intake.formId);
+      const answers = form ? Object.fromEntries(form.questions.map((q) => [q.label, intake!.answers![q.id] ?? ""])) : {};
+      const r = await aiTask<{ name?: string; meals?: { name: string; items: { foodId: string; qty: number }[] }[] }>("mealplan", {
+        client: { goal: c.goal, latestWeightKg: ms.at(-1)?.weight, intake: answers },
+        foods: db.foods.map((f) => ({ id: f.id, name: lang === "ar" ? f.nameAr : f.nameEn, unit: f.unit, per: f.per, kcal: f.kcal, p: f.p, c: f.c, f: f.f })),
+      }, lang);
+      const meals = (r.meals ?? []).map((m) => ({ id: uid("m"), name: String(m.name ?? ""), items: (m.items ?? []).filter((it) => db.foods.some((f) => f.id === it.foodId) && Number(it.qty) > 0).map((it) => ({ id: uid("mi"), foodId: it.foodId, qty: Math.round(Number(it.qty) * 10) / 10 })) })).filter((m) => m.items.length);
+      if (!meals.length) throw new Error("fail");
+      const pid = uid("np");
+      update((d) => {
+        d.nutritionPlans.push({ id: pid, name: `${r.name || t("aiDraft")} - ${c.name.split(" ")[0]}`, meals, ownerId: c.id });
+        d.clients.find((x) => x.id === c.id)!.nutritionPlanId = pid;
+      });
+      router.push(`/coach/plans/nutrition/edit?id=${pid}`);
+    } catch (e) { flash((e as Error).message === "nokey" ? t("scanNoKey") : t("aiFailed")); }
+    setDrafting(false);
+  };
 
   const extend = () => {
     const base = new Date(Math.max(Date.now(), new Date(c.subEnd).getTime()));
@@ -61,7 +109,12 @@ function ClientDetail() {
         <a href={waLink(c.phone)} target="_blank" rel="noopener" aria-label={t("whatsapp")} className="grid size-12 shrink-0 place-items-center rounded-full border border-line-gold text-gold hover:bg-gold-soft"><MessageCircle size={20} /></a>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="no-scrollbar -mx-4 mt-4 flex gap-2 overflow-x-auto px-4">
+        <button onClick={() => runAi(t("aiSummary"), () => aiTask("summary", facts(), lang))} className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><FileText size={16} /> {t("aiSummary")}</button>
+        <button onClick={() => runAi(t("aiWa"), () => aiTask("wa", facts(), lang), true)} className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><MessageCircle size={16} /> {t("aiWa")}</button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <section className="card p-4">
           <div className="flex items-center justify-between">
             <h2 className="font-bold">{t("subscription")}</h2>
@@ -116,6 +169,11 @@ function ClientDetail() {
                     )}
                   </select>
                 </Field>
+                {kind === "nutrition" && (
+                  <button onClick={draftMeals} disabled={drafting} className="mt-2 flex w-full items-center justify-center gap-1.5 text-sm font-bold text-gold disabled:opacity-60">
+                    {drafting ? <Loader2 size={15} className="animate-spin" /> : <Utensils size={15} />} {drafting ? t("aiBusy") : t("aiMealDraft")}
+                  </button>
+                )}
                 {cur && (own ? (
                   <Link href={`/coach/plans/${kind}/edit?id=${cur.id}`} className="btn-ghost mt-2 w-full"><Pencil size={17} /> {t("editHisPlan", { name: c.name.split(" ")[0] })}</Link>
                 ) : (
@@ -144,6 +202,9 @@ function ClientDetail() {
 
       <SectionLabel>{t("progressPhotos")}</SectionLabel>
       <ProgressPhotos clientId={c.id} />
+      {photoDates.length >= 2 && (
+        <button onClick={comparePhotos} className="mt-3 flex h-10 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><Images size={16} /> {t("aiComparePhotos")}</button>
+      )}
 
       <div className="mb-3 mt-7 flex items-center justify-between">
         <h2 className="label">{t("forms")}</h2>
@@ -195,6 +256,16 @@ function ClientDetail() {
 
       <Sheet open={!!viewing} onClose={() => setViewAs(null)} title={db.forms.find((f) => f.id === viewing?.formId)?.title ?? ""}>
         {viewing && <FormView form={db.forms.find((f) => f.id === viewing.formId)!} answers={viewing.answers} />}
+      </Sheet>
+      <Sheet open={!!ai} onClose={() => setAi(null)} title={ai?.title ?? ""}>
+        {ai?.busy && <p className="flex items-center justify-center gap-2 py-6 font-bold text-gold"><Loader2 size={18} className="animate-spin" /> {t("aiBusy")}</p>}
+        {ai?.err && <p className="py-4 text-center text-muted">{ai.err}</p>}
+        {ai?.text !== undefined && (ai.wa ? (
+          <div className="space-y-3">
+            <textarea className="input min-h-32 leading-relaxed" dir="auto" value={ai.text} onChange={(e) => setAi({ ...ai, text: e.target.value })} />
+            <a href={waLink(c.phone, ai.text)} target="_blank" rel="noopener" className="btn-gold w-full"><Send size={18} /> {t("sendWa")}</a>
+          </div>
+        ) : <p className="whitespace-pre-line leading-relaxed text-text-2" dir="auto">{ai.text}</p>)}
       </Sheet>
       <ActivateSheet client={act ? c : null} onClose={() => setAct(false)} />
       <Creds client={newPw ? c : null} password={newPw ?? ""} onClose={() => setNewPw(null)} />
