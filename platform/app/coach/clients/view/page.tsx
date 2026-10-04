@@ -1,9 +1,10 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound } from "lucide-react";
+import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList, Phone, KeyRound, Pencil, Sparkles } from "lucide-react";
+import { personalize, type PlanKind } from "@/lib/plans";
 import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate } from "@/lib/calc";
@@ -23,6 +24,7 @@ function ClientDetail() {
   const [newPw, setNewPw] = useState<string | null>(null);
   const [pwEdit, setPwEdit] = useState<string | null>(null);
   const [act, setAct] = useState(false);
+  const router = useRouter();
   const c = db.clients.find((x) => x.id === id);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
   if (!c) return null;
@@ -87,19 +89,44 @@ function ClientDetail() {
           )}
         </section>
 
-        <section className="card space-y-3 p-4">
-          <Field label={t("trainingPlan")}>
-            <select className="input" value={c.trainingPlanId ?? ""} onChange={(e) => { set({ trainingPlanId: e.target.value || undefined }); flash(t("saved")); }}>
-              <option value="">{t("none")}</option>
-              {db.trainingPlans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </Field>
-          <Field label={t("nutritionPlan")}>
-            <select className="input" value={c.nutritionPlanId ?? ""} onChange={(e) => { set({ nutritionPlanId: e.target.value || undefined }); flash(t("saved")); }}>
-              <option value="">{t("none")}</option>
-              {db.nutritionPlans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </Field>
+        <section className="card space-y-4 p-4">
+          <div>
+            <h2 className="font-bold">{t("hisPlans", { name: c.name.split(" ")[0] })}</h2>
+            <p className="mt-1 text-sm text-muted">{t("hisPlansNote")}</p>
+          </div>
+          {(["training", "nutrition"] as PlanKind[]).map((kind) => {
+            const key = kind === "training" ? "trainingPlanId" : "nutritionPlanId";
+            const plans = kind === "training" ? db.trainingPlans : db.nutritionPlans;
+            const cur = plans.find((p) => p.id === c[key]);
+            const own = cur?.ownerId === c.id;
+            return (
+              <div key={kind}>
+                <Field label={t(kind === "training" ? "trainingPlan" : "nutritionPlan")}>
+                  <select className="input" value={c[key] ?? ""} onChange={(e) => { set({ [key]: e.target.value || undefined }); flash(t("saved")); }}>
+                    <option value="">{t("none")}</option>
+                    <optgroup label={t("templates")}>
+                      {plans.filter((p) => !p.ownerId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </optgroup>
+                    {plans.some((p) => p.ownerId === c.id) && (
+                      <optgroup label={t("ownPlans", { name: c.name.split(" ")[0] })}>
+                        {plans.filter((p) => p.ownerId === c.id).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </optgroup>
+                    )}
+                  </select>
+                </Field>
+                {cur && (own ? (
+                  <Link href={`/coach/plans/${kind}/edit?id=${cur.id}`} className="btn-ghost mt-2 w-full"><Pencil size={17} /> {t("editHisPlan", { name: c.name.split(" ")[0] })}</Link>
+                ) : (
+                  <button
+                    onClick={() => { const pid = uid(kind === "training" ? "tp" : "np"); update((d) => { personalize(d, c.id, kind, pid); }); router.push(`/coach/plans/${kind}/edit?id=${pid}`); }}
+                    className="btn-ghost mt-2 w-full"
+                  >
+                    <Sparkles size={17} /> {t("customizeFor", { name: c.name.split(" ")[0] })}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
         </section>
       </div>
 

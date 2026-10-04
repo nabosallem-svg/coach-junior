@@ -37,7 +37,11 @@ function TrainingBuilder() {
         d.trainingPlans = d.trainingPlans.filter((p) => p.id !== id);
         d.clients.forEach((c) => { if (c.trainingPlanId === id) c.trainingPlanId = undefined; });
       })} />
-      <p className="mt-2 text-sm text-muted">{t("assignedTo", { n: db.clients.filter((c) => c.trainingPlanId === id).length })}</p>
+      {plan.ownerId ? (
+        <p className="mt-2 inline-flex rounded-full border border-line-gold bg-gold-soft px-3 py-1 text-sm font-bold text-gold">{t("personalFor", { name: db.clients.find((c) => c.id === plan.ownerId)?.name ?? "" })}</p>
+      ) : (
+        <p className="mt-2 text-sm text-muted">{t("templateNote", { n: db.clients.filter((c) => c.trainingPlanId === id).length })}</p>
+      )}
 
       <div className="mt-5 flex items-center gap-2">
         <div className="min-w-0 flex-1"><Pills bleed={false} value={day?.id ?? ""} onChange={setDayId} options={plan.days.map((d) => ({ value: d.id, label: d.name }))} /></div>

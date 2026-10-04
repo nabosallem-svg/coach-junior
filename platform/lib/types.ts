@@ -41,7 +41,8 @@ export type Exercise = {
 export type SetSpec = { reps: string; tempo?: string; rir?: string };
 export type PlanExercise = { id: ID; exerciseId: ID; note?: string; sets: SetSpec[] };
 export type TrainingDay = { id: ID; name: string; exercises: PlanExercise[] };
-export type TrainingPlan = { id: ID; name: string; days: TrainingDay[] };
+/** ownerId set = a personal copy for one client; unset = a reusable template */
+export type TrainingPlan = { id: ID; name: string; days: TrainingDay[]; ownerId?: ID };
 
 export type LoggedSet = { weight: string; reps: string; done: boolean };
 export type WorkoutLog = {
@@ -70,7 +71,7 @@ export type Food = {
 };
 export type MealItem = { id: ID; foodId: ID; qty: number };
 export type Meal = { id: ID; name: string; note?: string; items: MealItem[] };
-export type NutritionPlan = { id: ID; name: string; meals: Meal[] };
+export type NutritionPlan = { id: ID; name: string; meals: Meal[]; ownerId?: ID };
 
 /** per-client food swaps: MealItem.id -> replacement */
 export type Swap = { clientId: ID; itemId: ID; foodId: ID; qty: number };

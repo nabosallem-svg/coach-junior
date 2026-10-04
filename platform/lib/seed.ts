@@ -64,6 +64,22 @@ const trainingPlans: TrainingPlan[] = [
   },
 ];
 
+trainingPlans.push({
+  id: "tp-fb",
+  name: "فول بادي - 3 أيام",
+  days: ["أ", "ب", "ج"].map((l, di) => ({
+    id: `fb${di + 1}`,
+    name: `يوم ${l}`,
+    exercises: [
+      { id: `fb${di}1`, exerciseId: di === 1 ? "ex-rdl" : "ex-squat", sets: s(3, "8-12", "3-1-1", "2") },
+      { id: `fb${di}2`, exerciseId: di === 1 ? "ex-flat-bb" : "ex-incline-db", sets: s(3, "8-12", "", "2") },
+      { id: `fb${di}3`, exerciseId: di === 1 ? "ex-row" : "ex-pulldown", sets: s(3, "10-12", "", "2") },
+      { id: `fb${di}4`, exerciseId: "ex-lateral", sets: s(2, "12-15", "", "1") },
+      { id: `fb${di}5`, exerciseId: di === 1 ? "ex-pushdown" : "ex-curl", sets: s(2, "10-15", "", "1") },
+    ],
+  })),
+});
+
 const foods: Food[] = [
   { id: "f-egg", nameAr: "بيض", nameEn: "Egg", group: "protein", unit: "piece", per: 1, kcal: 78, c: 0.6, f: 5.3, p: 6.3 },
   { id: "f-chicken", nameAr: "صدور فراخ", nameEn: "Chicken breast", group: "protein", unit: "g", per: 100, kcal: 165, c: 0, f: 3.6, p: 31 },
@@ -128,6 +144,17 @@ const nutritionPlans: NutritionPlan[] = [
   },
 ];
 
+nutritionPlans.push({
+  id: "np-skinnyfat",
+  name: "سكيني فات - 4 وجبات",
+  meals: [
+    { id: "sf1", name: "الفطار", items: [{ id: "sfi1", foodId: "f-egg", qty: 3 }, { id: "sfi2", foodId: "f-bread", qty: 1 }, { id: "sfi3", foodId: "f-yogurt", qty: 150 }] },
+    { id: "sf2", name: "الغدا", note: "بروتين عالي وكارب متوسط", items: [{ id: "sfi4", foodId: "f-chicken", qty: 200 }, { id: "sfi5", foodId: "f-rice", qty: 150 }, { id: "sfi6", foodId: "f-salad", qty: 150 }] },
+    { id: "sf3", name: "قبل التمرين", items: [{ id: "sfi7", foodId: "f-banana", qty: 1 }, { id: "sfi8", foodId: "f-pb", qty: 15 }] },
+    { id: "sf4", name: "العشا", items: [{ id: "sfi9", foodId: "f-tuna", qty: 150 }, { id: "sfi10", foodId: "f-potato", qty: 200 }, { id: "sfi11", foodId: "f-whey", qty: 1 }] },
+  ],
+});
+
 const weights = [79.2, 78.8, 78.1, 77.9, 77.0, 76.6, 76.1, 75.4, 75.0, 74.6, 74.1, 73.5, 73.0, 72.5];
 const measurements: Measurement[] = weights.map((w, i) => ({
   id: `ms${i}`,
@@ -145,7 +172,7 @@ measurements.push(
 export function makeSeed(): DB {
   return {
     clients: [
-      { id: "c1", name: "أحمد سامي", phone: "+201000000001", password: "ahmed123", goal: "تنشيف مع الحفاظ على العضل", packageName: "3+1", subStart: isoDate(-116), subEnd: isoDate(4), trainingPlanId: "tp-ul", nutritionPlanId: "np-recomp", active: true },
+      { id: "c1", name: "أحمد سامي", phone: "+201000000001", password: "ahmed123", goal: "سكيني فات: تنشيف وبناء عضل", packageName: "3+1", subStart: isoDate(-116), subEnd: isoDate(4), trainingPlanId: "tp-ul", nutritionPlanId: "np-recomp", active: true },
       { id: "c2", name: "محمد علي", phone: "+201000000002", password: "mohamed123", goal: "تضخيم", packageName: "6+1", subStart: isoDate(-30), subEnd: isoDate(180), trainingPlanId: "tp-ul", active: true },
       { id: "c3", name: "يوسف حسن", phone: "+201000000003", password: "youssef123", goal: "لياقة عامة", packageName: "1", subStart: isoDate(-3), subEnd: isoDate(27), active: true },
     ],

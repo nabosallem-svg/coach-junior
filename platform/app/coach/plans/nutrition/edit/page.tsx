@@ -31,6 +31,11 @@ function NutritionBuilder() {
         d.nutritionPlans = d.nutritionPlans.filter((p) => p.id !== id);
         d.clients.forEach((c) => { if (c.nutritionPlanId === id) c.nutritionPlanId = undefined; });
       })} />
+      {plan.ownerId ? (
+        <p className="mt-2 inline-flex rounded-full border border-line-gold bg-gold-soft px-3 py-1 text-sm font-bold text-gold">{t("personalFor", { name: db.clients.find((c) => c.id === plan.ownerId)?.name ?? "" })}</p>
+      ) : (
+        <p className="mt-2 text-sm text-muted">{t("templateNote", { n: db.clients.filter((c) => c.nutritionPlanId === id).length })}</p>
+      )}
 
       <div className="card mt-5 flex items-center gap-5 p-4">
         <MacroRing {...total} label={t("kcal")} />
