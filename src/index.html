@@ -193,13 +193,6 @@ button,input,select{font:inherit;color:inherit}
 .hero .line{margin-top:var(--s-2);font-size:clamp(var(--fs-md),2vw,var(--fs-h3));font-weight:700;text-wrap:balance}
 .hero .ctas{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-top:var(--s-4)}
 
-/* ---- stats ---- */
-.stats{background:var(--card);border-block:1px solid var(--line-gold)}
-.stats-in{display:grid;grid-template-columns:repeat(2,minmax(0,280px));justify-content:center}
-.stat{min-width:0;padding:var(--s-3) var(--s-2);text-align:center}
-.stat+.stat{border-inline-start:1px solid var(--line)}
-.stat b{display:block;font-family:var(--f-big);font-weight:400;font-size:var(--fs-num);line-height:1;color:var(--gold);direction:ltr}
-.stat span{display:block;margin-top:var(--s-1);color:var(--muted);font-size:var(--fs-sm);font-weight:700}
 
 /* ---- ON STAGE (title + 3 photos only) ---- */
 .stage{position:relative;overflow:hidden;isolation:isolate;padding-block:var(--band-y);background:var(--bg)}
@@ -535,14 +528,6 @@ html.lenis,html.lenis body{height:auto}
     </div>
   </section>
 
-  <!-- ============ STATS ============ -->
-  <div class="stats">
-    <div class="wrap stats-in">
-      <div class="stat"><b class="num cnt" data-to="48" data-suf="h">48h</b><span data-i="s2">وتستلم خطتك</span></div>
-      <div class="stat"><b class="num cnt" data-to="7" data-suf="/7">7/7</b><span data-i="s3">متابعة واتساب</span></div>
-    </div>
-  </div>
-
   <!-- ============ ON STAGE: title + 3 photos, nothing else ============ -->
   <section class="stage" id="stage">
     <div class="stage-big" id="stageBig" aria-hidden="true">ON STAGE · ON STAGE · ON STAGE · ON STAGE</div>
@@ -768,7 +753,7 @@ html.lenis,html.lenis body{height:auto}
     ar: {
       offer:'شهر هدية مع 3 شهور أو أكتر', grab:'الحق العرض', clockL:'ينتهي العرض بعد', subscribe:'اشترك الآن',
       nHome:'الرئيسية', nPrograms:'البرامج', nAbout:'عن الكابتن', nPlans:'الاشتراك', nFaq:'أسئلة', nContact:'تواصل',
-      heroLine:'ابدأ رحلة التحول مع لاعب بطولات', whatsapp:'واتساب', s2:'وتستلم خطتك', s3:'متابعة واتساب',
+      heroLine:'ابدأ رحلة التحول مع لاعب بطولات', whatsapp:'واتساب', 
       stageT:'على <span class="g">المسرح</span>', stageAlt:'كابتن جونيور على المسرح',
       progK:'البرامج', progT:'اشتراكك <span class="g">فيه إيه؟</span>', pr1T:'تمرين على مقاسك', pr1P:'بنبدأ باختبار لمستواك وقوتك وأي إصابة عندك، وبنعدل البرنامج كل ما تتقدم.', pr2T:'أكل بتحبه', pr2P:'خطة أكل من الأكل المصري اللي بتحبه، محسوبة على هدفك ومواعيد يومك.', pr3T:'متابعة كل يوم على واتساب', pr3P:'بتبعت تمرينك وصورك، والكابتن بيرد عليك كل يوم ويظبطلك الخطة.', chat1:'تمرين النهارده خلص 💪', chat2:'عاش يا بطل، بكرة نزود الوزن',
       whyK:'ليه تشترك؟', whyT:'كل اللي محتاجه في <span class="g">مكان واحد</span>', v1:'تطوير في شكل جسمك وصحتك', v2:'برامج مرنة على مقاسك', v3:'تحول طبيعي 100%',
@@ -789,7 +774,7 @@ html.lenis,html.lenis body{height:auto}
     en: {
       offer:'1 free month on 3+ months', grab:'Get the offer', clockL:'Offer ends in', subscribe:'Subscribe now',
       nHome:'Home', nPrograms:'Programs', nAbout:'About', nPlans:'Plans', nFaq:'FAQ', nContact:'Contact',
-      heroLine:'Start your transformation with a stage competitor', whatsapp:'WhatsApp', s2:'To get your plan', s3:'WhatsApp support',
+      heroLine:'Start your transformation with a stage competitor', whatsapp:'WhatsApp', 
       stageT:'On <span class="g">stage</span>', stageAlt:'Coach Junior on stage',
       progK:'Programs', progT:'What you <span class="g">get</span>', pr1T:'Training built for you', pr1P:'We start by testing your level, strength and any injuries, then adjust the plan as you progress.', pr2T:'Food you actually like', pr2P:'A meal plan built from the Egyptian food you love, matched to your goal and your day.', pr3T:'Daily check-ins on WhatsApp', pr3P:'Send your workouts and photos, and the coach replies every day and fine-tunes your plan.', chat1:'Workout done today 💪', chat2:'Great job champ, more weight tomorrow',
       whyK:'Why join?', whyT:'Everything you <span class="g">need</span>', v1:'A better body and better health', v2:'Flexible plans built for you', v3:'100% natural transformation',
@@ -859,7 +844,7 @@ html.lenis,html.lenis body{height:auto}
   // pause CSS loops in sections that are off screen
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function(es){ es.forEach(function(e){ e.target.classList.toggle('off', !e.isIntersecting); }); }, { rootMargin: '100px 0px' });
-    $$('main > section, .stats, footer').forEach(function(s){ io.observe(s); });
+    $$('main > section, footer').forEach(function(s){ io.observe(s); });
   }
 
   // duration toggle: price = monthly x paid months
@@ -1024,10 +1009,6 @@ html.lenis,html.lenis body{height:auto}
       });
 
       // counters
-      $$('.cnt').forEach(function(el){
-        var to = +el.dataset.to, suf = el.dataset.suf || '', o = { v: 0 };
-        ScrollTrigger.create({ trigger: el, start: 'top 92%', once: true, onEnter: function(){ gsap.to(o, { v: to, duration: 1.6, ease: 'power3.out', onUpdate: function(){ el.textContent = Math.round(o.v) + suf; } }); } });
-      });
 
       // generic reveals
       $$('.rv').forEach(function(el){
