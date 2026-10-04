@@ -15,7 +15,6 @@ const tabs = [
   { href: "/app", icon: Home, key: "home" },
   { href: "/app/nutrition", icon: Salad, key: "nutrition" },
   { href: "/app/training", icon: Dumbbell, key: "training" },
-  { href: "/app/forms", icon: ClipboardList, key: "forms" },
 ] as const;
 
 export function noticeText(n: Notice, t: ReturnType<typeof useI18n>["t"]) {
@@ -87,13 +86,11 @@ export function ClientShell({ children }: { children: ReactNode }) {
           <ul className="mx-auto flex max-w-xl justify-around px-2 py-2">
             {tabs.map(({ href, icon: Icon, key }) => {
               const on = href === "/app" ? path === "/app" : path.startsWith(href);
-              const badge = key === "forms" ? notices.find((n) => n.kind === "form") : undefined;
               return (
                 <li key={href} className="flex-1">
                   <Link href={href} className="flex flex-col items-center gap-1" aria-current={on ? "page" : undefined}>
                     <span className={`relative grid h-9 w-16 place-items-center rounded-full transition-colors ${on ? "bg-gold-soft text-gold" : "text-muted"}`}>
                       <Icon size={24} strokeWidth={on ? 2.2 : 1.8} />
-                      {badge && !on && <span className="absolute end-3 top-0.5 size-2.5 rounded-full bg-gold" />}
                     </span>
                     <span className={`text-xs font-bold ${on ? "text-gold" : "text-muted"}`}>{t(key)}</span>
                   </Link>
