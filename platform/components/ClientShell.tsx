@@ -55,6 +55,22 @@ export function ClientShell({ children }: { children: ReactNode }) {
       </div>
     );
   }
+  // first thing a new trainee does: the starter form; the app opens after it
+  const starter = db.assignments.find((a) => a.clientId === me.id && a.status === "pending" && db.forms.find((f) => f.id === a.formId)?.starter);
+  if (starter && !path.startsWith("/app/forms/fill")) {
+    return (
+      <div className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
+        <img src={asset("/img/logo.webp")} alt="" width={96} height={96} className="mb-6 rounded-full" />
+        <h1 className="text-2xl font-black">{t("welcomeName", { name: me.name.split(" ")[0] })}</h1>
+        <p className="mt-3 leading-relaxed text-text-2">{t("starterFirst")}</p>
+        <Link href={`/app/forms/fill?id=${starter.id}`} className="btn-gold mt-8 w-full">{t("fillStarter")}</Link>
+        <div className="mt-3 flex w-full gap-2">
+          <button onClick={toggle} className="btn-ghost flex-1">{t("langToggle")}</button>
+          <button onClick={() => { setSession(null); router.replace("/"); }} className="btn-quiet flex-1"><LogOut size={18} /> {t("logout")}</button>
+        </div>
+      </div>
+    );
+  }
   const notices = clientNotices(db, me.id);
   const workout = path.startsWith("/app/training/session");
 

@@ -38,6 +38,10 @@ export default function CoachHome() {
     const n = daysLeft(c.subEnd);
     items.push({ c, text: n >= 0 ? t("daysLeftN", { n }) : t("expiredN", { n: -n }), tone: "red", icon: CalendarClock, wa: t("waRenew", { name: first(c), n: Math.max(n, 0) }) });
   }
+  for (const a of db.assignments.filter((x) => x.status === "submitted" && !x.reviewed && db.forms.find((f) => f.id === x.formId)?.starter)) {
+    const c = clients.find((x) => x.id === a.clientId);
+    if (c) items.push({ c, text: t("formArrived"), tone: "gold", icon: ClipboardCheck });
+  }
   for (const id of photoClients) { const c = clients.find((x) => x.id === id); if (c) items.push({ c, text: t("sentPhotos"), tone: "gold", icon: Camera }); }
   for (const c of active) {
     const pendingForm = db.assignments.find((a) => a.clientId === c.id && a.status === "pending" && ago(a.sentAt) >= 1);

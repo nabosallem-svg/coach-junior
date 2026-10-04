@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, Dumbbell, Salad } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Plus, Dumbbell, Salad, Hourglass } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { clientNotices, useMe } from "@/lib/hooks";
@@ -93,6 +93,13 @@ export default function ClientHome() {
             })}
           </div>
         </>
+      )}
+
+      {!plan && !np && !starter && (
+        <div className="card mt-5 flex items-center gap-3 border-line-gold p-4">
+          <Hourglass size={22} className="shrink-0 text-gold" />
+          <span><span className="block font-bold">{t("noPlanYet")}</span><span className="text-sm text-muted">{t("noPlanYetSub")}</span></span>
+        </div>
       )}
 
       {!me.pending && <div className="mt-5 grid grid-cols-2 gap-3">
