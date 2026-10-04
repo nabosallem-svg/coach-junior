@@ -37,6 +37,8 @@ const dict = {
   enterClient: ["دخول كمشترك", "Sign in as client"],
   enterCoach: ["دخول الكابتن", "Coach sign in"],
   demoNote: ["نسخة تجريبية ببيانات وهمية. أي تعديل بيتحفظ على الجهاز ده بس.", "Demo with sample data. Changes are saved on this device only."],
+  demoDeviceOnly: ["نسخة تجربة: التعديلات محفوظة على الجهاز والمتصفح ده بس، ومش هتبان من موبايل تاني لحد ما نشغّل Supabase.", "Demo: changes are saved on this device and browser only, not on other phones, until Supabase is on."],
+  pwChanged: ["اتغيرت كلمة السر ✓", "Password changed ✓"],
   resetConfirm: ["هيرجّع المشتركين والخطط التجريبية ويمسح أي تعديلات عليها. الفيديوهات والتمارين بتاعتك هتفضل. متأكد؟", "This restores the demo trainees and plans and drops your edits to them. Your videos and exercises stay. Sure?"],
   resetDemo: ["رجّع البيانات التجريبية", "Reset demo data"],
   chooseClient: ["اختار المشترك", "Choose a client"],

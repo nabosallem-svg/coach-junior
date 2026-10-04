@@ -169,7 +169,7 @@ function ClientDetail() {
           {pwEdit === null ? (
             <button onClick={() => setPwEdit(genPassword())} className="mt-3 flex items-center gap-1.5 text-sm font-bold text-gold"><KeyRound size={15} /> {t("resetPassword")}</button>
           ) : (
-            <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const pw = pwEdit.trim(); if (pw.length < 6) return flash(t("minChars")); setAccountPassword(c.id, pw).then(() => { set({ password: pw }); setPwEdit(null); setNewPw(pw); }, () => flash(t("syncFailed"))); }}>
+            <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); const pw = pwEdit.trim(); if (pw.length < 6) return flash(t("minChars")); setAccountPassword(c.id, pw).then(() => { set({ password: pw }); setPwEdit(null); setNewPw(pw); flash(t("pwChanged")); }, () => flash(t("syncFailed"))); }}>
               <input className="input num min-w-0 flex-1 text-start" dir="ltr" value={pwEdit} onChange={(e) => setPwEdit(e.target.value)} autoFocus />
               <button disabled={pwEdit.trim().length < 6} className="btn-gold shrink-0 px-4 disabled:opacity-40">{t("save")}</button>
               <button type="button" onClick={() => setPwEdit(null)} className="btn-quiet shrink-0 px-3">{t("cancel")}</button>
