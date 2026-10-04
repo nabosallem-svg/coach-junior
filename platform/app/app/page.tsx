@@ -11,6 +11,7 @@ import { LineChart } from "@/components/charts";
 import { Field, SectionLabel, Segmented, Sheet } from "@/components/ui";
 import { noticeIcon, noticeText } from "@/components/ClientShell";
 import { COACH_WA, waLink } from "@/lib/wa";
+import { ProgressPhotos } from "@/components/ProgressPhotos";
 
 type Range = "30" | "90" | "180" | "all";
 
@@ -164,6 +165,13 @@ export default function ClientHome() {
         </div>
       )}
 
+        </>
+      )}
+
+      {!me.pending && (
+        <>
+          <SectionLabel>{t("progressPhotos")}</SectionLabel>
+          <ProgressPhotos clientId={me.id} canAdd />
         </>
       )}
 

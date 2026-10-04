@@ -42,6 +42,18 @@ export async function deleteVideo(key: string) {
   db.transaction(STORE, "readwrite").objectStore(STORE).delete(key);
 }
 
+/** shrink a phone photo to max 1280px JPEG before storing it */
+export async function shrinkImage(file: File, max = 1280): Promise<Blob> {
+  const bmp = await createImageBitmap(file).catch(() => null);
+  if (!bmp) return file;
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const c = document.createElement("canvas");
+  c.width = Math.round(bmp.width * k);
+  c.height = Math.round(bmp.height * k);
+  c.getContext("2d")!.drawImage(bmp, 0, 0, c.width, c.height);
+  return new Promise((res) => c.toBlob((b) => res(b ?? file), "image/jpeg", 0.85));
+}
+
 /** object URL for a stored video, or the external URL, or undefined */
 export function useVideoSrc(videoKey?: string, videoUrl?: string) {
   const [src, setSrc] = useState<string | undefined>(videoUrl);
