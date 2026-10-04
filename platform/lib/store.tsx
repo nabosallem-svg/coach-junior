@@ -139,9 +139,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const reset = useCallback(() => {
     if (LIVE) return;
-    const fresh = makeSeed();
-    setDb(fresh);
-    save(DB_KEY, fresh);
+    // fresh demo trainees and plans, but the coach's video library stays: the videos themselves live in IndexedDB
+    setDb((prev) => {
+      const fresh = makeSeed();
+      const mine = prev.exercises.filter((e) => e.videoKey || e.videoUrl || !fresh.exercises.some((x) => x.id === e.id));
+      fresh.exercises = [...mine, ...fresh.exercises.filter((x) => !mine.some((e) => e.id === x.id))];
+      save(DB_KEY, fresh);
+      return fresh;
+    });
   }, []);
 
   return (
