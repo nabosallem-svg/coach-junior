@@ -191,7 +191,7 @@ function ClientDetail() {
             return (
               <div key={kind}>
                 <Field label={t(kind === "training" ? "trainingPlan" : "nutritionPlan")}>
-                  <select className="input" value={c[key] ?? ""} onChange={(e) => { set({ [key]: e.target.value || undefined }); flash(t("saved")); }}>
+                  <select className="input" value={c[key] ?? ""} onChange={(e) => { set({ [key]: e.target.value || undefined, ...(e.target.value && { planAt: new Date().toISOString() }) }); flash(t("saved")); }}>
                     <option value="">{t("none")}</option>
                     <optgroup label={t("templates")}>
                       {plans.filter((p) => !p.ownerId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -212,7 +212,7 @@ function ClientDetail() {
                   <Link href={`/coach/plans/${kind}/edit?id=${cur.id}`} className="btn-ghost mt-2 w-full"><Pencil size={17} /> {t("editHisPlan", { name: c.name.split(" ")[0] })}</Link>
                 ) : (
                   <button
-                    onClick={() => { const pid = uid(kind === "training" ? "tp" : "np"); update((d) => { personalize(d, c.id, kind, pid); }); router.push(`/coach/plans/${kind}/edit?id=${pid}`); }}
+                    onClick={() => { const pid = uid(kind === "training" ? "tp" : "np"); update((d) => { personalize(d, c.id, kind, pid); d.clients.find((x) => x.id === c.id)!.planAt = new Date().toISOString(); }); router.push(`/coach/plans/${kind}/edit?id=${pid}`); }}
                     className="btn-ghost mt-2 w-full"
                   >
                     <Sparkles size={17} /> {t("customizeFor", { name: c.name.split(" ")[0] })}
@@ -225,7 +225,7 @@ function ClientDetail() {
                     update((d) => {
                       if (kind === "training") d.trainingPlans.push({ id: pid, name: t("trainingOf", { name: first }), ownerId: c.id, days: [{ id: uid("d"), name: `${t("days")} 1`, exercises: [] }] });
                       else d.nutritionPlans.push({ id: pid, name: t("mealsOf", { name: first }), ownerId: c.id, meals: [{ id: uid("m"), name: t("mealN", { n: 1 }), items: [] }] });
-                      d.clients.find((x) => x.id === c.id)![key] = pid;
+                      Object.assign(d.clients.find((x) => x.id === c.id)!, { [key]: pid, planAt: new Date().toISOString() });
                     });
                     router.push(`/coach/plans/${kind}/edit?id=${pid}`);
                   }}

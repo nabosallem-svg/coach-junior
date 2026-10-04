@@ -21,6 +21,8 @@ export type Client = {
   /** signed up by themselves and waiting for the coach to activate them */
   pending?: boolean;
   signedUpAt?: string;
+  /** when the coach last gave this trainee a plan; drives the "your plan is ready" notice */
+  planAt?: string;
 };
 
 export type Measurement = { id: ID; clientId: ID; date: string; weight: number; waist?: number };

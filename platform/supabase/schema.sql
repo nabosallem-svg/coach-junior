@@ -82,3 +82,14 @@ create policy client_videos on storage.objects for select
 create policy own_photos on storage.objects for all
   using (bucket_id = 'media' and name like 'photos/' || auth.uid()::text || '/%')
   with check (bucket_id = 'media' and name like 'photos/' || auth.uid()::text || '/%');
+
+-- Phone notifications (Web Push): one row per subscribed browser. Only the server
+-- (service role) reads or writes it, so RLS stays on with no policies.
+create table if not exists public.push_subs (
+  endpoint text primary key,
+  user_id uuid not null,
+  is_coach boolean not null default false,
+  sub jsonb not null,
+  created_at timestamptz not null default now()
+);
+alter table public.push_subs enable row level security;
