@@ -42,8 +42,8 @@ export default function Entry() {
   return (
     <div className="relative mx-auto flex min-h-dvh max-w-xl flex-col">
       <div className="absolute inset-x-0 top-0 h-[48dvh] overflow-hidden">
-        <img src="/img/gym-m.webp" alt="" className="size-full object-cover object-top opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-b from-bg/30 via-bg/50 to-bg" />
+        <img src="/img/hero-1200.webp" srcSet="/img/hero-800.webp 800w, /img/hero-1200.webp 1200w" sizes="(min-width: 576px) 576px, 100vw" alt="" fetchPriority="high" decoding="async" className="size-full object-cover object-top" />
+        <div className="absolute inset-0 bg-gradient-to-b from-bg/10 via-bg/30 to-bg" />
       </div>
       <button onClick={toggle} className="absolute end-4 top-4 z-10 grid h-10 min-w-10 place-items-center rounded-xl border border-line-gold bg-bg/60 px-2 text-sm font-bold text-gold">
         {t("langToggle")}
