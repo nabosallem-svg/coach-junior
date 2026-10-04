@@ -42,7 +42,7 @@ body {
 @utility btn-quiet { @apply btn border border-line text-text-2 hover:bg-card-hi; }
 @utility chip { @apply inline-flex items-center rounded-full border border-line px-3 py-1 text-sm text-text-2; }
 @utility label { @apply text-xs font-bold tracking-[0.14em] text-muted uppercase; }
-@utility input { @apply w-full rounded-xl border border-line bg-card-hi px-3 py-2.5 text-text placeholder:text-muted outline-none focus:border-gold; }
+@utility input { @apply w-full rounded-xl border border-line bg-card-hi px-3 py-2.5 font-semibold text-text placeholder:font-medium placeholder:text-muted/70 outline-none focus:border-gold; }
 @utility h1 { @apply text-3xl font-black leading-tight; }
 
 /* numbers always LTR so "5-12" and "72.5" don't flip in Arabic */
