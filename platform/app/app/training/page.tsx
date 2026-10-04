@@ -76,7 +76,6 @@ export default function Training() {
                     <th className="py-2 text-start font-bold">{t("set")}</th>
                     <th className="font-bold">{t("prev")}</th>
                     <th className="font-bold">{t("reps")}</th>
-                    <th className="font-bold">{t("tempo")}</th>
                     <th className="font-bold">{t("rir")}</th>
                   </tr>
                 </thead>
@@ -86,7 +85,6 @@ export default function Training() {
                       <td className="num py-3 text-start">{i + 1}</td>
                       <td className="num text-muted">{prev?.[i]?.done ? `${prev[i].weight}×${prev[i].reps}` : "—"}</td>
                       <td className="num text-text">{s.reps}</td>
-                      <td className="num">{s.tempo || "—"}</td>
                       <td className="num">{s.rir || "—"}</td>
                     </tr>
                   ))}
