@@ -1,6 +1,6 @@
 # Coach Junior: handoff
 
-> **بالعربي باختصار:** المشروع فيه حاجتين: صفحة الموقع (Landing) في جذر الريبو، ومنصة المشتركين ولوحة الكابتن في فولدر `platform/`. المنصة شغالة دلوقتي على https://coach-junior.vercel.app ببيانات تجريبية محفوظة في المتصفح. ربط Supabase جاهز في الكود: أول ما تتحط المفاتيح على Vercel الحسابات تشتغل من أي موبايل (خطوات §6). باسورد الكابتن التجريبي: `junior2026`. كل التفاصيل تحت بالإنجليزي عشان أي AI أو مبرمج يكمل.
+> **بالعربي باختصار:** المشروع فيه حاجتين: صفحة الموقع (Landing) في جذر الريبو، ومنصة المشتركين ولوحة الكابتن في فولدر `platform/`. المنصة شغالة دلوقتي على https://coach-junior.vercel.app ببيانات تجريبية محفوظة في المتصفح. ربط Supabase جاهز في الكود: أول ما تتحط المفاتيح على Vercel الحسابات تشتغل من أي موبايل (خطوات §6). باسورد الكابتن التجريبي: `123456789`. كل التفاصيل تحت بالإنجليزي عشان أي AI أو مبرمج يكمل.
 
 Repo: `github.com/nabosallem-svg/coach-junior` (default branch `main`). Owner: nabeeh (writes Egyptian Arabic). Coach: كابتن عبد الملك «جونيور», WhatsApp **+20 101 400 7764**.
 
@@ -39,7 +39,7 @@ npx next build && npx next start
 ## 4. Product decisions (from the owner)
 
 1. **Only the coach creates accounts.** Coach → المشتركين → إضافة مشترك: name, phone, goal, package (1 / 3+1 / 6+1 / 12+1 months), a password he types or generates, training and nutrition template. Then "ابعت على واتساب" sends the trainee a message with a link to `/?login=client&phone=…`, phone and password. No trainee self sign-up.
-2. Login = phone (last 10 digits compared) + password. Coach has a separate tab (demo password `junior2026`).
+2. Login = phone (last 10 digits compared) + password. Coach has a separate tab (demo password `123456789`).
 3. **Follow-up happens on WhatsApp**, not in the app: no chat, no recurring check-in forms. Only the starter form "استمارة البداية" remains. The trainee bottom nav has a WhatsApp tab to the coach.
 4. **Per-trainee plans:** plans without `ownerId` are templates. On a trainee's page, "خصّص الخطة لـ …" clones the assigned template into a personal copy (`ownerId = clientId`) and opens the editor; edits don't touch the template or other trainees.
 5. Coach can add new foods from the meal builder (name, type for swaps, amount + unit, macros; kcal auto = 4P+4C+9F if empty), saved to the food library.

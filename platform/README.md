@@ -37,4 +37,4 @@ Only the coach creates accounts: **المشتركين → إضافة مشترك*
 
 Live, `/api/accounts` creates the trainee's Supabase login (service key, coach only). Trainees sign in with phone + password. RLS limits every row to its owner, and a trainee only sees the plans and exercises assigned to them while their subscription is active.
 
-Demo logins are listed under "Demo accounts" on the sign-in page (coach password `junior2026`). See `../HANDOFF.md` for the full picture.
+Demo logins are listed under "Demo accounts" on the sign-in page (coach password `123456789`). See `../HANDOFF.md` for the full picture.

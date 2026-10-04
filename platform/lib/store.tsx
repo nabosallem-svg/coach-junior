@@ -169,7 +169,7 @@ export function useStore() {
 }
 
 /** demo coach password; with Supabase the coach is a normal auth user with role = coach */
-export const COACH_DEMO_PASSWORD = "junior2026";
+export const COACH_DEMO_PASSWORD = "123456789";
 
 /** last 10 digits, so 010..., +2010... and 2010... all match */
 export const normPhone = (p: string) => p.replace(/\D/g, "").slice(-10);
