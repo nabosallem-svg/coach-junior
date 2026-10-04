@@ -102,6 +102,8 @@ const dict = {
   removeExercise: ["شيل التمرين", "Remove"],
   addExerciseFromLib: ["ضيف تمرين من الفيديوهات", "Add exercise from library"],
   restN: ["راحة {n} ث", "Rest {n}s"],
+  syncFailed: ["التعديل متحفظش، اتأكد من النت وجرب تاني", "Change not saved, check your connection and try again"],
+  accountFailed: ["معرفناش نعمل الحساب، جرب تاني", "Could not create the account, try again"],
   progressPhotos: ["صور التقدم", "Progress photos"],
   photosNote: ["صوّر نفسك كل أسبوعين في نفس المكان والإضاءة عشان الكابتن يتابع التغيير.", "Take photos every two weeks in the same spot and light so your coach can track changes."],
   addPhoto: ["ضيف صورة", "Add photo"],

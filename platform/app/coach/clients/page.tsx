@@ -9,6 +9,7 @@ import { useI18n } from "@/lib/i18n";
 import { daysLeft } from "@/lib/calc";
 import { Avatar, Field, Sheet } from "@/components/ui";
 import { Creds } from "@/components/Creds";
+import { createAccount } from "@/lib/accounts";
 import { ActivateSheet, PendingList, PACKAGES } from "@/components/Activate";
 import type { Client } from "@/lib/types";
 
@@ -70,7 +71,7 @@ function Clients() {
         <p className="mb-4 text-sm text-muted">{t("addClientNote")}</p>
         <form
           className="space-y-4"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             if (form.pw.trim().length < 6) return setErr(t("minChars"));
             if (db.clients.some((x) => normPhone(x.phone) === normPhone(form.phone))) return setErr(t("phoneUsed"));
@@ -79,8 +80,9 @@ function Clients() {
             const start = new Date();
             const end = new Date(start);
             end.setMonth(end.getMonth() + months);
-            const id = uid("c");
             const pw = form.pw.trim();
+            let id: string;
+            try { id = await createAccount(form.phone.trim(), pw); } catch { return setErr(t("accountFailed")); }
             update((d) => {
               d.clients.push({ id, name: form.name.trim(), phone: form.phone.trim(), password: pw, goal: form.goal.trim(), packageName: form.pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), active: true, trainingPlanId: form.tp || undefined, nutritionPlanId: form.np || undefined });
               const starter = d.forms.find((f) => f.id === "fm-start");

@@ -3,14 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, RotateCcw } from "lucide-react";
-import { useStore, normPhone, COACH_DEMO_PASSWORD } from "@/lib/store";
+import { useStore, COACH_DEMO_PASSWORD } from "@/lib/store";
 import { COACH_WA, waLink } from "@/lib/wa";
 import { useI18n } from "@/lib/i18n";
 import { Field, Segmented } from "@/components/ui";
 import { asset } from "@/lib/asset";
 
 export default function Entry() {
-  const { ready, session, setSession, db, reset } = useStore();
+  const { ready, session, db, reset, login, live } = useStore();
   const { t, toggle } = useI18n();
   const router = useRouter();
   const [who, setWho] = useState<"client" | "coach">("client");
@@ -32,21 +32,16 @@ export default function Entry() {
     router.replace(session.role === "coach" ? "/coach" : "/app");
   }, [ready, session, router, invite]);
 
-  // Demo check against local data. With Supabase this becomes
-  // supabase.auth.signInWithPassword({ phone, password }) and RLS does the rest.
-  const signIn = (e: React.FormEvent) => {
+  const [busy, setBusy] = useState(false);
+  const signIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
-    if (who === "coach") {
-      if (pw !== COACH_DEMO_PASSWORD) return setErr(t("wrongLogin"));
-      setSession({ role: "coach" });
-      return router.push("/coach");
-    }
-    const c = db.clients.find((x) => normPhone(x.phone) === normPhone(phone) && x.password === pw);
-    if (!c) return setErr(t("wrongLogin"));
+    setBusy(true);
+    const ok = await login(who, phone, pw);
+    setBusy(false);
+    if (!ok) return setErr(t("wrongLogin"));
     // pending and paused clients get in, but only see the waiting screen (ClientShell)
-    setSession({ role: "client", clientId: c.id });
-    router.push("/app");
+    router.push(who === "coach" ? "/coach" : "/app");
   };
 
   return (
@@ -86,7 +81,7 @@ export default function Entry() {
             </div>
           </Field>
           {err && <p className="text-center text-sm font-bold text-danger">{err}</p>}
-          <button className="btn-gold min-h-13 w-full text-lg">{t("signIn")}</button>
+          <button disabled={busy} className="btn-gold min-h-13 w-full text-lg">{t("signIn")}</button>
           {who === "client" && (
             <a href={waLink(COACH_WA, t("noAccountWa"))} target="_blank" rel="noopener" className="block w-full py-2 text-center font-bold text-gold">
               {t("noAccount")}
@@ -94,7 +89,7 @@ export default function Entry() {
           )}
         </form>
 
-        <details className="mt-6 text-sm text-muted">
+        {!live && <details className="mt-6 text-sm text-muted">
           <summary className="cursor-pointer">{t("demoAccounts")}</summary>
           <p className="mt-2">{t("demoNote")}</p>
           <ul className="num mt-2 space-y-1 text-start" dir="ltr">
@@ -102,7 +97,7 @@ export default function Entry() {
             <li>coach / {COACH_DEMO_PASSWORD}</li>
           </ul>
           <button onClick={reset} className="mt-3 flex items-center gap-1.5 hover:text-gold"><RotateCcw size={14} /> {t("resetDemo")}</button>
-        </details>
+        </details>}
       </div>
     </div>
   );

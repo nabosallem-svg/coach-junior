@@ -10,6 +10,7 @@ import { clientNotices, useMe, type Notice } from "@/lib/hooks";
 import { Avatar, Brand, Field, Sheet } from "./ui";
 import { asset } from "@/lib/asset";
 import { COACH_WA, waLink } from "@/lib/wa";
+import { changeOwnPassword } from "@/lib/accounts";
 
 const tabs = [
   { href: "/app", icon: Home, key: "home" },
@@ -134,9 +135,11 @@ export function ClientShell({ children }: { children: ReactNode }) {
           onSubmit={(e) => {
             e.preventDefault();
             if (pw.length < 6) return;
-            update((d) => { d.clients.find((x) => x.id === me.id)!.password = pw; });
-            setPw("");
-            setMenu(false);
+            changeOwnPassword(pw).then(() => {
+              update((d) => { d.clients.find((x) => x.id === me.id)!.password = pw; });
+              setPw("");
+              setMenu(false);
+            }, () => alert(t("syncFailed")));
           }}
         >
           <Field label={t("changePassword")}>
