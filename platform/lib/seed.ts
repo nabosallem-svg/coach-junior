@@ -1,4 +1,5 @@
 import type { DB, Exercise, Food, TrainingPlan, NutritionPlan, Measurement } from "./types";
+import { SEX_OPTIONS, ACTIVITY_OPTIONS, GOAL_OPTIONS } from "./intake";
 
 const day = 86400000;
 const iso = (offsetDays: number) => new Date(Date.now() + offsetDays * day).toISOString();
@@ -195,8 +196,12 @@ export function makeSeed(): DB {
       {
         id: "fm-start", title: "استمارة البداية", starter: true,
         questions: [
+          { id: "s6", type: "choice", label: "النوع", options: SEX_OPTIONS },
+          { id: "s7", type: "number", label: "السن" },
           { id: "s1", type: "number", label: "الطول (سم)" },
           { id: "s2", type: "number", label: "الوزن (كجم)" },
+          { id: "s8", type: "choice", label: "مستوى نشاطك", options: ACTIVITY_OPTIONS },
+          { id: "s9", type: "choice", label: "هدفك", options: GOAL_OPTIONS },
           { id: "s3", type: "choice", label: "خبرتك في الجيم", options: ["مبتدئ", "متوسط", "متقدم"] },
           { id: "s4", type: "text", label: "إصابات أو أمراض؟" },
           { id: "s5", type: "text", label: "أكلات مش بتحبها" },
@@ -204,7 +209,7 @@ export function makeSeed(): DB {
       },
     ],
     assignments: [
-      { id: "as2", formId: "fm-start", clientId: "c1", sentAt: iso(-116), status: "submitted", submittedAt: iso(-115), reviewed: true, answers: { s1: "178", s2: "79.5", s3: "متوسط", s4: "مفيش", s5: "الكبدة" } },
+      { id: "as2", formId: "fm-start", clientId: "c1", sentAt: iso(-116), status: "submitted", submittedAt: iso(-115), reviewed: true, answers: { s6: "ذكر", s7: "27", s1: "178", s2: "79.5", s8: "تمرين 3-5 أيام", s9: "تنشيف", s3: "متوسط", s4: "مفيش", s5: "الكبدة" } },
       { id: "as3", formId: "fm-start", clientId: "c3", sentAt: iso(-3), status: "pending" },
     ],
     messages: [

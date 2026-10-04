@@ -8,6 +8,7 @@ import { personalize, type PlanKind } from "@/lib/plans";
 import { useStore, uid, genPassword } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate, targets, type Activity, type Goal } from "@/lib/calc";
+import { clientTargets, intakeInputs } from "@/lib/intake";
 import { LineChart } from "@/components/charts";
 import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
@@ -66,12 +67,9 @@ function ClientDetail() {
     const imgs = (await Promise.all([...pick(older), ...pick(newer)].map((p) => photoForAi(p.key)))).filter(Boolean) as { mime: string; data: string }[];
     return aiTask("photos", { olderDate: photoDates[1], newerDate: photoDates[0], poses }, lang, imgs);
   });
-  const intakeAnswer = (word: string) => {
-    const a = assigns.find((x) => x.status === "submitted" && x.answers);
-    const q = a && db.forms.find((f) => f.id === a.formId)?.questions.find((qq) => qq.label.includes(word));
-    return (q && a?.answers?.[q.id]) || "";
-  };
-  const openCalc = () => setCalc({ sex: "m", age: "", height: intakeAnswer("الطول"), weight: String(ms.at(-1)?.weight ?? intakeAnswer("الوزن")), activity: "moderate", goal: /تنشيف|cut/i.test(c.goal) ? "cut" : /تضخيم|bulk/i.test(c.goal) ? "bulk" : "maintain" });
+  const intake = intakeInputs(db, c);
+  const needs = clientTargets(db, c);
+  const openCalc = () => { const i = intake.input; const s = (n: number) => (n ? String(n) : ""); setCalc({ sex: i.sex, age: s(i.age), height: s(i.heightCm), weight: s(i.weightKg), activity: i.activity, goal: i.goal }); };
   const calcResult = calc && +calc.age > 0 && +calc.height > 0 && +calc.weight > 0 ? targets({ sex: calc.sex, age: +calc.age, heightCm: +calc.height, weightKg: +calc.weight, activity: calc.activity, goal: calc.goal }) : null;
 
   const draftMeals = async () => {
@@ -119,10 +117,27 @@ function ClientDetail() {
       </div>
 
       <div className="no-scrollbar -mx-4 mt-4 flex gap-2 overflow-x-auto px-4">
-        <button onClick={openCalc} className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><Calculator size={16} /> {t("calcNeeds")}</button>
         <button onClick={() => runAi(t("aiSummary"), () => aiTask("summary", facts(), lang))} className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><FileText size={16} /> {t("aiSummary")}</button>
         <button onClick={() => runAi(t("aiWa"), () => aiTask("wa", facts(), lang), true)} className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line-gold px-4 text-sm font-bold text-gold hover:bg-gold-soft"><MessageCircle size={16} /> {t("aiWa")}</button>
       </div>
+
+      {/* daily needs: calculated from the starter form, the coach only edits if he wants */}
+      <section className="card mt-4 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="flex items-center gap-1.5 font-bold"><Calculator size={17} className="text-gold" /> {t("dailyNeeds")}</h2>
+          <button onClick={openCalc} className="flex items-center gap-1 text-sm font-bold text-gold"><Pencil size={14} /> {needs ? t("edit") : t("calcManually")}</button>
+        </div>
+        {needs ? (
+          <>
+            <div className="mt-3 grid grid-cols-4 gap-2 text-center">
+              {[{ v: needs.kcal, l: t("kcal"), cl: "text-gold" }, { v: needs.p, l: t("protein"), cl: "text-protein" }, { v: needs.c, l: t("carbs"), cl: "text-carbs" }, { v: needs.f, l: t("fat"), cl: "text-fat" }].map((x) => (
+                <div key={x.l} className="rounded-xl bg-card-hi p-2"><p className={`num text-xl font-black ${x.cl}`}>{x.v}</p><p className="text-xs text-muted">{x.l}</p></div>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted">{c.targets ? t("needsByCoach") : t("needsFromForm")}</p>
+          </>
+        ) : <p className="mt-2 text-sm text-muted">{intake.submitted ? t("needsMissing") : t("waitingIntake")}</p>}
+      </section>
 
       <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <section className="card p-4">
@@ -297,6 +312,7 @@ function ClientDetail() {
                 <button onClick={() => { const { kcal, p, c: cc, f } = calcResult; update((d) => { const x = d.clients.find((y) => y.id === c.id); if (x) x.targets = { kcal, p, c: cc, f }; }); setCalc(null); flash(t("targetsSaved")); }} className="btn-gold w-full">{t("useForDraft")}</button>
               </>
             ) : <p className="text-center text-sm text-muted">{t("fillToCalc")}</p>}
+            {c.targets && <button onClick={() => { update((d) => { const x = d.clients.find((y) => y.id === c.id); if (x) delete x.targets; }); setCalc(null); }} className="btn-quiet w-full">{t("backToAuto")}</button>}
           </div>
         )}
       </Sheet>
