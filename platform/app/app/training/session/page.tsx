@@ -2,17 +2,18 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, X } from "lucide-react";
+import { Check, X, Shuffle, Loader2 } from "lucide-react";
+import { aiTask } from "@/lib/aiTasks";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { useMe } from "@/lib/hooks";
 import { VideoBox } from "@/components/VideoBox";
-import { Toast } from "@/components/ui";
-import type { LoggedSet } from "@/lib/types";
+import { Sheet, Toast } from "@/components/ui";
+import type { Exercise, LoggedSet } from "@/lib/types";
 
 function Session() {
   const { db, update } = useStore();
-  const { t } = useI18n();
+  const { t, lang, muscle } = useI18n();
   const me = useMe()!;
   const router = useRouter();
   const params = useSearchParams();
@@ -20,10 +21,21 @@ function Session() {
   const day = plan?.days.find((d) => d.id === params.get("day")) ?? plan?.days[0];
   const [doneIds, setDoneIds] = useState<string[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [swap, setSwap] = useState<{ ex?: Exercise; why?: string; busy?: boolean; err?: string } | null>(null);
 
   if (!plan || !day) return null;
   const total = day.exercises.length;
   const done = doneIds.length;
+  // Gemini picks a replacement from the coach's own exercise library
+  const findSwap = async (ex: Exercise) => {
+    setSwap({ busy: true });
+    try {
+      const library = db.exercises.filter((e) => e.id !== ex.id).sort((a, b) => Number(b.muscle === ex.muscle) - Number(a.muscle === ex.muscle)).slice(0, 60).map((e) => ({ id: e.id, name: e.name, muscle: e.muscle }));
+      const r = await aiTask<{ exerciseId?: string; why?: string }>("swapExercise", { exercise: { name: ex.name, muscle: ex.muscle }, library }, lang);
+      const alt = db.exercises.find((e) => e.id === r.exerciseId);
+      setSwap(alt ? { ex: alt, why: r.why } : { err: t("aiNoSwap") });
+    } catch (e) { setSwap({ err: (e as Error).message === "nokey" ? t("scanNoKey") : t("aiFailed") }); }
+  };
   const toggle = (id: string) => setDoneIds((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]));
   // the log keeps the per-set shape so history stays compatible; sets of a ticked exercise count as done
   const sets: Record<string, LoggedSet[]> = Object.fromEntries(day.exercises.map((pe) => [pe.id, pe.sets.map((x) => ({ weight: "", reps: x.reps, done: doneIds.includes(pe.id) }))]));
@@ -73,6 +85,7 @@ function Session() {
                 </div>
                 {(pe.note || ex.cue) && <p className="mt-3 border-s-2 border-gold ps-3 text-sm text-text-2">{pe.note || ex.cue}</p>}
                 {!(ex.videoKey || ex.videoUrl) && <p className="mt-2 text-xs text-muted">{t("noVideoShort")}</p>}
+                <button onClick={() => findSwap(ex)} className="mt-3 flex items-center gap-1.5 text-sm font-bold text-muted hover:text-gold"><Shuffle size={15} /> {t("aiSwap")}</button>
               </div>
             </section>
           );
@@ -84,6 +97,17 @@ function Session() {
           <Check size={20} /> {t("finishDay")}
         </button>
       </div>
+      <Sheet open={!!swap} onClose={() => setSwap(null)} title={t("aiSwapTitle")}>
+        {swap?.busy && <p className="flex items-center justify-center gap-2 py-6 font-bold text-gold"><Loader2 size={18} className="animate-spin" /> {t("aiBusy")}</p>}
+        {swap?.err && <p className="py-4 text-center text-muted">{swap.err}</p>}
+        {swap?.ex && (
+          <div className="space-y-3">
+            {(swap.ex.videoKey || swap.ex.videoUrl) && <VideoBox ex={swap.ex} />}
+            <p className="text-lg font-bold"><bdi>{swap.ex.name}</bdi> <span className="text-sm font-medium text-muted">· {muscle(swap.ex.muscle)}</span></p>
+            {swap.why && <p className="border-s-2 border-gold ps-3 text-sm text-text-2" dir="auto">{swap.why}</p>}
+          </div>
+        )}
+      </Sheet>
       <Toast text={toast} />
     </div>
   );

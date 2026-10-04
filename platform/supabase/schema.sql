@@ -43,16 +43,6 @@ language sql stable security definer set search_path = public as $$
   select coalesce((my_client()->>'active')::boolean and (my_client()->>'subEnd')::date >= current_date, false)
 $$;
 
--- an exercise is visible to a trainee only if it is in their assigned training plan
-create or replace function public.in_my_plan(ex_id text) returns boolean
-language sql stable security definer set search_path = public as $$
-  select exists (
-    select 1 from docs p
-    where p.coll = 'trainingPlans' and p.id = my_client()->>'trainingPlanId'
-      and jsonb_path_exists(p.data, '$.days[*].exercises[*] ? (@.exerciseId == $id)', jsonb_build_object('id', ex_id))
-  )
-$$;
-
 alter table public.coaches enable row level security;
 alter table public.docs enable row level security;
 
@@ -69,7 +59,7 @@ create policy own_rows on docs for all
   using (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = auth.uid())
   with check (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = auth.uid());
 
--- trainee: food list, assigned plans and their exercises while the subscription runs
+-- trainee: food list, assigned plans and the exercise library while the subscription runs
 create policy foods_read on docs for select using (coll = 'foods' and auth.uid() is not null);
 create policy forms_read on docs for select using (coll = 'forms' and auth.uid() is not null);
 create policy plans_read on docs for select using (
@@ -78,7 +68,8 @@ create policy plans_read on docs for select using (
     (coll = 'nutritionPlans' and id = my_client()->>'nutritionPlanId')
   )
 );
-create policy exercises_read on docs for select using (coll = 'exercises' and client_active() and in_my_plan(id));
+-- the whole exercise library, so "مش لاقي الجهاز؟" can suggest a replacement
+create policy exercises_read on docs for select using (coll = 'exercises' and client_active());
 
 -- Storage: one PRIVATE bucket 'media'.
 --   videos/<key>                 coach uploads, active trainees can play (signed URLs)
