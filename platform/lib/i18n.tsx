@@ -279,6 +279,8 @@ const dict = {
   hasVideo: ["فيه فيديو", "Has video"],
   noVideoShort: ["من غير فيديو", "No video"],
   uploading: ["بيترفع…", "Uploading…"],
+  uploadVideoForEx: ["ارفع فيديو للتمرين ده", "Upload a video for this exercise"],
+  uploadFailed: ["الرفع ما نجحش، جرّب تاني", "Upload failed, try again"],
   usedIn: ["مستخدم في {n} خطة", "Used in {n} plan(s)"],
 
   // coach plans

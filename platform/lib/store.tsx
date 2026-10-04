@@ -78,7 +78,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return;
     }
     const stored = load<DB>(DB_KEY);
-    if (stored) setDb(stored);
+    if (stored) {
+      // plans made before the fix were named "Day 1"
+      stored.trainingPlans?.forEach((p) => p.days.forEach((d) => { d.name = d.name.replace(/^Day (\d+)$/, "يوم $1"); }));
+      setDb(stored);
+    }
     setSessionState(load<Session>(SESSION_KEY));
     setReady(true);
   }, [boot]);

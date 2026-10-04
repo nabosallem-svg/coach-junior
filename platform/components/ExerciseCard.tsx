@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUp, ArrowDown, Trash2, Minus, Plus, Video, ChevronDown, HelpCircle, X } from "lucide-react";
+import { ArrowUp, ArrowDown, Trash2, Minus, Plus, Video, ChevronDown, HelpCircle, X, Upload, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useStore } from "@/lib/store";
+import { putVideo } from "@/lib/media";
+import { VideoBox } from "@/components/VideoBox";
 import type { Exercise, PlanExercise } from "@/lib/types";
 
 const RESTS = ["60", "90", "120", "180"];
@@ -20,6 +23,18 @@ export function ExerciseCard({ pe, ex, index, count, onChange, onMove, onDelete 
   const [perSet, setPerSet] = useState(!same);
   const [extra, setExtra] = useState(!!pe.sets[0]?.rir);
   const [help, setHelp] = useState(false);
+  const { update } = useStore();
+  const [uploading, setUploading] = useState(false);
+  const upload = async (file?: File) => {
+    if (!ex || !file) return;
+    setUploading(true);
+    try {
+      const key = `${ex.id}-${Date.now()}`;
+      await putVideo(key, file);
+      update((d) => { const e = d.exercises.find((x) => x.id === ex.id); if (e) e.videoKey = key; });
+    } catch { alert(t("uploadFailed")); }
+    setUploading(false);
+  };
   const first = pe.sets[0] ?? { reps: "" };
   const all = (k: "reps" | "rir", v: string) => onChange((p) => { p.sets.forEach((s) => { s[k] = v; }); });
   const setCount = (n: number) => onChange((p) => {
@@ -38,6 +53,16 @@ export function ExerciseCard({ pe, ex, index, count, onChange, onMove, onDelete 
           {ex && <span className="mt-1 inline-block rounded-full border border-line-gold px-2.5 py-0.5 text-xs font-bold text-gold">{muscle(ex.muscle)}</span>}
         </div>
       </div>
+
+      {/* the exercise video: small preview, or upload one right here */}
+      {ex && (ex.videoKey || ex.videoUrl ? (
+        <div className="mt-3 w-full max-w-60"><VideoBox ex={ex} /></div>
+      ) : (
+        <label className={`mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line-gold px-3 text-sm font-bold text-gold hover:bg-gold-soft ${uploading ? "pointer-events-none opacity-60" : ""}`}>
+          {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />} {uploading ? t("uploading") : t("uploadVideoForEx")}
+          <input type="file" accept="video/*" className="hidden" onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ""; }} />
+        </label>
+      ))}
 
       {/* sets count + reps + rest: the three things every exercise needs */}
       <div className="mt-4 grid grid-cols-2 gap-3">
