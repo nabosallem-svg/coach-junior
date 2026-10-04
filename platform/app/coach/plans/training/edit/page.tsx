@@ -2,13 +2,14 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Plus, Trash2, Search, Video } from "lucide-react";
+import { Plus, Trash2, Search, Video, Upload, Loader2 } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, MUSCLES } from "@/lib/i18n";
+import { putVideo } from "@/lib/media";
 import { BuilderHeader } from "@/components/BuilderHeader";
 import { ExerciseCard } from "@/components/ExerciseCard";
-import { Pills, Sheet } from "@/components/ui";
-import type { TrainingPlan } from "@/lib/types";
+import { Field, Pills, Sheet } from "@/components/ui";
+import type { Muscle, TrainingPlan } from "@/lib/types";
 
 function TrainingBuilder() {
   const id = useSearchParams().get("id") ?? "";
@@ -18,11 +19,29 @@ function TrainingBuilder() {
   const [dayId, setDayId] = useState<string | undefined>(plan?.days[0]?.id);
   const [picker, setPicker] = useState(false);
   const [q, setQ] = useState("");
+  const [mf, setMf] = useState("all");
+  const [nx, setNx] = useState<{ name: string; muscle: Muscle | ""; file: File | null } | null>(null);
+  const [saving, setSaving] = useState(false);
   if (!plan) return null;
   const day = plan.days.find((d) => d.id === dayId) ?? plan.days[0];
 
   const edit = (fn: (p: TrainingPlan) => void) => update((d) => fn(d.trainingPlans.find((p) => p.id === id)!));
   const editDay = (fn: (day: TrainingPlan["days"][number]) => void) => edit((p) => fn(p.days.find((x) => x.id === day.id)!));
+
+  const addEx = (exerciseId: string) => editDay((d) => { d.exercises.push({ id: uid("pe"), exerciseId, rest: "90", sets: [{ reps: "8-12" }, { reps: "8-12" }, { reps: "8-12" }] }); });
+  const closePicker = () => { setPicker(false); setQ(""); setMf("all"); setNx(null); };
+  // a new exercise goes into the library too, so it can be reused in other plans
+  const saveNew = async () => {
+    if (!nx || !nx.name.trim() || !nx.muscle) return;
+    setSaving(true);
+    const id = uid("ex");
+    let videoKey: string | undefined;
+    if (nx.file) { try { videoKey = `${id}-${Date.now()}`; await putVideo(videoKey, nx.file); } catch { videoKey = undefined; alert(t("uploadFailed")); } }
+    update((d) => { d.exercises.unshift({ id, name: nx.name.trim(), muscle: nx.muscle as Muscle, videoKey }); });
+    addEx(id);
+    setSaving(false);
+    closePicker();
+  };
 
   const addDay = () => {
     const nid = uid("d");
@@ -77,24 +96,47 @@ function TrainingBuilder() {
         </div>
       )}
 
-      <Sheet open={picker} onClose={() => setPicker(false)} title={t("pickExercise")}>
-        <div className="relative mb-3">
-          <Search size={18} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
-          <input className="input ps-10" value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
-        </div>
-        <ul className="space-y-1.5">
-          {db.exercises.filter((e) => !q || e.name.toLowerCase().includes(q.toLowerCase()) || muscle(e.muscle).includes(q)).map((e) => (
-            <li key={e.id}>
-              <button
-                onClick={() => { editDay((d) => { d.exercises.push({ id: uid("pe"), exerciseId: e.id, rest: "90", sets: [{ reps: "8-12" }, { reps: "8-12" }, { reps: "8-12" }] }); }); setPicker(false); setQ(""); }}
-                className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-start hover:bg-card-hi"
-              >
-                <span className="font-bold" dir="auto">{e.name}</span>
-                <span className="flex items-center gap-2 text-sm text-muted">{(e.videoKey || e.videoUrl) && <Video size={14} className="text-gold" />}{muscle(e.muscle)}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+      <Sheet open={picker} onClose={closePicker} title={nx ? t("newExercise") : t("pickExercise")}>
+        {nx ? (
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); saveNew(); }}>
+            <Field label={t("exerciseName")}><input className="input" dir="auto" value={nx.name} onChange={(e) => setNx({ ...nx, name: e.target.value })} required autoFocus /></Field>
+            <Field group label={t("pickMuscle")}>
+              <div className="flex flex-wrap gap-1.5">
+                {MUSCLES.map((m) => <button type="button" key={m} onClick={() => setNx({ ...nx, muscle: m as Muscle })} className={`h-9 rounded-full border px-3 text-sm font-bold ${nx.muscle === m ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>{muscle(m as Muscle)}</button>)}
+              </div>
+            </Field>
+            <label className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line-gold px-3 text-sm font-bold text-gold hover:bg-gold-soft">
+              <Upload size={18} /> <span className="truncate">{nx.file ? nx.file.name : t("videoOptional")}</span>
+              <input type="file" accept="video/*" className="hidden" onChange={(e) => setNx({ ...nx, file: e.target.files?.[0] ?? null })} />
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button className="btn-gold" disabled={saving || !nx.name.trim() || !nx.muscle}>{saving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />} {t("addToDay")}</button>
+              <button type="button" onClick={() => setNx(null)} className="btn-quiet">{t("back")}</button>
+            </div>
+            <p className="text-xs text-muted">{t("savedToLibrary")}</p>
+          </form>
+        ) : (
+          <>
+            <div className="relative mb-3">
+              <Search size={18} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
+              <input className="input ps-10" placeholder={t("searchExercise")} value={q} onChange={(e) => setQ(e.target.value)} />
+            </div>
+            <button onClick={() => setNx({ name: q, muscle: mf === "all" ? "" : (mf as Muscle), file: null })} className="mb-3 flex w-full items-center gap-2 rounded-xl border border-dashed border-line-gold px-3 py-3 font-bold text-gold hover:bg-gold-soft">
+              <Plus size={18} /> {q ? t("addNamedExercise", { x: q }) : t("newExercise")}
+            </button>
+            <Pills bleed={false} value={mf} onChange={setMf} options={[{ value: "all", label: t("all") }, ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m as Muscle) }))]} />
+            <ul className="mt-3 space-y-1.5">
+              {db.exercises.filter((e) => (mf === "all" || e.muscle === mf) && (!q || e.name.toLowerCase().includes(q.toLowerCase()) || muscle(e.muscle).includes(q))).map((e) => (
+                <li key={e.id}>
+                  <button onClick={() => { addEx(e.id); closePicker(); }} className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-start hover:bg-card-hi">
+                    <span className="font-bold" dir="auto">{e.name}</span>
+                    <span className="flex items-center gap-2 text-sm text-muted">{(e.videoKey || e.videoUrl) && <Video size={14} className="text-gold" />}{muscle(e.muscle)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </Sheet>
     </div>
   );
