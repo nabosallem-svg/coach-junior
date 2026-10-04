@@ -13,7 +13,8 @@ import { emptyDB, loadDB, saveDiff, seedIfEmpty } from "./sync";
 // - live (NEXT_PUBLIC_SUPABASE_URL + ANON_KEY set): Supabase Auth for logins and the
 //   docs table for data (lib/sync.ts, supabase/schema.sql).
 
-const DB_KEY = "cj-platform-db-v12";
+const DB_VERSION = 12;
+const DB_KEY = `cj-platform-db-v${DB_VERSION}`;
 const SESSION_KEY = "cj-platform-session-v1";
 
 export type Session = { role: "coach" } | { role: "client"; clientId: ID } | null;
@@ -77,7 +78,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       boot().finally(() => setReady(true));
       return;
     }
-    const stored = load<DB>(DB_KEY);
+    // a new version key used to start from fresh demo data, wiping what the coach built; carry the latest older copy over instead
+    let stored = load<DB>(DB_KEY);
+    for (let v = DB_VERSION - 1; !stored && v >= 9; v--) stored = load<DB>(`cj-platform-db-v${v}`);
     if (stored) {
       // plans made before the fix were named "Day 1"
       stored.trainingPlans?.forEach((p) => p.days.forEach((d) => { d.name = d.name.replace(/^Day (\d+)$/, "يوم $1"); }));
@@ -85,6 +88,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     setSessionState(load<Session>(SESSION_KEY));
     setReady(true);
+    // coach in one tab and trainee in another: take the other tab's writes so a stale tab never overwrites them
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === DB_KEY && e.newValue) try { setDb(JSON.parse(e.newValue)); } catch {}
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [boot]);
 
   const update = useCallback((fn: (draft: DB) => void) => {
