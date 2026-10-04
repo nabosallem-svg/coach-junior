@@ -5,14 +5,19 @@ import { Users, CalendarClock, MessageSquare, ClipboardCheck, Upload, UserPlus, 
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate } from "@/lib/calc";
-import { Avatar, SectionLabel } from "@/components/ui";
+import { Avatar, SectionLabel, Toast } from "@/components/ui";
+import { ActivateSheet, PendingList } from "@/components/Activate";
+import { useState } from "react";
+import type { Client } from "@/lib/types";
 
 export default function CoachHome() {
   const { db } = useStore();
   const { t, lang, dir } = useI18n();
   const Chevron = dir === "rtl" ? ChevronLeft : ChevronRight;
+  const [act, setAct] = useState<Client | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const active = db.clients.filter((c) => c.active && daysLeft(c.subEnd) >= 0);
-  const expiring = db.clients.filter((c) => { const d = daysLeft(c.subEnd); return d <= 7; });
+  const expiring = db.clients.filter((c) => c.active && daysLeft(c.subEnd) <= 7);
   const unread = db.messages.filter((m) => m.from === "client" && !m.read);
   const newForms = db.assignments.filter((a) => a.status === "submitted" && !a.reviewed);
   const noPlan = db.clients.filter((c) => c.active && (!c.trainingPlanId || !c.nutritionPlanId));
@@ -41,13 +46,16 @@ export default function CoachHome() {
   return (
     <div>
       <h1 className="h1">{t("dashboard")}</h1>
+      <PendingList onActivate={setAct} />
 
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map(({ label, n, icon: Icon, href }) => (
-          <Link key={label} href={href} className="card p-4 hover:border-line-gold">
-            <Icon size={20} className="text-gold" />
-            <p className="num mt-3 text-3xl font-black">{n}</p>
-            <p className="text-sm text-muted">{label}</p>
+          <Link key={label} href={href} className="card flex items-center gap-3 p-3 hover:border-line-gold">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-gold-soft text-gold"><Icon size={18} /></span>
+            <span className="min-w-0">
+              <span className="num block text-2xl font-black leading-none">{n}</span>
+              <span className="mt-1 block text-xs leading-tight text-muted">{label}</span>
+            </span>
           </Link>
         ))}
       </div>
@@ -96,6 +104,8 @@ export default function CoachHome() {
           </ul>
         </div>
       </div>
+      <ActivateSheet client={act} onClose={() => setAct(null)} onDone={() => { setToast(t("activated")); setTimeout(() => setToast(null), 1500); }} />
+      <Toast text={toast} />
     </div>
   );
 }

@@ -50,6 +50,7 @@ export function daysLeft(isoDate: string) {
 }
 
 export function fmtDate(iso: string, lang: "ar" | "en", opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" }) {
+  if (!iso || isNaN(new Date(iso).getTime())) return "—";
   return new Date(iso).toLocaleDateString(lang === "ar" ? "ar-EG-u-nu-latn" : "en-GB", opts);
 }
 

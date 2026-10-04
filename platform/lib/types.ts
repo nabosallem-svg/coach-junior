@@ -16,6 +16,9 @@ export type Client = {
   trainingPlanId?: ID;
   nutritionPlanId?: ID;
   active: boolean;
+  /** signed up by themselves and waiting for the coach to activate them */
+  pending?: boolean;
+  signedUpAt?: string;
 };
 
 export type Measurement = { id: ID; clientId: ID; date: string; weight: number; waist?: number };

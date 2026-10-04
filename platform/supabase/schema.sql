@@ -2,11 +2,12 @@
 -- Run in the Supabase SQL editor once a project exists. Mirrors lib/types.ts.
 -- Roles: one coach (profiles.role = 'coach'); clients only see their own rows.
 --
--- Accounts: the coach creates each client from the panel. A server route calls
--- supabase.auth.admin.createUser({ phone, password, phone_confirm: true }) with the
--- service-role key (no SMS needed), then inserts profiles + clients rows.
--- Clients sign in with signInWithPassword({ phone, password }); Supabase stores
--- only a bcrypt hash. "New password" in the panel = auth.admin.updateUserById.
+-- Accounts: trainees sign up themselves (auth.signUp with phone + password and
+-- { data: { name, goal } }). The trigger below creates their profile and a
+-- PENDING clients row. They can sign in but RLS shows them nothing until the
+-- coach activates them (active = true, package dates set). The coach can also
+-- create accounts himself via auth.admin.createUser from a server route.
+-- Supabase stores only a bcrypt hash of the password.
 
 create table public.profiles (
   id uuid primary key references auth.users on delete cascade,
@@ -52,13 +53,30 @@ create table public.nutrition_plans (
 create table public.clients (
   id uuid primary key references profiles on delete cascade,
   goal text,
-  package_name text not null,
-  sub_start date not null,
-  sub_end date not null,
+  package_name text,
+  sub_start date,
+  sub_end date,
   training_plan_id uuid references training_plans on delete set null,
   nutrition_plan_id uuid references nutrition_plans on delete set null,
-  active boolean not null default true
+  active boolean not null default false,
+  pending boolean not null default true,
+  signed_up_at timestamptz not null default now()
 );
+
+-- self sign-up -> profile + pending client
+create or replace function public.handle_new_user() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  insert into profiles (id, role, name, phone)
+  values (new.id, 'client', coalesce(new.raw_user_meta_data->>'name', ''), new.phone);
+  insert into clients (id, goal) values (new.id, new.raw_user_meta_data->>'goal');
+  return new;
+end $$;
+create trigger on_auth_user_created after insert on auth.users
+  for each row execute function public.handle_new_user();
+-- the coach's own account: after signing up once, run
+--   update profiles set role = 'coach' where phone = '<coach phone>';
+--   delete from clients where id = (select id from profiles where role = 'coach');
 
 create table public.measurements (
   id uuid primary key default gen_random_uuid(),
@@ -155,8 +173,8 @@ language sql stable security definer set search_path = public as $$
 $$;
 create policy plan_read on exercises for select using (client_has_exercise(id));
 create policy active_read on foods for select using (auth.uid() is not null);
-create policy assigned_read on training_plans for select using (exists (select 1 from clients where id = auth.uid() and training_plan_id = training_plans.id));
-create policy assigned_read on nutrition_plans for select using (exists (select 1 from clients where id = auth.uid() and nutrition_plan_id = nutrition_plans.id));
+create policy assigned_read on training_plans for select using (exists (select 1 from clients where id = auth.uid() and active and training_plan_id = training_plans.id));
+create policy assigned_read on nutrition_plans for select using (exists (select 1 from clients where id = auth.uid() and active and nutrition_plan_id = nutrition_plans.id));
 create policy assigned_read on forms for select using (exists (select 1 from form_assignments a where a.form_id = forms.id and a.client_id = auth.uid()));
 
 -- clients' own data

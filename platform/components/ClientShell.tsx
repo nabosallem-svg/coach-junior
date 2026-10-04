@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { clientNotices, useMe, type Notice } from "@/lib/hooks";
 import { Avatar, Brand, Field, Sheet } from "./ui";
+import { asset } from "@/lib/asset";
 
 const tabs = [
   { href: "/app", icon: Home, key: "home" },
@@ -36,11 +37,25 @@ export function ClientShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    if (me && !me.active) setSession(null);
-    if (!session || session.role !== "client" || !me || !me.active) router.replace("/");
-  }, [ready, session, me, router, setSession]);
+    if (!session || session.role !== "client" || !me) router.replace("/");
+  }, [ready, session, me, router]);
 
-  if (!ready || !me || !me.active) return null;
+  if (!ready || !me) return null;
+  if (!me.active) {
+    const pending = !!me.pending;
+    return (
+      <div className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
+        <img src={asset("/img/logo.webp")} alt="" width={96} height={96} className="mb-6 rounded-full" />
+        <h1 className="text-2xl font-black">{pending ? t("pendingTitle") : t("pausedTitle")}</h1>
+        <p className="mt-3 text-text-2">{pending ? t("pendingSub") : t("pausedSub")}</p>
+        <a className="btn-gold mt-8 w-full" target="_blank" rel="noopener" href={`https://wa.me/201014007764?text=${encodeURIComponent(`${me.name} - ${me.phone}`)}`}>{t("msgCoachWa")}</a>
+        <div className="mt-3 flex w-full gap-2">
+          <button onClick={toggle} className="btn-ghost flex-1">{t("langToggle")}</button>
+          <button onClick={() => { setSession(null); router.replace("/"); }} className="btn-quiet flex-1"><LogOut size={18} /> {t("logout")}</button>
+        </div>
+      </div>
+    );
+  }
   const notices = clientNotices(db, me.id);
   const workout = path.startsWith("/app/training/session");
 

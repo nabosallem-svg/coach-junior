@@ -130,7 +130,7 @@ export default function ClientHome() {
       <div className="card p-5">
         <p className="text-text-2">{t("weight")}</p>
         <div className="flex items-baseline gap-3">
-          <p className="num text-4xl font-black">{latest ? latest.weight : "—"} <span className="text-2xl">{t("kg")}</span></p>
+          <p className="num text-4xl font-black">{latest ? <>{latest.weight} <span className="text-2xl">{t("kg")}</span></> : "—"}</p>
           {shown.length > 1 && <span className={`num text-sm font-bold ${change <= 0 ? "text-ok" : "text-gold"}`}>{change > 0 ? "+" : ""}{change.toFixed(1)}</span>}
         </div>
         <p className="mb-4 text-sm text-muted">{t("readings", { n: shown.length })}</p>

@@ -109,7 +109,15 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   );
 }
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+/** label + control; pass group for button groups so taps don't hit the first button */
+export function Field({ label, children, group }: { label: string; children: ReactNode; group?: boolean }) {
+  if (group)
+    return (
+      <div role="group" aria-label={label}>
+        <span className="mb-1.5 block text-sm font-bold text-text-2">{label}</span>
+        {children}
+      </div>
+    );
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm font-bold text-text-2">{label}</span>

@@ -60,7 +60,7 @@ function Plans() {
           { value: "forms", label: t("formTemplates") },
         ]}
       />
-      <ul className="mt-4 grid gap-2 lg:grid-cols-2">
+      <ul className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2">
         {rows.map(({ id, name, sub, icon: Icon }) => (
           <li key={id} className="card flex items-center gap-3 p-3 hover:border-line-gold">
             <Link href={`/coach/plans/${tab}/edit?id=${id}`} className="flex min-w-0 flex-1 items-center gap-3">

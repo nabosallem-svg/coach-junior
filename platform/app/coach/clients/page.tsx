@@ -9,13 +9,9 @@ import { useI18n } from "@/lib/i18n";
 import { daysLeft } from "@/lib/calc";
 import { Avatar, Field, Sheet } from "@/components/ui";
 import { Creds } from "@/components/Creds";
+import { ActivateSheet, PendingList, PACKAGES } from "@/components/Activate";
+import type { Client } from "@/lib/types";
 
-const PACKAGES = [
-  { label: "1", months: 1 },
-  { label: "3+1", months: 4 },
-  { label: "6+1", months: 7 },
-  { label: "12+1", months: 13 },
-];
 
 function Clients() {
   const { db, update } = useStore();
@@ -25,12 +21,13 @@ function Clients() {
   const [q, setQ] = useState("");
   const [add, setAdd] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", goal: "", pkg: "3+1" });
+  const [act, setAct] = useState<Client | null>(null);
   const [created, setCreated] = useState<{ id: string; pw: string } | null>(null);
   const Chevron = dir === "rtl" ? ChevronLeft : ChevronRight;
 
   useEffect(() => { if (params.get("add")) setAdd(true); }, [params]);
 
-  const list = db.clients.filter((c) => c.name.includes(q) || c.phone.includes(q));
+  const list = db.clients.filter((c) => !c.pending && (c.name.includes(q) || c.phone.includes(q)));
 
   return (
     <div>
@@ -39,12 +36,14 @@ function Clients() {
         <button className="btn-gold" onClick={() => setAdd(true)}><UserPlus size={18} /> {t("addClient")}</button>
       </div>
 
+      <PendingList onActivate={setAct} />
+
       <div className="relative mt-5">
         <Search size={18} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
         <input className="input ps-10" placeholder={t("searchClients")} value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
 
-      <ul className="mt-4 grid gap-2 lg:grid-cols-2">
+      <ul className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2">
         {list.map((c) => {
           const left = daysLeft(c.subEnd);
           const unread = db.messages.filter((m) => m.clientId === c.id && m.from === "client" && !m.read).length;
@@ -56,8 +55,8 @@ function Clients() {
                   <span className="flex items-center gap-2 font-bold">{c.name}{unread > 0 && <span className="size-2 rounded-full bg-gold" />}</span>
                   <span className="block truncate text-sm text-muted">{c.goal} · <span className="num">{c.packageName}</span></span>
                 </span>
-                <span className={`num shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>
-                  {left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}
+                <span className={`num shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${!c.active ? "bg-card-hi text-muted" : left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>
+                  {!c.active ? t("paused") : left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}
                 </span>
                 <Chevron size={18} className="text-muted" />
               </Link>
@@ -91,7 +90,7 @@ function Clients() {
           <Field label={t("name")}><input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
           <Field label={t("phone")}><input className="input num text-start" inputMode="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required placeholder="+20" /></Field>
           <Field label={t("goal")}><input className="input" value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })} /></Field>
-          <Field label={`${t("package")} (${t("months")})`}>
+          <Field group label={`${t("package")} (${t("months")})`}>
             <div className="grid grid-cols-4 gap-2">
               {PACKAGES.map((p) => (
                 <button type="button" key={p.label} onClick={() => setForm({ ...form, pkg: p.label })} className={`num h-11 rounded-xl border font-bold ${form.pkg === p.label ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>{p.label}</button>
@@ -101,6 +100,7 @@ function Clients() {
           <button className="btn-gold w-full">{t("add")}</button>
         </form>
       </Sheet>
+      <ActivateSheet client={act} onClose={() => setAct(null)} />
       <Creds client={db.clients.find((c) => c.id === created?.id) ?? null} password={created?.pw ?? ""} onClose={() => { const id = created?.id; setCreated(null); router.push(`/coach/clients/view?id=${id}`); }} />
     </div>
   );
