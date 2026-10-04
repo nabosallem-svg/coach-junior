@@ -25,6 +25,7 @@ npx next build && npx next start
 - Env vars (Vercel → Settings → Environment Variables):
   - `GEMINI_API_KEY`: AI via `lib/ai.ts` (model `gemini-flash-latest`, falls back to `gemini-flash-lite-latest` when busy). Powers "احسب السعرات تلقائي" for new foods (`/api/macros`) and the trainee's "صوّر وجبتك" meal-photo estimate on the nutrition page (`/api/meal`). `ANTHROPIC_API_KEY` still works as a fallback if Gemini isn't set. Without either key the buttons say AI isn't set up.
     Also `/api/ai` (one route, task-based prompts; client helper `lib/aiTasks.ts`): coach trainee page → "ملخص الأسبوع", "رسالة واتس جاهزة" (editable, opens WhatsApp), "قارن آخر صورتين", "اعمل مسودة أكل بالذكاء الاصطناعي" (creates a personal nutrition plan from the intake form using only the coach's foods, then opens the editor); trainee workout → "مش لاقي الجهاز؟" picks a replacement from the coach's library. Live RLS lets active trainees read the whole exercise library for this.
+    Daily needs: "احسب احتياجه" on the coach trainee page is deterministic (`targets()` in `lib/calc.ts`, Mifflin-St Jeor → TDEE → goal; protein 2 g/kg cut / 1.8 otherwise, fat 25%), prefilled from the intake form; "استخدمها في مسودة الأكل" feeds the numbers to the AI meal draft. Trainees can also type a meal ("200 جم فراخ + 150 جم رز") under "صوّر وجبتك" (`/api/meal` with `text`). Macro-equal food swaps were already built in without AI ("بدّل الأكلة", `swapOptions`).
   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`: for the Supabase step. **Not provided yet.**
 
 ## 3. Style rules
