@@ -36,7 +36,7 @@ body {
 ::selection { background: var(--color-gold); color: var(--color-bg); }
 
 @utility card { @apply rounded-2xl border border-line bg-card; }
-@utility btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 font-bold transition-colors disabled:opacity-50; }
+@utility btn { @apply inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 font-bold transition-colors disabled:opacity-50; }
 @utility btn-gold { @apply btn bg-gold text-bg hover:bg-gold-hi; }
 @utility btn-ghost { @apply btn border border-line-gold text-gold hover:bg-gold-soft; }
 @utility btn-quiet { @apply btn border border-line text-text-2 hover:bg-card-hi; }

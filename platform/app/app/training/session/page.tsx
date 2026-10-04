@@ -45,7 +45,7 @@ function Session() {
     <div className="pb-32">
       <header className="sticky top-0 z-30 border-b border-line bg-bg/95 px-4 pb-3 pt-4 backdrop-blur">
         <div className="flex items-center justify-between gap-3">
-          <button onClick={() => router.back()} className="flex items-center gap-1 text-muted hover:text-text"><X size={20} /> {t("exitWorkout")}</button>
+          <button onClick={() => router.replace("/app/training")} className="flex items-center gap-1 text-muted hover:text-text"><X size={20} /> {t("exitWorkout")}</button>
           <span className="num font-bold text-gold">{done}/{total}</span>
         </div>
         <h1 className="mt-2 text-2xl font-black">{day.name}</h1>

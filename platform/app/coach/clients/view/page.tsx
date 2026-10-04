@@ -11,6 +11,7 @@ import { LineChart } from "@/components/charts";
 import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
 import { Creds } from "@/components/Creds";
+import { ActivateSheet } from "@/components/Activate";
 
 function ClientDetail() {
   const id = useSearchParams().get("id") ?? "";
@@ -20,6 +21,7 @@ function ClientDetail() {
   const [viewAs, setViewAs] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [newPw, setNewPw] = useState<string | null>(null);
+  const [act, setAct] = useState(false);
   const c = db.clients.find((x) => x.id === id);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
   if (!c) return null;
@@ -55,11 +57,11 @@ function ClientDetail() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 lg:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <section className="card p-4">
           <div className="flex items-center justify-between">
             <h2 className="font-bold">{t("subscription")}</h2>
-            <span className={`num rounded-full px-2.5 py-1 text-xs font-bold ${left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>{left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}</span>
+            <span className={`num rounded-full px-2.5 py-1 text-xs font-bold ${c.pending || !c.active ? "bg-card-hi text-muted" : left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>{c.pending ? t("requests") : !c.active ? t("paused") : left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}</span>
           </div>
           <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
             <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{c.packageName}</dd></div>
@@ -67,8 +69,12 @@ function ClientDetail() {
             <div><dt className="text-muted">{t("end")}</dt><dd className="font-bold">{fmtDate(c.subEnd, lang)}</dd></div>
           </dl>
           <div className="mt-4 flex gap-2">
-            <button onClick={extend} className="btn-gold flex-1"><CalendarPlus size={18} /> {t("oneMonth")}</button>
-            <button onClick={() => set({ active: !c.active })} className="btn-quiet flex-1">{c.active ? t("active") : t("inactive")}</button>
+            <button onClick={extend} disabled={c.pending} className="btn-gold flex-1"><CalendarPlus size={18} /> {t("oneMonth")}</button>
+            {c.pending ? (
+              <button onClick={() => setAct(true)} className="btn-ghost flex-1">{t("activate")}</button>
+            ) : (
+              <button onClick={() => set({ active: !c.active })} className="btn-quiet flex-1">{c.active ? t("pause") : t("resume")}</button>
+            )}
           </div>
           <button onClick={() => { const pw = genPassword(); set({ password: pw }); setNewPw(pw); }} className="mt-2 flex items-center gap-1.5 text-sm font-bold text-gold"><KeyRound size={15} /> {t("resetPassword")}</button>
         </section>
@@ -169,6 +175,7 @@ function ClientDetail() {
       <Sheet open={!!viewing} onClose={() => setViewAs(null)} title={db.forms.find((f) => f.id === viewing?.formId)?.title ?? ""}>
         {viewing && <FormView form={db.forms.find((f) => f.id === viewing.formId)!} answers={viewing.answers} />}
       </Sheet>
+      <ActivateSheet client={act ? c : null} onClose={() => setAct(false)} />
       <Creds client={newPw ? c : null} password={newPw ?? ""} onClose={() => setNewPw(null)} />
       <Toast text={toast} />
     </div>

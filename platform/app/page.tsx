@@ -3,16 +3,20 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, RotateCcw } from "lucide-react";
-import { useStore, normPhone, COACH_DEMO_PASSWORD } from "@/lib/store";
+import { useStore, normPhone, uid, COACH_DEMO_PASSWORD } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { Field, Segmented } from "@/components/ui";
 import { asset } from "@/lib/asset";
 
 export default function Entry() {
-  const { ready, session, setSession, db, reset } = useStore();
+  const { ready, session, setSession, db, reset, update } = useStore();
   const { t, toggle } = useI18n();
   const router = useRouter();
   const [who, setWho] = useState<"client" | "coach">("client");
+  const [mode, setMode] = useState<"in" | "up">("in");
+  const [name, setName] = useState("");
+  const [goal, setGoal] = useState("");
+  const [pw2, setPw2] = useState("");
   const [phone, setPhone] = useState("");
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
@@ -33,9 +37,21 @@ export default function Entry() {
       setSession({ role: "coach" });
       return router.push("/coach");
     }
+    if (mode === "up") {
+      // Supabase: auth.signUp({ phone, password }) + a trigger inserts a pending clients row
+      if (pw.length < 6) return setErr(t("minChars"));
+      if (pw !== pw2) return setErr(t("pwMismatch"));
+      if (db.clients.some((x) => normPhone(x.phone) === normPhone(phone))) return setErr(t("phoneUsed"));
+      const id = uid("c");
+      update((d) => {
+        d.clients.push({ id, name: name.trim(), phone: phone.trim(), password: pw, goal: goal.trim(), packageName: "", subStart: "", subEnd: "", active: false, pending: true, signedUpAt: new Date().toISOString() });
+      });
+      setSession({ role: "client", clientId: id });
+      return router.push("/app");
+    }
     const c = db.clients.find((x) => normPhone(x.phone) === normPhone(phone) && x.password === pw);
     if (!c) return setErr(t("wrongLogin"));
-    if (!c.active) return setErr(t("accountPaused"));
+    // pending and paused clients get in, but only see the waiting screen (ClientShell)
     setSession({ role: "client", clientId: c.id });
     router.push("/app");
   };
@@ -58,11 +74,17 @@ export default function Entry() {
         <Segmented
           className="mt-6"
           value={who}
-          onChange={(v) => { setWho(v); setErr(""); }}
+          onChange={(v) => { setWho(v); setErr(""); setMode("in"); }}
           options={[{ value: "client", label: t("enterClient") }, { value: "coach", label: t("enterCoach") }]}
         />
 
         <form onSubmit={signIn} className="mt-5 space-y-4">
+          {who === "client" && mode === "up" && (
+            <>
+              <Field label={t("name")}><input className="input" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} required /></Field>
+              <Field label={t("goal")}><input className="input" value={goal} onChange={(e) => setGoal(e.target.value)} /></Field>
+            </>
+          )}
           {who === "client" && (
             <Field label={t("phone")}>
               <input className="input num text-start" type="tel" inputMode="tel" autoComplete="username" placeholder="01xxxxxxxxx" value={phone} onChange={(e) => setPhone(e.target.value)} required />
@@ -70,14 +92,24 @@ export default function Entry() {
           )}
           <Field label={who === "coach" ? t("coachPassword") : t("password")}>
             <div className="relative">
-              <input className="input pe-11 text-start" dir="ltr" type={show ? "text" : "password"} autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} required />
+              <input className="input pe-11 text-start" dir="ltr" type={show ? "text" : "password"} autoComplete={mode === "up" ? "new-password" : "current-password"} value={pw} onChange={(e) => setPw(e.target.value)} required />
               <button type="button" onClick={() => setShow(!show)} aria-label={t("password")} className="absolute end-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center text-muted">
                 {show ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </Field>
+          {who === "client" && mode === "up" && (
+            <Field label={t("confirmPassword")}>
+              <input className="input text-start" dir="ltr" type={show ? "text" : "password"} autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} required />
+            </Field>
+          )}
           {err && <p className="text-center text-sm font-bold text-danger">{err}</p>}
-          <button className="btn-gold min-h-13 w-full text-lg">{t("signIn")}</button>
+          <button className="btn-gold min-h-13 w-full text-lg">{who === "client" && mode === "up" ? t("createAccount") : t("signIn")}</button>
+          {who === "client" && (
+            <button type="button" onClick={() => { setMode(mode === "in" ? "up" : "in"); setErr(""); }} className="w-full py-2 text-center font-bold text-gold">
+              {mode === "in" ? t("noAccount") : t("haveAccount")}
+            </button>
+          )}
         </form>
 
         <details className="mt-6 text-sm text-muted">
