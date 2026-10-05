@@ -58,7 +58,7 @@ export default function Entry() {
       </button>
 
       <div className="relative z-10 mt-[24dvh] px-5 pb-[max(2rem,env(safe-area-inset-bottom))]">
-        <img src={asset("/img/logo.webp")} alt="Coach Junior" width={88} height={88} className="mb-4 rounded-full" />
+        <img src={asset("/img/logo.webp")} alt="Coach Junior" width={128} height={128} className="mb-4" />
         <h1 className="text-3xl font-black leading-tight">{t("entryTitle")}</h1>
         <p className="mt-2 text-text-2">{t("entrySub")}</p>
 

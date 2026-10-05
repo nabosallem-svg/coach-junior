@@ -8,7 +8,7 @@ import { asset } from "@/lib/asset";
 export function Brand({ small }: { small?: boolean }) {
   return (
     <span className="flex items-center gap-2">
-      <img src={asset("/img/logo-120.webp")} alt="" width={small ? 32 : 36} height={small ? 32 : 36} className="rounded-full" />
+      <img src={asset("/img/logo-120.webp")} alt="" width={small ? 32 : 36} height={small ? 32 : 36} />
       <span className="font-big text-lg tracking-[0.08em] text-gold">JUNIOR</span>
     </span>
   );
@@ -18,7 +18,7 @@ export function Brand({ small }: { small?: boolean }) {
 export function Splash() {
   return (
     <div className="grid min-h-dvh place-items-center">
-      <img src={asset("/img/logo-120.webp")} alt="Coach Junior" width={88} height={88} className="animate-pulse rounded-full" />
+      <img src={asset("/img/logo-120.webp")} alt="Coach Junior" width={88} height={88} className="animate-pulse" />
     </div>
   );
 }
