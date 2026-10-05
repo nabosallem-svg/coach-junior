@@ -51,7 +51,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
     const pending = false;
     return (
       <div className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
-        <img src={asset("/img/logo.webp")} alt="" width={96} height={96} className="mb-6 rounded-full" />
+        <img src={asset("/img/logo.webp")} alt="" width={96} height={96} className="mb-6" />
         <h1 className="text-2xl font-black">{pending ? t("pendingTitle") : t("pausedTitle")}</h1>
         <p className="mt-3 text-text-2">{pending ? t("pendingSub") : t("pausedSub")}</p>
         <a className="btn-gold mt-8 w-full" target="_blank" rel="noopener" href={waLink(COACH_WA, `${me.name} - ${me.phone}`)}>{t("msgCoachWa")}</a>
@@ -67,7 +67,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
   if (starter && !path.startsWith("/app/forms/fill")) {
     return (
       <div className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
-        <img src={asset("/img/logo.webp")} alt="" width={96} height={96} className="mb-6 rounded-full" />
+        <img src={asset("/img/logo.webp")} alt="" width={96} height={96} className="mb-6" />
         <h1 className="text-2xl font-black">{t("welcomeName", { name: me.name.split(" ")[0] })}</h1>
         <p className="mt-3 leading-relaxed text-text-2">{t("starterFirst")}</p>
         <Link href={`/app/forms/fill?id=${starter.id}`} className="btn-gold mt-8 w-full">{t("fillStarter")}</Link>

@@ -16,7 +16,7 @@ export function VideoBox({ ex }: { ex: Exercise }) {
   if (!src && !yt) {
     return (
       <div className="relative grid aspect-video place-items-center overflow-hidden rounded-2xl bg-card-hi">
-        <img src={asset("/img/logo-120.webp")} alt="" className="size-16 rounded-full opacity-30" />
+        <img src={asset("/img/logo-120.webp")} alt="" className="size-16 opacity-30" />
         <span className="absolute bottom-3 text-sm text-muted">{t("noVideo")}</span>
       </div>
     );

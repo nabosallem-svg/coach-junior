@@ -59,7 +59,7 @@
   --text-2:#c9cbd2;
   --muted:#8b8e99;
   --ink:var(--bg);
-  --red-rgb:239,68,68;              /* urgency accent, offer bar only */
+  --red-rgb:239,68,68;            
   --red-deep:#5a1414;
   --red-deeper:#3a0d0d;
   --wa:#25d366;
@@ -104,9 +104,8 @@
   --r-pill:999px;
 
   /* components */
-  --offer-h:40px;
   --nav-h:72px;
-  --hdr-h:calc(var(--offer-h) + var(--nav-h));
+  --hdr-h:var(--nav-h);
   --ctl-h:44px;
   --btn-h:52px;
   --icon-circle:56px;
@@ -114,7 +113,7 @@
   color-scheme:dark;
 }
 @media (max-width:600px){
-  :root{--fs-xs:13px;--fs-sm:15px;--fs-base:17px;--offer-h:36px;--nav-h:60px}
+  :root{--fs-xs:13px;--fs-sm:15px;--fs-base:17px;--nav-h:60px}
 }
 
 /* =====================================================================
@@ -166,23 +165,18 @@ button,input,select{font:inherit;color:inherit}
 /* =====================================================================
    5. SECTIONS
    ===================================================================== */
-/* ---- header: offer bar + nav ---- */
+/* ---- header: nav ---- */
 .hdr{position:fixed;top:0;inset-inline:0;z-index:50;padding-top:env(safe-area-inset-top,0px);border-bottom:1px solid transparent;transition:background-color .3s,border-color .3s}
 .hdr.solid{background:rgba(var(--bg-rgb),.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-color:var(--line)}
 .hdr>.wrap{height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;gap:var(--s-2)}
 .brand{display:flex;align-items:center;gap:var(--s-1);min-height:var(--ctl-h);font-family:var(--f-big);font-size:var(--fs-lg);letter-spacing:.06em}
-.brand img{width:40px;height:40px;border-radius:50%}
+.brand img{width:44px;height:44px}
 .nav ul{display:flex;gap:var(--s-0)}
 .nav a{display:block;padding:var(--s-1) var(--s-2);border-radius:var(--r-sm);color:var(--muted);font-weight:700;font-size:var(--fs-sm);transition:color .2s,background-color .2s}
 .hdr-end{display:flex;align-items:center;gap:var(--s-1)}
 .lang,.hdr .btn{height:var(--ctl-h);min-height:0;padding:0 var(--s-2);border-radius:var(--r-sm);font-size:var(--fs-sm)}
 .lang{min-width:var(--ctl-h);background:transparent;border:1px solid var(--line-gold);color:var(--gold);font-weight:700;cursor:pointer;transition:border-color .2s}
 
-.offer{background:linear-gradient(90deg,var(--red-deeper),var(--red-deep) 50%,var(--red-deeper));border-bottom:1px solid rgba(var(--red-rgb),.35);font-size:var(--fs-xs);font-weight:700}
-.offer .wrap{height:var(--offer-h);display:flex;align-items:center;justify-content:center;gap:var(--s-2);white-space:nowrap}
-.offer .clock{display:inline-flex;align-items:center;gap:var(--s-0);direction:ltr}
-.offer .clock b{min-width:30px;padding:0 var(--s-1);background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-xs);font-weight:700;line-height:22px;text-align:center;font-variant-numeric:tabular-nums}
-.offer a{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
 
 /* ---- hero ---- */
 .hero{position:relative;min-height:100vh;min-height:100svh;display:grid;align-items:end;overflow:hidden;isolation:isolate;padding-top:calc(var(--hdr-h) + env(safe-area-inset-top,0px))}
@@ -394,10 +388,7 @@ html.lenis,html.lenis body{height:auto}
   /* header */
   .hdr.solid{background:rgba(var(--bg-rgb),.94);-webkit-backdrop-filter:none;backdrop-filter:none}
   .brand{font-size:var(--fs-md)}
-  .brand img{width:36px;height:36px}
-  .offer a{display:none}
-  .offer .wrap{gap:var(--s-1)}
-  .offer .clock b{min-width:26px;padding:0 var(--s-0)}
+  .brand img{width:40px;height:40px}
   /* hero: centred */
   .hero{min-height:88vh;min-height:88svh}
   .hero .copy{text-align:center}
@@ -439,7 +430,6 @@ html.lenis,html.lenis body{height:auto}
   .hdr .brand-txt{display:none}
 }
 @media (max-width:380px){
-  .offer .cs-wrap{display:none}
 }
 @media (max-width:359px){
   .hero .ctas,.final .ctas{grid-template-columns:1fr}
@@ -473,10 +463,6 @@ html.lenis,html.lenis body{height:auto}
 @media (max-width:600px){.progs{gap:var(--s-2)}.prog-body{padding:var(--s-2) var(--s-3) var(--s-3);text-align:center}.prog h3{font-size:var(--fs-lg)}.pm-food .plate{font-size:48px;width:34%}}
 @media (prefers-reduced-motion:reduce){.pm-chat .typing i{animation:none}}
 
-/* offer: old price struck through + save pill */
-.price .was{flex-basis:100%;color:var(--muted);font-size:var(--fs-md);font-weight:700;text-decoration:line-through;text-decoration-color:rgba(var(--red-rgb),.8);text-decoration-thickness:2px;direction:ltr}
-.plan .off{align-self:flex-start;display:inline-flex;gap:var(--s-0);padding:0 var(--s-1);line-height:24px;background:rgba(var(--red-rgb),.14);border:1px solid rgba(var(--red-rgb),.45);border-radius:var(--r-pill);color:#ff8a8a;font-size:var(--fs-xs);font-weight:800;margin-bottom:calc(-1 * var(--s-2))}
-@media (max-width:600px){.plan .off{align-self:center}}
 
 /* ===== phones: lite motion (CSS only, compositor-friendly) ===== */
 .lite #embers,.lite .stage .grain{display:none}
@@ -515,17 +501,10 @@ html.lenis,html.lenis body{height:auto}
   <symbol id="i-down" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></symbol>
 </svg>
 
-<!-- ============ HEADER: offer bar + nav ============ -->
+<!-- ============ HEADER: nav ============ -->
 <header class="hdr" id="hdr">
-  <div class="offer">
-    <div class="wrap">
-      <span data-i="offer">شهر هدية مع 3 شهور أو أكتر</span>
-      <span class="clock" id="clock" role="timer" aria-live="off" aria-label="ينتهي العرض بعد"><b id="cd">00</b>:<b id="ch">00</b>:<b id="cm">00</b><span class="cs-wrap">:<b id="cs">00</b></span></span>
-      <a href="#plans" data-i="grab">الحق العرض</a>
-    </div>
-  </div>
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="Coach Junior"><img src="img/logo-120.webp" alt="" width="40" height="40" decoding="async"><span class="brand-txt">JUNIOR</span></a>
+    <a class="brand" href="#top" aria-label="Coach Junior"><img src="img/logo-120.webp" alt="" width="44" height="44" decoding="async"><span class="brand-txt">JUNIOR</span></a>
     <nav class="nav" aria-label="main">
       <ul><li><a href="#top" data-i="nHome">الرئيسية</a></li><li><a href="#programs" data-i="nPrograms">البرامج</a></li><li><a href="#about" data-i="nAbout">عن الكابتن</a></li><li><a href="#plans" data-i="nPlans">الاشتراك</a></li><li><a href="#faq" data-i="nFaq">أسئلة</a></li><li><a href="#contact" data-i="nContact">تواصل</a></li></ul>
     </nav>
@@ -670,20 +649,20 @@ html.lenis,html.lenis body{height:auto}
       <div class="plans two">
         <article class="plan rv" data-plan="basic">
           <h3 data-i="p1">البداية</h3>
-          <span class="off"><span data-i="save">وفّر</span> <span class="num">46%</span></span><div class="price"><s class="was num" data-p="1490">1,490</s><b class="num" data-p="800">800</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <div class="price"><b class="num" data-p="800">800</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f1">برنامج تمرين</li><li data-i="f2">نظام أكل</li><li data-i="f3">فيديوهات التمارين</li></ul>
           <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
         </article>
         <article class="plan star rv" data-plan="pro">
           <span class="badge" data-i="popular">الأكثر طلباً</span>
           <h3 data-i="p2">المتابعة</h3>
-          <span class="off"><span data-i="save">وفّر</span> <span class="num">40%</span></span><div class="price"><s class="was num" data-p="2490">2,490</s><b class="num" data-p="1500" data-p12="8000">1,500</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <div class="price"><b class="num" data-p="1500" data-p12="8000">1,500</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f4">كل اللي في البداية</li><li data-i="f5">متابعة أسبوعية</li><li data-i="f6">واتساب مباشر</li><li data-i="f7">تصحيح التكنيك بالفيديو</li></ul>
           <button class="btn btn-gold order mag" type="button" data-i="choose">اطلب</button>
         </article>
         <article class="plan rv" data-plan="comp" hidden>
           <h3 data-i="p3">تجهيز بطولة</h3>
-          <span class="off"><span data-i="save">وفّر</span> <span class="num">41%</span></span><div class="price"><s class="was num" data-p="4200">4,200</s><b class="num" data-p="2490" data-p12="16000">2,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <div class="price"><b class="num" data-p="2490" data-p12="16000">2,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f8">كل اللي في المتابعة</li><li data-i="f9">Peak Week</li><li data-i="f10">تدريب بوزينج</li><li data-i="f11">متابعة يومية</li></ul>
           <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
         </article>
@@ -741,7 +720,7 @@ html.lenis,html.lenis body{height:auto}
 <footer>
   <div class="wrap">
     <div class="fg">
-      <div><a class="brand" href="#top" aria-label="Coach Junior"><img src="img/logo-120.webp" alt="" width="40" height="40" loading="lazy" decoding="async"><span class="brand-txt">JUNIOR</span></a></div>
+      <div><a class="brand" href="#top" aria-label="Coach Junior"><img src="img/logo-120.webp" alt="" width="44" height="44" loading="lazy" decoding="async"><span class="brand-txt">JUNIOR</span></a></div>
       <div><h4 data-i="fLinks">روابط</h4><ul><li><a href="#programs" data-i="nPrograms">البرامج</a></li><li><a href="#plans" data-i="nPlans">الاشتراك</a></li><li><a href="#faq" data-i="nFaq">أسئلة</a></li></ul></div>
       <div><h4 data-i="nContact">تواصل</h4><ul><li><a class="wa" href="https://wa.me/201014007764" target="_blank" rel="noopener" dir="ltr">WhatsApp: +20 10 1400 7764</a></li></ul></div>
     </div>
@@ -778,7 +757,7 @@ html.lenis,html.lenis body{height:auto}
      ------------------------------------------------------------------ */
   var T = {
     ar: {
-      offer:'شهر هدية مع 3 شهور أو أكتر', grab:'الحق العرض', clockL:'ينتهي العرض بعد', subscribe:'اشترك الآن',
+      subscribe:'اشترك الآن',
       nHome:'الرئيسية', nPrograms:'البرامج', nAbout:'عن الكابتن', nPlans:'الاشتراك', nFaq:'أسئلة', nContact:'تواصل',
       heroLine:'ابدأ رحلة التحول مع لاعب بطولات', whatsapp:'واتساب', 
       stageT:'على <span class="g">المسرح</span>', stageAlt:'كابتن جونيور على المسرح',
@@ -796,10 +775,10 @@ html.lenis,html.lenis body{height:auto}
       faqT:'أسئلة <span class="g">شائعة</span>', q4:'محتاج أكون رياضي قبل كده؟', a4:'لأ، البرنامج بيبدأ من مستواك، سواء أول مرة تتمرن أو بقالك سنين.', q5:'إمتى هبدأ أشوف نتيجة؟', a5:'مع الالتزام، الفرق بيبان عادة في أول 4 لـ 6 أسابيع.', q1:'التدريب الأونلاين مناسب ليا؟', a1:'أيوه، الخطة بتتعمل على مستواك ووقتك، والمتابعة على واتساب.', q2:'لو حصلت مشكلة في الدفع؟', a2:'ابعتلنا على واتساب ونحلها معاك فوراً.', q3:'ينفع أتمرن في البيت؟', a3:'أيوه، البرنامج بيتعمل على الأدوات اللي عندك، جيم أو بيت.',
       finalTitle:'جاهز<span class="g">؟</span>', order:'اطلب دلوقتي', orCall:'أو كلمنا:', fLinks:'روابط', disc:'استشير دكتور قبل أي مجهود عنيف لو عندك مشكلة صحية.',
       sheetTitle:'اطلب باقتك', name:'الاسم', phone:'رقم الموبايل', goal:'الهدف', g1:'تضخيم', g2:'تنشيف', g3:'تجهيز بطولة', err:'اكتب اسمك ورقمك.', send:'كمّل الطلب على واتساب',
-      waHello:'أهلاً كابتن جونيور، عايز أعرف تفاصيل الاشتراك', waOrder:'طلب اشتراك جديد', save:'وفّر', lPhone:'الموبايل', lPlan:'الباقة', lang:'EN'
+      waHello:'أهلاً كابتن جونيور، عايز أعرف تفاصيل الاشتراك', waOrder:'طلب اشتراك جديد', lPhone:'الموبايل', lPlan:'الباقة', lang:'EN'
     },
     en: {
-      offer:'1 free month on 3+ months', grab:'Get the offer', clockL:'Offer ends in', subscribe:'Subscribe now',
+      subscribe:'Subscribe now',
       nHome:'Home', nPrograms:'Programs', nAbout:'About', nPlans:'Plans', nFaq:'FAQ', nContact:'Contact',
       heroLine:'Start your transformation with a stage competitor', whatsapp:'WhatsApp', 
       stageT:'On <span class="g">stage</span>', stageAlt:'Coach Junior on stage',
@@ -817,7 +796,7 @@ html.lenis,html.lenis body{height:auto}
       faqT:'<span class="g">FAQ</span>', q4:'Do I need to be athletic already?', a4:'No. The plan starts from your level, whether it is your first workout or you have trained for years.', q5:'When will I see results?', a5:'With commitment, changes usually show in the first 4 to 6 weeks.', q1:'Is online coaching right for me?', a1:'Yes. Your plan fits your level and schedule, with WhatsApp follow-up.', q2:'Problem with payment?', a2:'Message us on WhatsApp and we sort it out right away.', q3:'Can I train at home?', a3:'Yes. The program is built around the equipment you have, gym or home.',
       finalTitle:'Ready<span class="g">?</span>', order:'Order now', orCall:'Or call:', fLinks:'Links', disc:'Consult a doctor before intense training if you have a health condition.',
       sheetTitle:'Order your plan', name:'Name', phone:'Phone', goal:'Goal', g1:'Build muscle', g2:'Lose fat', g3:'Contest prep', err:'Enter your name and phone.', send:'Continue on WhatsApp',
-      waHello:'Hi Coach Junior, I want to know more about coaching', waOrder:'New order', save:'Save', lPhone:'Phone', lPlan:'Plan', lang:'عربي'
+      waHello:'Hi Coach Junior, I want to know more about coaching', waOrder:'New order', lPhone:'Phone', lPlan:'Plan', lang:'عربي'
     }
   };
 
@@ -842,25 +821,12 @@ html.lenis,html.lenis body{height:auto}
     $$('[data-ia]').forEach(function(el){ var v = t[el.dataset.ia]; if (v != null) el.alt = v; });
     setPer();
     $$('.wa').forEach(function(a){ a.href = wa(t.waHello); });
-    var clock = $('#clock'); if (clock) clock.setAttribute('aria-label', t.clockL);
     if (langBtn) langBtn.textContent = t.lang;
     try { localStorage.setItem('lang', lang); } catch(e){}
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
   if (langBtn) langBtn.addEventListener('click', function(){ lang = lang === 'ar' ? 'en' : 'ar'; apply(); });
   apply();
-
-  // countdown to the end of this month
-  (function(){
-    var els = ['cd', 'ch', 'cm', 'cs'].map(function(id){ return document.getElementById(id); });
-    if (!els.every(Boolean)) return;
-    var now = new Date(), end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    function tick(){
-      var d = Math.max(0, end - new Date()), v = [Math.floor(d / 864e5), Math.floor(d / 36e5) % 24, Math.floor(d / 6e4) % 60, Math.floor(d / 1e3) % 60];
-      els.forEach(function(el, i){ el.textContent = String(v[i]).padStart(2, '0'); });
-    }
-    tick(); setInterval(tick, 1000);
-  })();
 
   // header background + floating WhatsApp (shown once the hero is mostly scrolled past)
   function onScroll(){
@@ -893,9 +859,8 @@ html.lenis,html.lenis body{height:auto}
       $$('.toggle button').forEach(function(x){ x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
       $('.plans').classList.toggle('two', dur === '12' || dur === '1');
       $$('.plan').forEach(function(pl){
-        var b = $('.price b', pl), w = $('.price .was', pl), to = price(b), was = +w.dataset.p * +dur;
         pl.hidden = (dur === '12' && pl.dataset.plan === 'basic') || (dur === '1' && pl.dataset.plan === 'comp');
-        w.textContent = money(was); $('.off .num', pl).textContent = Math.round((1 - to / was) * 100) + '%';
+        if (!pl.hidden) { pl.classList.add('in'); if (window.gsap) { gsap.killTweensOf(pl); gsap.set(pl, { clearProps: 'opacity,transform' }); } }   // a card hidden at load never got its reveal
       });
       $$('.price b').forEach(function(el){
         var to = price(el), from = +el.textContent.replace(/,/g, '');
