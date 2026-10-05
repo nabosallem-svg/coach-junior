@@ -307,7 +307,7 @@ footer .bot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--
 
 /* ---- order sheet ---- */
 .sheet{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:var(--gutter);background:var(--scrim);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.sheet[hidden]{display:none}
+.sheet[hidden],.plan[hidden]{display:none}
 .sheet form{width:min(440px,100%);max-height:100%;overflow:auto;display:grid;gap:var(--s-2);padding:var(--s-4);background:var(--card);border:1px solid var(--line-gold);border-radius:var(--r-lg);box-shadow:var(--shadow-lg)}
 .sheet .top{display:flex;justify-content:space-between;align-items:center;gap:var(--s-2)}
 .sheet h3{font-size:var(--fs-h3);font-weight:900}
@@ -375,6 +375,7 @@ html.lenis,html.lenis body{height:auto}
   [dir="ltr"] .hero-img::after{background:linear-gradient(to right,var(--bg) 0%,rgba(var(--bg-rgb),.5) 22%,transparent 50%)}
   .hero .copy{max-width:52%}
   .plans{grid-auto-rows:1fr}   /* equal card heights only when side by side */
+  .plans.two{grid-template-columns:repeat(2,1fr);max-width:820px;margin-inline:auto}
 }
 @media (max-width:1024px){
   .nav{display:none}
@@ -385,6 +386,7 @@ html.lenis,html.lenis body{height:auto}
   .about{grid-template-columns:1fr}
   .about .pic{width:100%;max-width:420px;margin-inline:auto}
   .plans{grid-template-columns:1fr;max-width:460px;margin-inline:auto}
+  .plans.two{grid-template-columns:1fr}
   .plan.star{order:-1}
   .steps{grid-template-columns:1fr 1fr;row-gap:var(--s-4)}
 }
@@ -668,20 +670,20 @@ html.lenis,html.lenis body{height:auto}
       <div class="plans">
         <article class="plan rv" data-plan="basic">
           <h3 data-i="p1">البداية</h3>
-          <span class="off"><span data-i="save">وفّر</span> <span class="num">34%</span></span><div class="price"><s class="was num" data-p="1490">1,490</s><b class="num" data-p="990">990</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <span class="off"><span data-i="save">وفّر</span> <span class="num">46%</span></span><div class="price"><s class="was num" data-p="1490">1,490</s><b class="num" data-p="800">800</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f1">برنامج تمرين</li><li data-i="f2">نظام أكل</li><li data-i="f3">فيديوهات التمارين</li></ul>
           <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
         </article>
         <article class="plan star rv" data-plan="pro">
           <span class="badge" data-i="popular">الأكثر طلباً</span>
           <h3 data-i="p2">المتابعة</h3>
-          <span class="off"><span data-i="save">وفّر</span> <span class="num">40%</span></span><div class="price"><s class="was num" data-p="2490">2,490</s><b class="num" data-p="1490">1,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <span class="off"><span data-i="save">وفّر</span> <span class="num">40%</span></span><div class="price"><s class="was num" data-p="2490">2,490</s><b class="num" data-p="1500" data-p12="8000">1,500</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f4">كل اللي في البداية</li><li data-i="f5">متابعة أسبوعية</li><li data-i="f6">واتساب مباشر</li><li data-i="f7">تصحيح التكنيك بالفيديو</li></ul>
           <button class="btn btn-gold order mag" type="button" data-i="choose">اطلب</button>
         </article>
         <article class="plan rv" data-plan="comp">
           <h3 data-i="p3">تجهيز بطولة</h3>
-          <span class="off"><span data-i="save">وفّر</span> <span class="num">41%</span></span><div class="price"><s class="was num" data-p="4200">4,200</s><b class="num" data-p="2490">2,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <span class="off"><span data-i="save">وفّر</span> <span class="num">41%</span></span><div class="price"><s class="was num" data-p="4200">4,200</s><b class="num" data-p="2490" data-p12="16000">2,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f8">كل اللي في المتابعة</li><li data-i="f9">Peak Week</li><li data-i="f10">تدريب بوزينج</li><li data-i="f11">متابعة يومية</li></ul>
           <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
         </article>
@@ -830,6 +832,7 @@ html.lenis,html.lenis body{height:auto}
   var hdr = $('#hdr'), langBtn = $('#lang'), fab = $('.fab');
   function wa(msg){ return 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg); }
   function money(n){ return n.toLocaleString('en-US'); }
+  function price(el){ return +(el.dataset['p' + dur] || el.dataset.p * dur); }
   function setPer(){ $$('.per').forEach(function(el){ el.textContent = T[lang]['per' + dur]; }); }
 
   function apply(){
@@ -888,13 +891,18 @@ html.lenis,html.lenis body{height:auto}
     b.addEventListener('click', function(){
       dur = b.dataset.d;
       $$('.toggle button').forEach(function(x){ x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+      $('.plans').classList.toggle('two', dur === '12');
+      $$('.plan').forEach(function(pl){
+        var b = $('.price b', pl), w = $('.price .was', pl), to = price(b), was = +w.dataset.p * +dur;
+        pl.hidden = dur === '12' && pl.dataset.plan === 'basic';
+        w.textContent = money(was); $('.off .num', pl).textContent = Math.round((1 - to / was) * 100) + '%';
+      });
       $$('.price b').forEach(function(el){
-        var to = +el.dataset.p * +dur, from = +el.textContent.replace(/,/g, '');
+        var to = price(el), from = +el.textContent.replace(/,/g, '');
         if (el._tw) el._tw.kill();
         if (window.gsap && !REDUCE) { var o = { v: from }; el._tw = gsap.to(o, { v: to, duration: .6, ease: 'power2.out', onUpdate: function(){ el.textContent = money(Math.round(o.v)); } }); }
         else el.textContent = money(to);
       });
-      $$('.price .was').forEach(function(el){ el.textContent = money(+el.dataset.p * +dur); });
       setPer();
     });
   });
@@ -912,7 +920,7 @@ html.lenis,html.lenis body{height:auto}
       b.addEventListener('click', function(){
         var plan = b.closest('.plan'); opener = b;
         $('#pickedName').textContent = $('h3', plan).textContent;
-        $('#pickedPrice').textContent = money(+$('.price b', plan).dataset.p * +dur) + ' ' + T[lang].egp + ' ' + T[lang]['per' + dur];
+        $('#pickedPrice').textContent = money(price($('.price b', plan))) + ' ' + T[lang].egp + ' ' + T[lang]['per' + dur];
         err.hidden = true; sheet.hidden = false; root.style.overflow = 'hidden';
         if (lenis) lenis.stop();
         if (window.gsap && !REDUCE) gsap.fromTo(form, { y: 40, opacity: 0, scale: .96 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(1.6)' });
