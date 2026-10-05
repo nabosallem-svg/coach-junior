@@ -667,7 +667,7 @@ html.lenis,html.lenis body{height:auto}
           <button type="button" aria-pressed="false" data-d="12"><span data-i="d12"><span dir="ltr">12+1</span> شهر</span></button>
         </div>
       </div>
-      <div class="plans">
+      <div class="plans two">
         <article class="plan rv" data-plan="basic">
           <h3 data-i="p1">البداية</h3>
           <span class="off"><span data-i="save">وفّر</span> <span class="num">46%</span></span><div class="price"><s class="was num" data-p="1490">1,490</s><b class="num" data-p="800">800</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
@@ -681,7 +681,7 @@ html.lenis,html.lenis body{height:auto}
           <ul><li data-i="f4">كل اللي في البداية</li><li data-i="f5">متابعة أسبوعية</li><li data-i="f6">واتساب مباشر</li><li data-i="f7">تصحيح التكنيك بالفيديو</li></ul>
           <button class="btn btn-gold order mag" type="button" data-i="choose">اطلب</button>
         </article>
-        <article class="plan rv" data-plan="comp">
+        <article class="plan rv" data-plan="comp" hidden>
           <h3 data-i="p3">تجهيز بطولة</h3>
           <span class="off"><span data-i="save">وفّر</span> <span class="num">41%</span></span><div class="price"><s class="was num" data-p="4200">4,200</s><b class="num" data-p="2490" data-p12="16000">2,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f8">كل اللي في المتابعة</li><li data-i="f9">Peak Week</li><li data-i="f10">تدريب بوزينج</li><li data-i="f11">متابعة يومية</li></ul>
@@ -891,10 +891,10 @@ html.lenis,html.lenis body{height:auto}
     b.addEventListener('click', function(){
       dur = b.dataset.d;
       $$('.toggle button').forEach(function(x){ x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
-      $('.plans').classList.toggle('two', dur === '12');
+      $('.plans').classList.toggle('two', dur === '12' || dur === '1');
       $$('.plan').forEach(function(pl){
         var b = $('.price b', pl), w = $('.price .was', pl), to = price(b), was = +w.dataset.p * +dur;
-        pl.hidden = dur === '12' && pl.dataset.plan === 'basic';
+        pl.hidden = (dur === '12' && pl.dataset.plan === 'basic') || (dur === '1' && pl.dataset.plan === 'comp');
         w.textContent = money(was); $('.off .num', pl).textContent = Math.round((1 - to / was) * 100) + '%';
       });
       $$('.price b').forEach(function(el){
