@@ -242,8 +242,6 @@ button,input,select{font:inherit;color:inherit}
 .toggle button{display:inline-flex;align-items:center;justify-content:center;gap:var(--s-1);min-height:var(--ctl-h);padding:0 var(--s-3);background:none;border:0;border-radius:var(--r-sm);color:var(--muted);font-weight:700;font-size:var(--fs-sm);cursor:pointer;transition:background-color .2s,color .2s}
 .toggle button>span{white-space:nowrap}
 .toggle button.on{background:var(--gold);color:var(--ink)}
-.toggle .save{padding:0 var(--s-1);line-height:20px;background:var(--gold-soft);border:1px solid var(--line-gold);border-radius:var(--r-pill);color:var(--gold);font-size:var(--fs-xs)}
-.toggle button.on .save{background:var(--ink);border-color:transparent}
 .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3);align-items:stretch}   /* side-by-side cards share one row height; stacked cards size to content */
 .plan{position:relative;min-width:0;display:flex;flex-direction:column;gap:var(--s-3);padding:var(--s-4);background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);transition:border-color .35s,box-shadow .35s}
 .plan.star{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-soft),transparent 45%) var(--card);box-shadow:inset 0 0 0 1px var(--gold),0 24px 64px -24px var(--gold-glow)}
@@ -641,7 +639,7 @@ html.lenis,html.lenis body{height:auto}
       <div class="toggle">
         <div role="group" aria-label="Duration">
           <button type="button" class="on" aria-pressed="true" data-d="1" data-i="d1">شهر</button>
-          <button type="button" aria-pressed="false" data-d="3"><span data-i="d3"><span dir="ltr">3+1</span> شهور</span> <span class="save" data-i="free">شهر هدية</span></button>
+          <button type="button" aria-pressed="false" data-d="3"><span data-i="d3"><span dir="ltr">3+1</span> شهور</span></button>
           <button type="button" aria-pressed="false" data-d="6"><span data-i="d6"><span dir="ltr">6+1</span> شهور</span></button>
           <button type="button" aria-pressed="false" data-d="12"><span data-i="d12"><span dir="ltr">12+1</span> شهر</span></button>
         </div>
@@ -766,7 +764,7 @@ html.lenis,html.lenis body{height:auto}
       ft1:'نظام تمرين مخصص', ft2:'نظام أكل مرن', ft3:'متابعة واتساب يومية', ft4:'فيديو لكل تمرين',
       aboutK:'عن الكابتن', aboutT:'كابتن <span class="nw">عبد الملك</span> <span class="g">«جونيور»</span>', aboutP:'مدرب متخصص في المجال ولاعب كمال أجسام، معاه كورسات وشهادات وخبرة معتمدة.',
       b1:'مدرب متخصص', b2:'لاعب كمال أجسام', b3:'شهادات معتمدة',
-      plansTitle:'اختار <span class="g">باقتك</span>', d1:'شهر', d3:'<span dir="ltr">3+1</span> شهور', d6:'<span dir="ltr">6+1</span> شهور', d12:'<span dir="ltr">12+1</span> شهر', free:'شهر هدية',
+      plansTitle:'اختار <span class="g">باقتك</span>', d1:'شهر', d3:'<span dir="ltr">3+1</span> شهور', d6:'<span dir="ltr">6+1</span> شهور', d12:'<span dir="ltr">12+1</span> شهر',
       per1:'/ شهر', per3:'/ 4 شهور', per6:'/ 7 شهور', per12:'/ 13 شهر', egp:'ج.م', popular:'الأكثر طلباً', choose:'اطلب',
       p1:'البداية', p2:'المتابعة', p3:'تجهيز بطولة',
       f1:'برنامج تمرين', f2:'نظام أكل', f3:'فيديوهات التمارين', f4:'كل اللي في البداية', f5:'متابعة أسبوعية', f6:'واتساب مباشر', f7:'تصحيح التكنيك بالفيديو', f8:'كل اللي في المتابعة', f9:'Peak Week', f10:'تدريب بوزينج', f11:'متابعة يومية',
@@ -787,7 +785,7 @@ html.lenis,html.lenis body{height:auto}
       ft1:'Custom training', ft2:'Flexible nutrition', ft3:'Daily check-ins on WhatsApp', ft4:'Video for every exercise',
       aboutK:'About the coach', aboutT:'Coach Abdelmalek <span class="g">"Junior"</span>', aboutP:'A specialist coach and bodybuilder, with certified courses, credentials and experience.',
       b1:'Specialist coach', b2:'Bodybuilder', b3:'Certified',
-      plansTitle:'Pick your <span class="g">plan</span>', d1:'1 month', d3:'3+1 months', d6:'6+1 months', d12:'12+1 months', free:'1 free month',
+      plansTitle:'Pick your <span class="g">plan</span>', d1:'1 month', d3:'3+1 months', d6:'6+1 months', d12:'12+1 months',
       per1:'/ month', per3:'/ 4 months', per6:'/ 7 months', per12:'/ 13 months', egp:'EGP', popular:'Most popular', choose:'Order',
       p1:'Starter', p2:'Follow-up', p3:'Contest prep',
       f1:'Training program', f2:'Nutrition plan', f3:'Exercise videos', f4:'Everything in Starter', f5:'Weekly check-ins', f6:'Direct WhatsApp', f7:'Video form review', f8:'Everything in Follow-up', f9:'Peak week', f10:'Posing coaching', f11:'Daily check-ins',
