@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Search, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useStore, uid, genPassword, normPhone, normPw } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { daysLeft } from "@/lib/calc";
+import { daysLeft, addMonths } from "@/lib/calc";
 import { Avatar, Field, Sheet } from "@/components/ui";
 import { Creds } from "@/components/Creds";
 import { createAccount, accountError } from "@/lib/accounts";
@@ -93,8 +93,7 @@ function Clients() {
             setErr("");
             const months = PACKAGES.find((p) => p.label === form.pkg)!.months;
             const start = new Date();
-            const end = new Date(start);
-            end.setMonth(end.getMonth() + months);
+            const end = addMonths(start, months);
             const pw = normPw(form.pw);
             let id: string;
             try { id = await createAccount(form.phone.trim(), pw); } catch (e) { return setErr(accountError(e, t)); }
