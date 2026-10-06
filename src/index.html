@@ -237,11 +237,6 @@ button,input,select{font:inherit;color:inherit}
 .badges .ic{color:var(--gold);font-size:20px}
 
 /* ---- plans ---- */
-.toggle{display:flex;justify-content:center;margin:0 auto var(--s-4)}
-.toggle>div{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:var(--s-0);padding:var(--s-0);background:var(--card);border:1px solid var(--line);border-radius:calc(var(--r-sm) + var(--s-0))}
-.toggle button{display:inline-flex;align-items:center;justify-content:center;gap:var(--s-1);min-height:var(--ctl-h);padding:0 var(--s-3);background:none;border:0;border-radius:var(--r-sm);color:var(--muted);font-weight:700;font-size:var(--fs-sm);cursor:pointer;transition:background-color .2s,color .2s}
-.toggle button>span{white-space:nowrap}
-.toggle button.on{background:var(--gold);color:var(--ink)}
 .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3);align-items:stretch}   /* side-by-side cards share one row height; stacked cards size to content */
 .plan{position:relative;min-width:0;display:flex;flex-direction:column;gap:var(--s-3);padding:var(--s-4);background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);transition:border-color .35s,box-shadow .35s}
 .plan.star{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-soft),transparent 45%) var(--card);box-shadow:inset 0 0 0 1px var(--gold),0 24px 64px -24px var(--gold-glow)}
@@ -410,8 +405,6 @@ html.lenis,html.lenis body{height:auto}
   .about>div:last-child{text-align:center}
   .about p{margin-inline:auto}
   .badges{justify-content:center}
-  .toggle>div{display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:420px}
-  .toggle button{flex-wrap:wrap;row-gap:2px;min-height:48px;padding:var(--s-0) var(--s-1)}
   .plan{padding:var(--s-3);text-align:center}
   .price{justify-content:center}
   .plan ul{align-self:center}
@@ -636,31 +629,17 @@ html.lenis,html.lenis body{height:auto}
   <section class="sec" id="plans">
     <div class="wrap">
       <div class="sec-head"><h2 class="title" data-i="plansTitle">اختار <span class="g">باقتك</span></h2></div>
-      <div class="toggle">
-        <div role="group" aria-label="Duration">
-          <button type="button" class="on" aria-pressed="true" data-d="1" data-i="d1">شهر</button>
-          <button type="button" aria-pressed="false" data-d="3"><span data-i="d3"><span dir="ltr">3+1</span> شهور</span></button>
-          <button type="button" aria-pressed="false" data-d="6"><span data-i="d6"><span dir="ltr">6+1</span> شهور</span></button>
-          <button type="button" aria-pressed="false" data-d="12"><span data-i="d12"><span dir="ltr">12+1</span> شهر</span></button>
-        </div>
-      </div>
       <div class="plans two">
-        <article class="plan rv" data-plan="basic">
-          <h3 data-i="p1">البداية</h3>
-          <div class="price"><b class="num" data-p="800">800</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
-          <ul><li data-i="f1">برنامج تمرين</li><li data-i="f2">نظام أكل</li><li data-i="f3">فيديوهات التمارين</li></ul>
-          <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
-        </article>
         <article class="plan star rv" data-plan="pro">
           <span class="badge" data-i="popular">الأكثر طلباً</span>
           <h3 data-i="p2">المتابعة</h3>
-          <div class="price"><b class="num" data-p="1500" data-p12="8000">1,500</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
-          <ul><li data-i="f4">كل اللي في البداية</li><li data-i="f5">متابعة أسبوعية</li><li data-i="f6">واتساب مباشر</li><li data-i="f7">تصحيح التكنيك بالفيديو</li></ul>
+          <div class="price"><b class="num" data-p="2000">2,000</b><span data-i="egp">ج.م</span><small class="per">/ 3 شهور</small></div>
+          <ul><li data-i="f4">برنامج تمرين ونظام أكل</li><li data-i="f5">متابعة أسبوعية</li><li data-i="f6">واتساب مباشر</li><li data-i="f7">تصحيح التكنيك بالفيديو</li></ul>
           <button class="btn btn-gold order mag" type="button" data-i="choose">اطلب</button>
         </article>
-        <article class="plan rv" data-plan="comp" hidden>
+        <article class="plan rv" data-plan="comp">
           <h3 data-i="p3">تجهيز بطولة</h3>
-          <div class="price"><b class="num" data-p="2490" data-p12="16000">2,490</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <div class="price"><b class="num" data-p="4000">4,000</b><span data-i="egp">ج.م</span><small class="per">/ 3 شهور</small></div>
           <ul><li data-i="f8">كل اللي في المتابعة</li><li data-i="f9">Peak Week</li><li data-i="f10">تدريب بوزينج</li><li data-i="f11">متابعة يومية</li></ul>
           <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
         </article>
@@ -764,10 +743,10 @@ html.lenis,html.lenis body{height:auto}
       ft1:'نظام تمرين مخصص', ft2:'نظام أكل مرن', ft3:'متابعة واتساب يومية', ft4:'فيديو لكل تمرين',
       aboutK:'عن الكابتن', aboutT:'كابتن <span class="nw">عبد الملك</span> <span class="g">«جونيور»</span>', aboutP:'مدرب متخصص في المجال ولاعب كمال أجسام، معاه كورسات وشهادات وخبرة معتمدة.',
       b1:'مدرب متخصص', b2:'لاعب كمال أجسام', b3:'شهادات معتمدة',
-      plansTitle:'اختار <span class="g">باقتك</span>', d1:'شهر', d3:'<span dir="ltr">3+1</span> شهور', d6:'<span dir="ltr">6+1</span> شهور', d12:'<span dir="ltr">12+1</span> شهر',
-      per1:'/ شهر', per3:'/ 4 شهور', per6:'/ 7 شهور', per12:'/ 13 شهر', egp:'ج.م', popular:'الأكثر طلباً', choose:'اطلب',
-      p1:'البداية', p2:'المتابعة', p3:'تجهيز بطولة',
-      f1:'برنامج تمرين', f2:'نظام أكل', f3:'فيديوهات التمارين', f4:'كل اللي في البداية', f5:'متابعة أسبوعية', f6:'واتساب مباشر', f7:'تصحيح التكنيك بالفيديو', f8:'كل اللي في المتابعة', f9:'Peak Week', f10:'تدريب بوزينج', f11:'متابعة يومية',
+      plansTitle:'اختار <span class="g">باقتك</span>',
+      per:'/ 3 شهور', egp:'ج.م', popular:'الأكثر طلباً', choose:'اطلب',
+      p2:'المتابعة', p3:'تجهيز بطولة',
+      f4:'برنامج تمرين ونظام أكل', f5:'متابعة أسبوعية', f6:'واتساب مباشر', f7:'تصحيح التكنيك بالفيديو', f8:'كل اللي في المتابعة', f9:'Peak Week', f10:'تدريب بوزينج', f11:'متابعة يومية',
       howK:'رحلتك معانا', howTitle:'<span class="g">4</span> خطوات وتبدأ', st1:'اشترك', st2:'التقييم', st3:'تحديد مستواك', st4:'استلم نظامك',
       sp1:'اختار الباقة وادفع', sp2:'استبيان وصور البداية', sp3:'الكابتن يحدد مستواك وهدفك', sp4:'تمرين وأكل خلال أسبوع',
       faqT:'أسئلة <span class="g">شائعة</span>', q4:'محتاج أكون رياضي قبل كده؟', a4:'لأ، البرنامج بيبدأ من مستواك، سواء أول مرة تتمرن أو بقالك سنين.', q5:'إمتى هبدأ أشوف نتيجة؟', a5:'مع الالتزام، الفرق بيبان عادة في أول 4 لـ 6 أسابيع.', q1:'التدريب الأونلاين مناسب ليا؟', a1:'أيوه، الخطة بتتعمل على مستواك ووقتك، والمتابعة على واتساب.', q2:'لو حصلت مشكلة في الدفع؟', a2:'ابعتلنا على واتساب ونحلها معاك فوراً.', q3:'ينفع أتمرن في البيت؟', a3:'أيوه، البرنامج بيتعمل على الأدوات اللي عندك، جيم أو بيت.',
@@ -785,10 +764,10 @@ html.lenis,html.lenis body{height:auto}
       ft1:'Custom training', ft2:'Flexible nutrition', ft3:'Daily check-ins on WhatsApp', ft4:'Video for every exercise',
       aboutK:'About the coach', aboutT:'Coach Abdelmalek <span class="g">"Junior"</span>', aboutP:'A specialist coach and bodybuilder, with certified courses, credentials and experience.',
       b1:'Specialist coach', b2:'Bodybuilder', b3:'Certified',
-      plansTitle:'Pick your <span class="g">plan</span>', d1:'1 month', d3:'3+1 months', d6:'6+1 months', d12:'12+1 months',
-      per1:'/ month', per3:'/ 4 months', per6:'/ 7 months', per12:'/ 13 months', egp:'EGP', popular:'Most popular', choose:'Order',
-      p1:'Starter', p2:'Follow-up', p3:'Contest prep',
-      f1:'Training program', f2:'Nutrition plan', f3:'Exercise videos', f4:'Everything in Starter', f5:'Weekly check-ins', f6:'Direct WhatsApp', f7:'Video form review', f8:'Everything in Follow-up', f9:'Peak week', f10:'Posing coaching', f11:'Daily check-ins',
+      plansTitle:'Pick your <span class="g">plan</span>',
+      per:'/ 3 months', egp:'EGP', popular:'Most popular', choose:'Order',
+      p2:'Follow-up', p3:'Contest prep',
+      f4:'Training & nutrition plan', f5:'Weekly check-ins', f6:'Direct WhatsApp', f7:'Video form review', f8:'Everything in Follow-up', f9:'Peak week', f10:'Posing coaching', f11:'Daily check-ins',
       howK:'Your journey', howTitle:'4 <span class="g">steps</span>', st1:'Subscribe', st2:'Assessment', st3:'Your level', st4:'Get your system',
       sp1:'Pick a plan and pay', sp2:'Questionnaire and photos', sp3:'The coach sets your level and goal', sp4:'Training and diet within a week',
       faqT:'<span class="g">FAQ</span>', q4:'Do I need to be athletic already?', a4:'No. The plan starts from your level, whether it is your first workout or you have trained for years.', q5:'When will I see results?', a5:'With commitment, changes usually show in the first 4 to 6 weeks.', q1:'Is online coaching right for me?', a1:'Yes. Your plan fits your level and schedule, with WhatsApp follow-up.', q2:'Problem with payment?', a2:'Message us on WhatsApp and we sort it out right away.', q3:'Can I train at home?', a3:'Yes. The program is built around the equipment you have, gym or home.',
@@ -804,13 +783,11 @@ html.lenis,html.lenis body{height:auto}
      ------------------------------------------------------------------ */
   var lang = 'ar';
   try { if (localStorage.getItem('lang') === 'en') lang = 'en'; } catch(e){}
-  var dur = '1';
   var lenis = null;             // set by the motion block (desktop only)
   var hdr = $('#hdr'), langBtn = $('#lang'), fab = $('.fab');
   function wa(msg){ return 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg); }
   function money(n){ return n.toLocaleString('en-US'); }
-  function price(el){ return +(el.dataset['p' + dur] || el.dataset.p * dur); }
-  function setPer(){ $$('.per').forEach(function(el){ el.textContent = T[lang]['per' + dur]; }); }
+  function setPer(){ $$('.per').forEach(function(el){ el.textContent = T[lang].per; }); }
 
   function apply(){
     var t = T[lang];
@@ -841,7 +818,7 @@ html.lenis,html.lenis body{height:auto}
 
   // phones: CSS reveals triggered by IntersectionObserver (compositor-only opacity/transform)
   if (root.classList.contains('lite')) {
-    var groups = [['.sec-head .kicker, .title:not(.hero *)'], ['#stageRow .scard'], ['.prog'], ['.value'], ['.feat'], ['.about .pic, .about p, .badges'], ['.toggle, .plan'], ['.step'], ['#faq details'], ['.final .ctas, .final p']];
+    var groups = [['.sec-head .kicker, .title:not(.hero *)'], ['#stageRow .scard'], ['.prog'], ['.value'], ['.feat'], ['.about .pic, .about p, .badges'], ['.plan'], ['.step'], ['#faq details'], ['.final .ctas, .final p']];
     var revs = [];
     groups.forEach(function(g){ $$(g[0]).forEach(function(el, k){ if (el.closest('.hero')) return; el.classList.add('lr'); el.style.setProperty('--i', k % 4); revs.push(el); }); });
     if ('IntersectionObserver' in window) {
@@ -849,26 +826,6 @@ html.lenis,html.lenis body{height:auto}
       revs.forEach(function(el){ rio.observe(el); });
     } else revs.forEach(function(el){ el.classList.add('in'); });
   }
-
-  // duration toggle: price = monthly x paid months
-  $$('.toggle button').forEach(function(b){
-    b.addEventListener('click', function(){
-      dur = b.dataset.d;
-      $$('.toggle button').forEach(function(x){ x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
-      $('.plans').classList.toggle('two', dur === '12' || dur === '1');
-      $$('.plan').forEach(function(pl){
-        pl.hidden = (dur === '12' && pl.dataset.plan === 'basic') || (dur === '1' && pl.dataset.plan === 'comp');
-        if (!pl.hidden) { pl.classList.add('in'); if (window.gsap) { gsap.killTweensOf(pl); gsap.set(pl, { clearProps: 'opacity,transform' }); } }   // a card hidden at load never got its reveal
-      });
-      $$('.price b').forEach(function(el){
-        var to = price(el), from = +el.textContent.replace(/,/g, '');
-        if (el._tw) el._tw.kill();
-        if (window.gsap && !REDUCE) { var o = { v: from }; el._tw = gsap.to(o, { v: to, duration: .6, ease: 'power2.out', onUpdate: function(){ el.textContent = money(Math.round(o.v)); } }); }
-        else el.textContent = money(to);
-      });
-      setPer();
-    });
-  });
 
   // order sheet -> WhatsApp
   var sheet = $('#sheet'), form = $('#orderForm'), err = $('#oErr'), opener = null;
@@ -883,7 +840,7 @@ html.lenis,html.lenis body{height:auto}
       b.addEventListener('click', function(){
         var plan = b.closest('.plan'); opener = b;
         $('#pickedName').textContent = $('h3', plan).textContent;
-        $('#pickedPrice').textContent = money(price($('.price b', plan))) + ' ' + T[lang].egp + ' ' + T[lang]['per' + dur];
+        $('#pickedPrice').textContent = money(+$('.price b', plan).dataset.p) + ' ' + T[lang].egp + ' ' + T[lang].per;
         err.hidden = true; sheet.hidden = false; root.style.overflow = 'hidden';
         if (lenis) lenis.stop();
         if (window.gsap && !REDUCE) gsap.fromTo(form, { y: 40, opacity: 0, scale: .96 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(1.6)' });
