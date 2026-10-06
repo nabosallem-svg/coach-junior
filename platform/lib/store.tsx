@@ -123,11 +123,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (who: "coach" | "client", phone: string, pw: string) => {
     if (LIVE) {
       const email = who === "coach" ? COACH_EMAIL : phoneEmail(phone), client = await sb();
-      let { error } = await client.auth.signInWithPassword({ email, password: normPw(pw) });
-      if (error && normPw(pw) !== pw) ({ error } = await client.auth.signInWithPassword({ email, password: pw }));   // accounts made before normPw
-      if (error) return error.message || false;
-      await boot();
-      return true;
+      try {
+        let { error } = await client.auth.signInWithPassword({ email, password: normPw(pw) });
+        if (error && normPw(pw) !== pw) ({ error } = await client.auth.signInWithPassword({ email, password: pw }));   // accounts made before normPw
+        if (error) return error.message || false;
+        if (who === "coach") {
+          // signed in but not listed in public.coaches: without this the form just re-appears with no message
+          const { data: { user } } = await client.auth.getUser();
+          const { data: row, error: e2 } = await client.from("coaches").select("id").eq("id", user!.id).maybeSingle();
+          if (!row) { await client.auth.signOut(); return e2 ? e2.message : "notCoach"; }
+        }
+        await boot();
+        return true;
+      } catch (e) {
+        return e instanceof Error ? e.message : String(e);
+      }
     }
     if (who === "coach") {
       if (pw !== COACH_DEMO_PASSWORD) return false;
