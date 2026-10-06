@@ -6,6 +6,11 @@ import { createClient } from "@supabase/supabase-js";
 const email = (phone: string) => `${phone.replace(/\D/g, "").slice(-10)}@coach-junior.app`;
 
 export async function POST(req: Request) {
+  // any crash comes back as readable JSON, so the coach sees the real reason instead of a generic failure
+  try { return await handle(req); } catch (e) { return Response.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 }); }
+}
+
+async function handle(req: Request) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, service = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !service) return Response.json({ error: "not configured" }, { status: 503 });
   const admin = createClient(url, service, { auth: { persistSession: false } });
@@ -20,8 +25,17 @@ export async function POST(req: Request) {
   if (body.action === "create") {
     if (!body.phone || (body.password ?? "").length < 6) return Response.json({ error: "bad input" }, { status: 400 });
     const { data, error } = await admin.auth.admin.createUser({ email: email(body.phone), password: body.password, email_confirm: true });
-    if (error) return Response.json({ error: error.message }, { status: 400 });
-    return Response.json({ id: data.user.id });
+    if (!error) return Response.json({ id: data.user.id });
+    // a login left over from an earlier attempt (no trainee record points at it; the page checks that): reuse it with the new password
+    if (/already|exists|registered/i.test(error.message)) {
+      const { data: list } = await admin.auth.admin.listUsers({ perPage: 1000 });
+      const old = list?.users.find((u) => u.email === email(body.phone));
+      if (old) {
+        const { error: e2 } = await admin.auth.admin.updateUserById(old.id, { password: body.password });
+        if (!e2) return Response.json({ id: old.id });
+      }
+    }
+    return Response.json({ error: error.message }, { status: 400 });
   }
   if (body.action === "password") {
     if (!body.id || (body.password ?? "").length < 6) return Response.json({ error: "bad input" }, { status: 400 });
