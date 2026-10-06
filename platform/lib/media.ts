@@ -36,13 +36,17 @@ export async function putVideo(key: string, file: Blob, onProgress?: (pct: numbe
   if (LIVE) {
     const p = path(key);
     // a signed upload URL lets us send the file with XHR, which reports progress; the plain SDK upload reports nothing
-    const { data, error } = await (await sb()).storage.from(BUCKET).createSignedUploadUrl(p, { upsert: true });
+    const { data, error } = await Promise.race([
+      (await sb()).storage.from(BUCKET).createSignedUploadUrl(p, { upsert: true }),
+      new Promise<never>((_, no) => setTimeout(() => no(new Error("timeout")), 30_000)),
+    ]);
     if (error || !data) throw error ?? new Error("no upload url");
     await new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", data.signedUrl);
       if (file.type) xhr.setRequestHeader("content-type", file.type);
       xhr.setRequestHeader("x-upsert", "true");
+      xhr.timeout = 15 * 60_000;   // a stalled connection fails with a message instead of spinning forever
       xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100)); };
       xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(xhr.responseText?.slice(0, 120) || `HTTP ${xhr.status}`)));
       xhr.onerror = () => reject(new Error("network"));
