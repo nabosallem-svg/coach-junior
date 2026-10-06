@@ -1,4 +1,4 @@
-import type { DB, Food, Meal, MealItem, ID, WorkoutLog } from "./types";
+import type { DB, Food, Meal, MealItem, ID, WorkoutLog, TrainingPlan } from "./types";
 
 export type Macros = { kcal: number; c: number; f: number; p: number };
 const zero = (): Macros => ({ kcal: 0, c: 0, f: 0, p: 0 });
@@ -44,6 +44,16 @@ export function swapOptions(db: DB, food: Food, qty: number) {
 }
 
 export const r0 = (n: number) => Math.round(n);
+
+const localDay = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+/** today's workout: the day logged today stays "today" (marked done) until tomorrow; otherwise the day after the last one logged */
+export function workoutDay(plan: TrainingPlan, myLogs: WorkoutLog[]) {
+  const last = [...myLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const i = last ? plan.days.findIndex((d) => d.id === last.dayId) : -1;
+  const next = plan.days[(i + 1) % plan.days.length];
+  const doneToday = !!last && i >= 0 && localDay(new Date(last.date)) === localDay(new Date());
+  return { day: doneToday ? plan.days[i] : next, next, doneToday };
+}
 
 export function daysLeft(isoDate: string) {
   return Math.ceil((new Date(isoDate).getTime() - Date.now()) / 86400000);

@@ -2,25 +2,25 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, X, Shuffle, Loader2 } from "lucide-react";
+import { Check, X, Shuffle, Loader2, ArrowLeft, ArrowRight } from "lucide-react";
 import { aiTask } from "@/lib/aiTasks";
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { useMe } from "@/lib/hooks";
 import { VideoBox } from "@/components/VideoBox";
-import { Sheet, Toast } from "@/components/ui";
+import { Sheet } from "@/components/ui";
 import type { Exercise, LoggedSet } from "@/lib/types";
 
 function Session() {
   const { db, update } = useStore();
-  const { t, lang, muscle } = useI18n();
+  const { t, lang, muscle, dir } = useI18n();
   const me = useMe()!;
   const router = useRouter();
   const params = useSearchParams();
   const plan = me.active ? db.trainingPlans.find((p) => p.id === me.trainingPlanId) : undefined;
   const day = plan?.days.find((d) => d.id === params.get("day")) ?? plan?.days[0];
   const [doneIds, setDoneIds] = useState<string[]>([]);
-  const [toast, setToast] = useState<string | null>(null);
+  const [finished, setFinished] = useState(false);
   const [swap, setSwap] = useState<{ ex?: Exercise; why?: string; busy?: boolean; err?: string } | null>(null);
 
   if (!plan || !day) return null;
@@ -44,9 +44,26 @@ function Session() {
     update((d) => {
       d.logs.push({ id: uid("log"), clientId: me.id, planId: plan.id, dayId: day.id, date: new Date().toISOString(), sets });
     });
-    setToast(t("workoutSaved"));
-    setTimeout(() => router.replace("/app/training"), 900);
+    setFinished(true);
+    scrollTo(0, 0);
   };
+
+  // stay on the finished day: a short "done" screen, the trainee moves on when they choose
+  if (finished) {
+    const next = plan.days[(plan.days.findIndex((d) => d.id === day.id) + 1) % plan.days.length];
+    const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center px-6 text-center">
+        <div className="grid size-24 place-items-center rounded-full border-2 border-gold bg-gold/15 text-gold shadow-[0_0_60px_-10px_rgba(212,175,55,.6)]"><Check size={48} strokeWidth={3} /></div>
+        <h1 className="mt-6 text-3xl font-black">{t("doneToday")}</h1>
+        <p className="mt-2 text-lg text-text-2"><bdi>{day.name}</bdi> · {t("doneSummary", { a: done, b: total })}</p>
+        <div className="mt-8 w-full max-w-sm space-y-3">
+          <button onClick={() => router.replace("/app")} className="btn-gold min-h-13 w-full text-lg">{t("backToPlan")}</button>
+          {next && next.id !== day.id && <button onClick={() => router.replace(`/app/training?day=${next.id}`)} className="btn-quiet w-full">{t("nextDayBtn")} <Arrow size={18} /></button>}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-32">
@@ -108,7 +125,6 @@ function Session() {
           </div>
         )}
       </Sheet>
-      <Toast text={toast} />
     </div>
   );
 }
