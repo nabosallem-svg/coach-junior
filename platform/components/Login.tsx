@@ -27,6 +27,7 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
     setBusy(true);
     const ok = await login(who, phone, pw);
     setBusy(false);
+    if (ok === "notCoach") return setErr(t("notCoach"));
     if (ok !== true) {
       // the server's own reason (e.g. "Invalid login credentials", "Email not confirmed") helps when setting up Supabase
       const why = typeof ok === "string" && !/invalid login credentials/i.test(ok) ? ` (${ok})` : "";
@@ -36,16 +37,17 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
   };
 
   return (
-    <div className="relative mx-auto flex min-h-dvh max-w-md flex-col">
-      <div className="absolute inset-x-0 top-0 h-[42dvh] overflow-hidden">
-        <img src={asset("/img/hero-1200.webp")} srcSet={`${asset("/img/hero-800.webp")} 800w, ${asset("/img/hero-1200.webp")} 1200w`} sizes="(min-width: 448px) 448px, 100vw" alt="" fetchPriority="high" decoding="async" className="anim-hero size-full object-cover object-top" />
-        <div className="absolute inset-0 bg-gradient-to-b from-bg/0 via-bg/40 to-bg" />
+    // phone: photo on top, form below; desktop: photo and form side by side
+    <div className="relative mx-auto flex min-h-dvh max-w-md flex-col lg:grid lg:max-w-none lg:grid-cols-2">
+      <div className="absolute inset-x-0 top-0 h-[42dvh] overflow-hidden lg:sticky lg:h-dvh">
+        <img src={asset("/img/hero-1200.webp")} srcSet={`${asset("/img/hero-800.webp")} 800w, ${asset("/img/hero-1200.webp")} 1200w`} sizes="(min-width: 1024px) 50vw, (min-width: 448px) 448px, 100vw" alt="" fetchPriority="high" decoding="async" className="anim-hero size-full object-cover object-top" />
+        <div className="absolute inset-0 bg-gradient-to-b from-bg/0 via-bg/40 to-bg lg:via-bg/0 lg:to-bg/60" />
       </div>
       <button onClick={toggle} className="absolute end-4 top-4 z-10 grid h-9 min-w-9 place-items-center rounded-xl border border-line-gold bg-bg/60 px-2 text-sm font-bold text-gold backdrop-blur">
         {t("langToggle")}
       </button>
 
-      <div className="relative z-10 mt-auto px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[30dvh]">
+      <div className="relative z-10 mt-auto px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[30dvh] lg:mx-auto lg:my-auto lg:w-full lg:max-w-md lg:py-10">
         <div className="flex items-center gap-3">
           <img src={asset("/img/logo.webp")} alt="Coach Junior" width={72} height={72} className="shrink-0 drop-shadow-[0_6px_20px_rgba(0,0,0,.6)]" />
           <div>
