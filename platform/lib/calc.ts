@@ -55,6 +55,15 @@ export function workoutDay(plan: TrainingPlan, myLogs: WorkoutLog[]) {
   return { day: doneToday ? plan.days[i] : next, next, doneToday };
 }
 
+/** a date N months later; Jan 31 + 1 month is Feb 28, not Mar 3 */
+export function addMonths(from: Date, months: number) {
+  const d = new Date(from), day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + months);
+  d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+  return d;
+}
+
 export function daysLeft(isoDate: string) {
   return Math.ceil((new Date(isoDate).getTime() - Date.now()) / 86400000);
 }

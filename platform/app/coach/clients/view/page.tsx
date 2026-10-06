@@ -7,7 +7,7 @@ import { ArrowRight, ArrowLeft, MessageCircle, Send, CalendarPlus, ClipboardList
 import { personalize, type PlanKind } from "@/lib/plans";
 import { useStore, uid, genPassword, normPw } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { daysLeft, fmtDate, targets, type Activity, type Goal } from "@/lib/calc";
+import { daysLeft, fmtDate, targets, addMonths, type Activity, type Goal } from "@/lib/calc";
 import { clientTargets, intakeInputs } from "@/lib/intake";
 import { WeightCard } from "@/components/WeightCard";
 import { FormView } from "@/components/FormView";
@@ -101,7 +101,7 @@ function ClientDetail() {
   };
 
   // renew by a package from today or from the current end, whichever is later
-  const renewEnd = (months: number) => { const d = new Date(Math.max(Date.now(), new Date(c.subEnd).getTime())); d.setMonth(d.getMonth() + months); return d; };
+  const renewEnd = (months: number) => { return addMonths(new Date(Math.max(Date.now(), new Date(c.subEnd).getTime())), months); };
   const renew = (pkg: (typeof PACKAGES)[number]) => {
     const end = renewEnd(pkg.months);
     // only moves the end date; paused stays paused until the coach taps activate

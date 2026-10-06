@@ -7,6 +7,7 @@ import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { clientNotices, useMe } from "@/lib/hooks";
 import { daysLeft, fmtDate, planMacros, workoutDay } from "@/lib/calc";
+import { pkgMonths } from "@/components/Activate";
 import { WeightCard } from "@/components/WeightCard";
 import { Field, SectionLabel, Sheet } from "@/components/ui";
 import { noticeIcon, noticeText } from "@/components/ClientShell";
@@ -107,7 +108,7 @@ export default function ClientHome() {
 
       {!me.pending && <div className="card mt-3 flex items-center justify-between p-4">
         <div>
-          <p className="text-sm text-muted">{t("subscription")} · {t("package")} <span className="num">{me.packageName}</span></p>
+          <p className="text-sm text-muted">{t("subscription")} · {t("package")} <span className="num">{pkgMonths(me)}</span></p>
           <p className="font-bold">{t("endsOn")} {fmtDate(me.subEnd, lang)}</p>
         </div>
         <span className={`num rounded-full px-3 py-1 text-sm font-bold ${left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>

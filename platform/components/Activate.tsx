@@ -4,7 +4,7 @@ import { useState } from "react";
 import { UserCheck, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { fmtDate } from "@/lib/calc";
+import { fmtDate, addMonths } from "@/lib/calc";
 import type { Client } from "@/lib/types";
 import { deleteAccount } from "@/lib/accounts";
 import { Avatar, Field, Sheet } from "./ui";
@@ -38,8 +38,7 @@ export function ActivateSheet({ client, onClose, onDone }: { client: Client | nu
         onSubmit={(e) => {
           e.preventDefault();
           const start = new Date();
-          const end = new Date(start);
-          end.setMonth(end.getMonth() + PACKAGES.find((p) => p.label === pkg)!.months);
+          const end = addMonths(start, PACKAGES.find((p) => p.label === pkg)!.months);
           update((d) => {
             const c = d.clients.find((x) => x.id === client.id)!;
             Object.assign(c, { active: true, pending: false, packageName: pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), trainingPlanId: tp || c.trainingPlanId, nutritionPlanId: np || c.nutritionPlanId, ...((tp || np) && { planAt: start.toISOString() }) });
