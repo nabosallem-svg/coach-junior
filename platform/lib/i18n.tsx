@@ -32,6 +32,7 @@ const dict = {
   days: ["يوم", "days"],
 
   // entry
+  traineeLogin: ["دخول المشتركين", "Trainee login"],
   entryTitle: ["منصة كوتش جونيور", "Coach Junior Platform"],
   entrySub: ["خطتك، أكلك، تمرينك والمتابعة مع الكابتن في مكان واحد.", "Your plan, meals, workouts and coach check-ins in one place."],
   enterClient: ["دخول كمشترك", "Sign in as client"],
