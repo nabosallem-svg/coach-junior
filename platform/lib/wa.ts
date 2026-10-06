@@ -7,5 +7,6 @@ export const waNumber = (phone: string) => {
   return /^01\d{9}$/.test(d) ? `2${d}` : d;
 };
 
+// api.whatsapp.com directly: the wa.me redirect re-encodes the text and can turn emoji into "�"
 export const waLink = (phone: string, text?: string) =>
-  `https://wa.me/${waNumber(phone)}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
+  `https://api.whatsapp.com/send?phone=${waNumber(phone)}${text ? `&text=${encodeURIComponent(text)}` : ""}`;

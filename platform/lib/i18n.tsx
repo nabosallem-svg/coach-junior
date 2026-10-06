@@ -412,7 +412,7 @@ const dict = {
   changePassword: ["غيّر كلمة السر", "Change password"],
   newPassword: ["كلمة السر الجديدة", "New password"],
   minChars: ["6 حروف على الأقل", "At least 6 characters"],
-  waCreds: ["أهلاً {name}، ده حسابك على منصة كوتش جونيور:\nالرابط: {url}\nالموبايل: {phone}\nكلمة السر: {pw}\n\nأول ما تدخل املا فورم البداية، وأنا هجهزلك خطتك على حسب إجاباتك خلال أسبوع من يوم ما تملاها 💪", "Hi {name}, here is your Coach Junior account:\nLink: {url}\nPhone: {phone}\nPassword: {pw}\n\nFill the starter form first and I will build your plan from it within a week 💪"],
+  waCreds: ["أهلاً {name}، ده حسابك على منصة كوتش جونيور:\nالرابط: {url}\nالموبايل: {phone}\nكلمة السر: {pw}\n\nأول ما تدخل املا فورم البداية، وأنا هجهزلك خطتك على حسب إجاباتك خلال أسبوع من يوم ما تملاها.\nوبعد ما تملا الفورم ابعتلي هنا على الواتساب صورك البداية: من قدام ومن الجنب ومن ضهر.", "Hi {name}, here is your Coach Junior account:\nLink: {url}\nPhone: {phone}\nPassword: {pw}\n\nFill the starter form first and I will build your plan from it within a week.\nAfter the form, send me your starting photos here on WhatsApp: front, side and back."],
   dropVideos: ["اسحب الفيديوهات هنا أو دوس واختار (ينفع كذا فيديو مرة واحدة)", "Drop videos here or tap to choose (several at once)"],
   bulkDone: ["اترفع {n} فيديو. عدّل الاسم والعضلة لو محتاج.", "{n} videos uploaded. Edit names and muscles if needed."],
   // signup / activation
