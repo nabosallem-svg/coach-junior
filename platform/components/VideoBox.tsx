@@ -10,6 +10,7 @@ import { asset } from "@/lib/asset";
 export function VideoBox({ ex }: { ex: Exercise }) {
   const { t } = useI18n();
   const src = useVideoSrc(ex.videoKey, ex.videoUrl);
+  const [bad, setBad] = useState(false);
   const yt = !ex.videoKey ? youtubeEmbed(ex.videoUrl) : null;
   const [playing, setPlaying] = useState(false);
 
@@ -36,6 +37,12 @@ export function VideoBox({ ex }: { ex: Exercise }) {
   return yt ? (
     <iframe src={`${yt}?autoplay=1&rel=0&modestbranding=1&playsinline=1`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen className="aspect-video w-full rounded-2xl" title={ex.name} />
   ) : (
-    <video src={src} controls autoPlay playsInline controlsList="nodownload" className="aspect-video w-full rounded-2xl bg-black" />
+    bad ? (
+      <div className="grid aspect-video w-full place-items-center rounded-2xl bg-card-hi p-4 text-center text-sm text-text-2">
+        <p>{t("videoFailed")}{src && <> <a href={src} target="_blank" rel="noopener" className="font-bold text-gold underline">{t("openVideo")}</a></>}</p>
+      </div>
+    ) : (
+      <video src={src} controls autoPlay playsInline preload="auto" controlsList="nodownload" onError={() => setBad(true)} className="aspect-video w-full rounded-2xl bg-black" />
+    )
   );
 }

@@ -246,6 +246,8 @@ const dict = {
   doneSummary: ["{a} من {b} تمارين", "{a} of {b} exercises"],
   nextDayBtn: ["اليوم الجاي", "Next day"],
   backToPlan: ["رجوع للخطة", "Back to plan"],
+  videoFailed: ["الفيديو مش بيشتغل على جهازك (ممكن صيغته مش مدعومة، الأفضل MP4).", "This video can't play on your device (format may be unsupported, MP4 works best)."],
+  openVideo: ["افتحه في صفحة لوحده", "Open it on its own"],
   noVideo: ["الفيديو لسه منزلش", "Video coming soon"],
   history: ["السجل", "History"],
   noHistory: ["لسه مفيش تمارين متسجلة", "No workouts logged yet"],
