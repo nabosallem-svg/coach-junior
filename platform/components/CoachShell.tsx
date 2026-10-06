@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { LayoutDashboard, Users, Clapperboard, ClipboardList, LogOut, CalendarClock, Camera, ClipboardCheck, Hourglass } from "lucide-react";
 import { coachNotices } from "@/lib/notify";
 import { BellButton, useSeen } from "./Bell";
@@ -10,6 +10,7 @@ import { PushToggle } from "./PushToggle";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { Avatar, Brand, Sheet, Splash } from "./ui";
+import { Login } from "./Login";
 
 const nav = [
   { href: "/coach", icon: LayoutDashboard, key: "dashboard" },
@@ -26,14 +27,13 @@ export function CoachShell({ children }: { children: ReactNode }) {
   const [bell, setBell] = useState(false);
   const [seen, markSeen] = useSeen("coach");
 
-  useEffect(() => {
-    if (ready && session?.role !== "coach") router.replace("/");
-  }, [ready, session, router]);
-  if (!ready || session?.role !== "coach") return <Splash />;
+  if (!ready) return <Splash />;
+  // /coach is the coach's own door: signed-out visitors get the coach sign-in here
+  if (session?.role !== "coach") return <Login who="coach" onDone={() => router.replace("/coach")} />;
 
   const unread = db.clients.filter((c) => c.pending).length;
   const isOn = (href: string) => (href === "/coach" ? path === "/coach" : path.startsWith(href));
-  const logout = () => { setSession(null); router.replace("/"); };
+  const logout = () => { setSession(null); router.replace("/coach"); };
   const notes = coachNotices(db);
   const unseen = notes.filter((n) => !seen.has(n.key)).length;
   const openBell = () => { setBell(true); markSeen(notes.map((n) => n.key)); };
