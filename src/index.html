@@ -170,6 +170,8 @@ button,input,select{font:inherit;color:inherit}
 .tr-row{display:flex;justify-content:safe center;gap:var(--s-3);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:var(--s-1)}
 .tr-row::-webkit-scrollbar{display:none}
 .tr{flex:0 0 min(320px,78vw);scroll-snap-align:center;border:1px solid var(--line-gold);border-radius:var(--r-md);overflow:hidden;background:var(--card)}
+.tr{transition:transform .5s ease,opacity .5s ease}
+.tr-row.auto .tr:not(.on){transform:scale(.93);opacity:.6}
 .tr img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover}
 .tr-nav{position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:40px;height:40px;margin-top:-20px;border-radius:50%;background:var(--bg);border:1px solid var(--line-gold);color:var(--gold);font-size:24px;line-height:1;cursor:pointer}
 .tr-nav.prev{inset-inline-start:0}.tr-nav.next{inset-inline-end:0}
@@ -904,6 +906,28 @@ html.lenis,html.lenis body{height:auto}
         row.scrollBy({ left: step * dir * (document.dir === 'rtl' ? -1 : 1), behavior: 'smooth' });
       });
     });
+
+    // auto-slide every 3s (loops back to the first); a touch, hover or arrow pauses it for a few seconds
+    var cards = $$('.tr', row), held = 0, raf = 0;
+    function delta(c){ var a = c.getBoundingClientRect(), b = row.getBoundingClientRect(); return (a.left + a.width / 2) - (b.left + b.width / 2); }
+    function current(){ var best = 0; cards.forEach(function(c, i){ if (Math.abs(delta(c)) < Math.abs(delta(cards[best]))) best = i; }); return best; }
+    function moves(d){ var max = row.scrollWidth - row.clientWidth, sl = row.scrollLeft, lo = getComputedStyle(row).direction === 'rtl' ? -max - 2 : -2, hi = lo + max + 4, to = Math.min(hi, Math.max(lo, sl + d)); return Math.abs(to - sl) > 4; }
+    function atEnd(){ return Math.abs(row.scrollLeft) >= row.scrollWidth - row.clientWidth - 4; }
+    function mark(){ raf = 0; var k = atEnd() ? cards.length - 1 : Math.abs(row.scrollLeft) < 4 ? 0 : current(); cards.forEach(function(c, i){ c.classList.toggle('on', i === k); }); }
+    row.addEventListener('scroll', function(){ if (!raf) raf = requestAnimationFrame(mark); }, { passive: true });
+    function hold(){ held = Date.now() + 5000; }
+    ['pointerenter', 'touchstart', 'focusin', 'wheel'].forEach(function(e){ row.addEventListener(e, hold, { passive: true }); });
+    $$('.tr-nav', wrap).forEach(function(b){ b.addEventListener('click', hold); });
+    if (cards.length > 1 && !REDUCE) {
+      row.classList.add('auto'); mark();
+      setInterval(function(){
+        if (document.hidden || Date.now() < held || row.matches(':hover') || wrap.classList.contains('one')) return;
+        var r = row.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;   // off screen
+        var j = cards.indexOf($('.tr.on', row)) + 1;
+        while (j < cards.length && !moves(delta(cards[j]))) j++;   // wide screens: the next card may already be as centered as it can get
+        row.scrollBy({ left: delta(cards[atEnd() || j >= cards.length ? 0 : j]), behavior: 'smooth' });
+      }, 3000);
+    }
   })();
 
   // order sheet -> WhatsApp
