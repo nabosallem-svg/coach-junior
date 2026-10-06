@@ -9,7 +9,7 @@ import { useI18n } from "@/lib/i18n";
 import { daysLeft } from "@/lib/calc";
 import { Avatar, Field, Sheet } from "@/components/ui";
 import { Creds } from "@/components/Creds";
-import { createAccount } from "@/lib/accounts";
+import { createAccount, accountError } from "@/lib/accounts";
 import { ActivateSheet, PendingList, PACKAGES } from "@/components/Activate";
 import type { Client } from "@/lib/types";
 
@@ -97,7 +97,7 @@ function Clients() {
             end.setMonth(end.getMonth() + months);
             const pw = normPw(form.pw);
             let id: string;
-            try { id = await createAccount(form.phone.trim(), pw); } catch { return setErr(t("accountFailed")); }
+            try { id = await createAccount(form.phone.trim(), pw); } catch (e) { return setErr(accountError(e, t)); }
             update((d) => {
               d.clients.push({ id, name: form.name.trim(), phone: form.phone.trim(), password: pw, goal: form.goal.trim(), packageName: form.pkg, subStart: start.toISOString().slice(0, 10), subEnd: end.toISOString().slice(0, 10), active: true, trainingPlanId: form.tp || undefined, nutritionPlanId: form.np || undefined });
               const starter = d.forms.find((f) => f.id === "fm-start");
