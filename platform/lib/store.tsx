@@ -57,10 +57,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [session, setSessionState] = useState<Session>(null);
   const [syncError, setSyncError] = useState<string | false>(false);
   const sessionRef = useRef<Session>(null);
+  const saving = useRef<Promise<unknown>>(Promise.resolve());   // saves run one after another; a reload waits for them
   sessionRef.current = session;
 
   // live: who is signed in, then everything RLS lets them read
   const boot = useCallback(async () => {
+    await saving.current.catch(() => {});   // never read back before our own last write landed
     const { data } = await (await sb()).auth.getSession();
     const user = data.session?.user;
     if (!user) {
@@ -110,7 +112,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (LIVE) {
         const s = sessionRef.current;
         // StrictMode may run this twice; upserts and deletes are idempotent
-        queueMicrotask(() => saveDiff(prev, next, s?.role === "client" ? s.clientId : undefined).then(() => setSyncError(false), (e) => setSyncError(errText(e))));
+        queueMicrotask(() => {
+          const run = saving.current.catch(() => {}).then(() => saveDiff(prev, next, s?.role === "client" ? s.clientId : undefined));
+          saving.current = run;
+          run.then(() => setSyncError(false), (e) => setSyncError(errText(e)));
+        });
       } else save(DB_KEY, next);
       return next;
     });
