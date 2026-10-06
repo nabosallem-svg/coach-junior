@@ -132,6 +132,7 @@ const dict = {
   moveDown: ["لتحت", "Down"],
   removeExercise: ["شيل التمرين", "Remove"],
   addExerciseFromLib: ["ضيف تمرين", "Add exercise from library"],
+  setsReps: ["{n} مجموعات × {reps} عدة", "{n} sets × {reps} reps"],
   restN: ["راحة {n} ث", "Rest {n}s"],
   syncFailed: ["التعديل متحفظش، اتأكد من النت وجرب تاني", "Change not saved, check your connection and try again"],
   accountFailed: ["معرفناش نعمل الحساب", "Could not create the account"],
