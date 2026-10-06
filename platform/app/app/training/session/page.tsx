@@ -89,7 +89,7 @@ function Session() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="flex items-baseline gap-2"><span className="num text-muted">{n + 1}</span><bdi className="text-lg font-bold">{ex.name}</bdi></p>
-                    <p className="mt-1 font-bold text-text-2"><span>{t("setsReps", { n: pe.sets.length, reps })}</span>{pe.rest && <span className="text-gold"> · {t("restN", { n: pe.rest })}</span>}</p>
+                    <p className="mt-1 font-bold text-text-2"><span>{t("setsReps", { n: pe.sets.length, reps })}</span>{pe.rest && <span className="whitespace-nowrap text-gold"> · {t("restN", { n: pe.rest })}</span>}</p>
                   </div>
                   <button
                     onClick={() => toggle(pe.id)}
