@@ -77,7 +77,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (LIVE) {
       boot().finally(() => setReady(true));
-      return;
+      // a trainee coming back to the app sees what the coach changed meanwhile (new plan, renewed package)
+      const back = () => { if (document.visibilityState === "visible" && sessionRef.current?.role === "client") boot(); };
+      document.addEventListener("visibilitychange", back);
+      return () => document.removeEventListener("visibilitychange", back);
     }
     // a new version key used to start from fresh demo data, wiping what the coach built; carry the latest older copy over instead
     let stored = load<DB>(DB_KEY);
