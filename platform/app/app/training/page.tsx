@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { History, LineChart as ChartIcon, Play, Dumbbell, BookOpen } from "lucide-react";
+import { History, LineChart as ChartIcon, Play, Dumbbell, BookOpen, CircleCheck } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { useMe } from "@/lib/hooks";
-import { fmtDate, prevSets } from "@/lib/calc";
+import { fmtDate, prevSets, workoutDay } from "@/lib/calc";
 import { LineChart } from "@/components/charts";
 import { VideoBox } from "@/components/VideoBox";
 import { Divider, Empty, Pills, Sheet } from "@/components/ui";
@@ -17,9 +17,8 @@ export default function Training() {
   const me = useMe()!;
   const plan = me.active ? db.trainingPlans.find((p) => p.id === me.trainingPlanId) : undefined;
   const myLogs = db.logs.filter((l) => l.clientId === me.id);
-  const lastLog = [...myLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
-  const defaultDay = plan ? plan.days[(Math.max(-1, plan.days.findIndex((d) => d.id === lastLog?.dayId)) + 1) % plan.days.length]?.id : undefined;
-  const [dayId, setDayId] = useState<string | undefined>(defaultDay);
+  const wd = plan && plan.days.length ? workoutDay(plan, myLogs) : undefined;
+  const [dayId, setDayId] = useState<string | undefined>(() => new URLSearchParams(typeof window === "undefined" ? "" : window.location.search).get("day") ?? wd?.day.id);
   const [history, setHistory] = useState(false);
   const [chartFor, setChartFor] = useState<string | null>(null);
   const [cueFor, setCueFor] = useState<string | null>(null);
@@ -48,6 +47,13 @@ export default function Training() {
       <div className="mt-5">
         <Pills value={day.id} onChange={setDayId} options={plan.days.map((d) => ({ value: d.id, label: d.name }))} />
       </div>
+
+      {wd?.doneToday && day.id === wd.day.id && (
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-line-gold bg-gold/10 p-3">
+          <span className="flex items-center gap-2 font-bold text-gold"><CircleCheck size={20} /> {t("doneToday")}</span>
+          {wd.next.id !== day.id && <button onClick={() => setDayId(wd.next.id)} className="shrink-0 text-sm font-bold text-text-2 hover:text-gold">{t("nextDayBtn")}</button>}
+        </div>
+      )}
 
       <Divider>{t("exercises")}</Divider>
 

@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Plus, Dumbbell, Salad, Hourglass } from "luc
 import { useStore, uid } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { clientNotices, useMe } from "@/lib/hooks";
-import { daysLeft, fmtDate, planMacros } from "@/lib/calc";
+import { daysLeft, fmtDate, planMacros, workoutDay } from "@/lib/calc";
 import { WeightCard } from "@/components/WeightCard";
 import { Field, SectionLabel, Sheet } from "@/components/ui";
 import { noticeIcon, noticeText } from "@/components/ClientShell";
@@ -26,12 +26,8 @@ export default function ClientHome() {
   const all = db.measurements.filter((m) => m.clientId === me.id).sort((a, b) => a.date.localeCompare(b.date));
 
   const plan = me.active ? db.trainingPlans.find((p) => p.id === me.trainingPlanId) : undefined;
-  const lastLog = db.logs.filter((l) => l.clientId === me.id).sort((a, b) => b.date.localeCompare(a.date))[0];
-  const nextDay = useMemo(() => {
-    if (!plan) return undefined;
-    const i = lastLog ? plan.days.findIndex((d) => d.id === lastLog.dayId) : -1;
-    return plan.days[(i + 1) % plan.days.length];
-  }, [plan, lastLog]);
+  const wd = useMemo(() => (plan && plan.days.length ? workoutDay(plan, db.logs.filter((l) => l.clientId === me.id)) : undefined), [plan, db.logs, me.id]);
+  const nextDay = wd?.day;
 
   const np = me.active ? db.nutritionPlans.find((p) => p.id === me.nutritionPlanId) : undefined;
   const starter = db.assignments.find((a) => a.clientId === me.id && a.status === "pending" && db.forms.find((f) => f.id === a.formId)?.starter);
@@ -99,6 +95,7 @@ export default function ClientHome() {
           <Dumbbell size={20} className="text-gold" />
           <p className="mt-2 text-sm text-muted">{t("todayWorkout")}</p>
           <p className="truncate font-bold">{nextDay?.name ?? "—"}</p>
+          {wd?.doneToday && <p className="mt-1 text-xs font-bold text-gold">✓ {t("doneToday")}</p>}
         </Link>
         <Link href="/app/nutrition" className="card p-4 hover:border-line-gold">
           <Salad size={20} className="text-gold" />
