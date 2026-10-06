@@ -49,7 +49,7 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
 
       <div className="relative z-10 mt-auto px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[30dvh] lg:mx-auto lg:my-auto lg:w-full lg:max-w-md lg:py-10">
         <div className="flex items-center gap-3">
-          <img src={asset("/img/logo.webp")} alt="Coach Junior" width={72} height={72} className="shrink-0 drop-shadow-[0_6px_20px_rgba(0,0,0,.6)]" />
+          <img src={asset("/img/logo.webp")} alt="Coach Junior" width={96} height={96} className="size-20 shrink-0 lg:size-24 drop-shadow-[0_6px_20px_rgba(0,0,0,.6)]" />
           <div>
             <h1 className="text-2xl font-black leading-tight">{who === "coach" ? t("coachPanel") : t("entryTitle")}</h1>
             {who === "client" && <p className="mt-0.5 text-sm text-text-2">{t("entrySub")}</p>}
@@ -77,6 +77,10 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
           <a href={waLink(COACH_WA, t("noAccountWa"))} target="_blank" rel="noopener" className="mt-3 block w-full py-2 text-center text-sm font-bold text-gold">
             {t("noAccount")}
           </a>
+        )}
+
+        {who === "coach" && (
+          <a href={asset("/")} className="mt-3 block w-full py-2 text-center text-sm font-bold text-gold">{t("traineeLogin")}</a>
         )}
 
         {/* sample logins only for us: add ?demo=1 to the URL */}
