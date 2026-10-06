@@ -1,9 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
+import { env, safe } from "@/lib/serverEnv";
 
 // Saves (POST) or forgets (DELETE) this browser's push subscription for the signed-in user.
 
 function admin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL, service = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = env("NEXT_PUBLIC_SUPABASE_URL"), service = env("SUPABASE_SERVICE_ROLE_KEY");
   return url && service ? createClient(url, service, { auth: { persistSession: false } }) : null;
 }
 
@@ -21,7 +22,7 @@ async function handle(req: Request, remove: boolean) {
   }
   const { data: coach } = await db.from("coaches").select("id").eq("id", who.user.id).maybeSingle();
   const { error } = await db.from("push_subs").upsert({ endpoint, user_id: who.user.id, is_coach: !!coach, sub: body.sub });
-  return error ? Response.json({ error: error.message }, { status: 400 }) : Response.json({});
+  return error ? Response.json({ error: safe(error.message) }, { status: 400 }) : Response.json({});
 }
 
 export const POST = (req: Request) => handle(req, false);

@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { env, safe } from "@/lib/serverEnv";
 import webpush from "web-push";
 import { coachNotices, traineeNotices } from "@/lib/notify";
 import type { DB } from "@/lib/types";
@@ -7,7 +8,7 @@ import type { DB } from "@/lib/types";
 // and sends one short push per subscribed phone. Needs VAPID keys + CRON_SECRET.
 
 export async function GET(req: Request) {
-  const { NEXT_PUBLIC_SUPABASE_URL: url, SUPABASE_SERVICE_ROLE_KEY: service, NEXT_PUBLIC_VAPID_PUBLIC_KEY: pub, VAPID_PRIVATE_KEY: priv, CRON_SECRET: secret } = process.env;
+  const [url, service, pub, priv, secret] = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY", "CRON_SECRET"].map(env);
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) return Response.json({ error: "unauthorized" }, { status: 401 });
   if (!url || !service || !pub || !priv) return Response.json({ error: "not configured" }, { status: 503 });
   webpush.setVapidDetails("mailto:coach@coach-junior.app", pub, priv);
@@ -16,7 +17,7 @@ export async function GET(req: Request) {
   const db: Record<string, unknown[]> = { clients: [], photos: [], measurements: [], trainingPlans: [], logs: [], forms: [], assignments: [] };
   for (let from = 0; ; from += 1000) {
     const { data, error } = await admin.from("docs").select("coll,data").in("coll", Object.keys(db)).range(from, from + 999);
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) return Response.json({ error: safe(error.message) }, { status: 500 });
     for (const r of data) db[r.coll].push(r.data);
     if (data.length < 1000) break;
   }
