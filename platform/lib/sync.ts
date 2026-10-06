@@ -60,8 +60,8 @@ export async function saveDiff(prev: DB, next: DB, me?: ID) {
 
 /** first coach login on an empty project: copy the starter library (foods, exercises, plan templates) */
 export async function seedIfEmpty(seed: DB) {
-  const { count } = await (await sb()).from("docs").select("id", { count: "exact", head: true });
-  if (count) return false;
+  const { count, error } = await (await sb()).from("docs").select("id", { count: "exact", head: true });
+  if (error || count !== 0) return false;   // on any doubt do nothing: re-seeding would overwrite the coach's own exercises and videos
   const lib: DB = { ...emptyDB(), foods: seed.foods, exercises: seed.exercises.map(({ videoKey: _v, ...e }) => e), trainingPlans: seed.trainingPlans.filter((p) => !p.ownerId), nutritionPlans: seed.nutritionPlans.filter((p) => !p.ownerId), forms: seed.forms };
   await saveDiff(emptyDB(), lib);
   return true;
