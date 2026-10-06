@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Plus, Trash2, Search, Video, Upload, Loader2 } from "lucide-react";
+import { Plus, Trash2, Search, Video, Upload, Loader2, Link2 } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n, MUSCLES } from "@/lib/i18n";
 import { putVideo } from "@/lib/media";
@@ -20,7 +20,7 @@ function TrainingBuilder() {
   const [picker, setPicker] = useState(false);
   const [q, setQ] = useState("");
   const [mf, setMf] = useState("all");
-  const [nx, setNx] = useState<{ name: string; muscle: Muscle | ""; file: File | null } | null>(null);
+  const [nx, setNx] = useState<{ name: string; muscle: Muscle | ""; file: File | null; url?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   if (!plan) return null;
   const day = plan.days.find((d) => d.id === dayId) ?? plan.days[0];
@@ -37,7 +37,7 @@ function TrainingBuilder() {
     const id = uid("ex");
     let videoKey: string | undefined;
     if (nx.file) { try { videoKey = `${id}-${Date.now()}`; await putVideo(videoKey, nx.file); } catch { videoKey = undefined; alert(t("uploadFailed")); } }
-    update((d) => { d.exercises.unshift({ id, name: nx.name.trim(), muscle: nx.muscle as Muscle, videoKey }); });
+    update((d) => { d.exercises.unshift({ id, name: nx.name.trim(), muscle: nx.muscle as Muscle, videoKey, videoUrl: videoKey ? undefined : nx.url?.trim() || undefined }); });
     addEx(id);
     setSaving(false);
     closePicker();
@@ -109,6 +109,12 @@ function TrainingBuilder() {
               <Upload size={18} /> <span className="truncate">{nx.file ? nx.file.name : t("videoOptional")}</span>
               <input type="file" accept="video/*" className="hidden" onChange={(e) => setNx({ ...nx, file: e.target.files?.[0] ?? null })} />
             </label>
+            <Field label={t("orLink")}>
+              <div className="relative">
+                <Link2 size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
+                <input className="input ps-9 text-start" dir="ltr" placeholder="https://youtu.be/..." value={nx.url ?? ""} onChange={(e) => setNx({ ...nx, url: e.target.value })} />
+              </div>
+            </Field>
             <div className="grid grid-cols-2 gap-2">
               <button className="btn-gold" disabled={saving || !nx.name.trim() || !nx.muscle}>{saving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />} {t("addToDay")}</button>
               <button type="button" onClick={() => setNx(null)} className="btn-quiet">{t("back")}</button>

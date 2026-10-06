@@ -99,6 +99,6 @@ export function useVideoSrc(videoKey?: string, videoUrl?: string) {
 /** turns a YouTube watch/share link into an embeddable URL */
 export function youtubeEmbed(url?: string) {
   if (!url) return null;
-  const m = url.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);
-  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+  const m = url.match(/(?:youtu\.be\/|[?&]v=|shorts\/|embed\/|live\/)([\w-]{11})/);
+  return m ? `https://www.youtube-nocookie.com/embed/${m[1]}` : null;
 }

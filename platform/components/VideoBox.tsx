@@ -34,7 +34,7 @@ export function VideoBox({ ex }: { ex: Exercise }) {
   }
 
   return yt ? (
-    <iframe src={`${yt}?autoplay=1&rel=0`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen className="aspect-video w-full rounded-2xl" title={ex.name} />
+    <iframe src={`${yt}?autoplay=1&rel=0&modestbranding=1&playsinline=1`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen className="aspect-video w-full rounded-2xl" title={ex.name} />
   ) : (
     <video src={src} controls autoPlay playsInline controlsList="nodownload" className="aspect-video w-full rounded-2xl bg-black" />
   );
