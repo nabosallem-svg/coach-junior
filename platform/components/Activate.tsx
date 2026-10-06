@@ -10,17 +10,14 @@ import { deleteAccount } from "@/lib/accounts";
 import { Avatar, Field, Sheet } from "./ui";
 
 export const PACKAGES = [
-  { label: "1", months: 1 },
-  { label: "3+1", months: 4 },
-  { label: "6+1", months: 7 },
-  { label: "12+1", months: 13 },
+  { label: "3", months: 3 },
 ];
 
 /** coach turns a self sign-up into an active client: package dates + plans */
 export function ActivateSheet({ client, onClose, onDone }: { client: Client | null; onClose: () => void; onDone?: () => void }) {
   const { db, update } = useStore();
   const { t } = useI18n();
-  const [pkg, setPkg] = useState("1");
+  const [pkg, setPkg] = useState("3");
   const [tp, setTp] = useState("");
   const [np, setNp] = useState("");
   if (!client) return null;
@@ -42,7 +39,7 @@ export function ActivateSheet({ client, onClose, onDone }: { client: Client | nu
         }}
       >
         <Field group label={`${t("package")} (${t("months")})`}>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 gap-2">
             {PACKAGES.map((p) => (
               <button type="button" key={p.label} onClick={() => setPkg(p.label)} className={`num h-12 rounded-xl border font-bold ${pkg === p.label ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>{p.label}</button>
             ))}
