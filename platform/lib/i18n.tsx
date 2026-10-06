@@ -248,6 +248,7 @@ const dict = {
   backToPlan: ["رجوع للخطة", "Back to plan"],
   videoFailed: ["الفيديو مش بيشتغل على جهازك (ممكن صيغته مش مدعومة، الأفضل MP4).", "This video can't play on your device (format may be unsupported, MP4 works best)."],
   openVideo: ["افتحه في صفحة لوحده", "Open it on its own"],
+  badVideoLink: ["اللينك مش مفهوم. حط لينك يوتيوب (youtu.be أو watch?v= أو shorts).", "Link not recognised. Use a YouTube link (youtu.be, watch?v= or shorts)."],
   noVideo: ["الفيديو لسه منزلش", "Video coming soon"],
   history: ["السجل", "History"],
   noHistory: ["لسه مفيش تمارين متسجلة", "No workouts logged yet"],

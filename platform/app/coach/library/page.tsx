@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Upload, Video, VideoOff, Pencil, Trash2, Link2 } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n, MUSCLES } from "@/lib/i18n";
-import { putVideo, deleteVideo, uploadError, MAX_UPLOAD_MB } from "@/lib/media";
+import { putVideo, deleteVideo, uploadError, youtubeEmbed, MAX_UPLOAD_MB } from "@/lib/media";
 import { VideoBox } from "@/components/VideoBox";
 import { Field, Pills, Sheet, Toast } from "@/components/ui";
 import type { Exercise, Muscle } from "@/lib/types";
@@ -81,6 +81,8 @@ function Library() {
 
   const save = async () => {
     if (!draft || !draft.name.trim() || !draft.muscle) return;
+    const link = draft.videoUrl.trim();
+    if (link && !draft.removeVideo && !youtubeEmbed(link) && !/^https?:\/\/\S+\.(mp4|webm|mov)(\?\S*)?$/i.test(link)) return alert(t("badVideoLink"));
     setBusy(true);
     const id = draft.id ?? uid("ex");
     let videoKey = draft.removeVideo ? undefined : draft.videoKey;
