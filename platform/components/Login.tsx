@@ -51,6 +51,7 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
         <div className="flex items-center gap-3">
           <img src={asset("/img/logo.webp")} alt="Coach Junior" width={96} height={96} className="size-20 shrink-0 lg:size-24 drop-shadow-[0_6px_20px_rgba(0,0,0,.6)]" />
           <div>
+            <span className={`mb-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-black ${who === "coach" ? "bg-gold text-bg" : "bg-gold-soft text-gold"}`}>{t(who === "coach" ? "roleCoach" : "roleClient")}</span>
             <h1 className="text-2xl font-black leading-tight">{who === "coach" ? t("coachPanel") : t("entryTitle")}</h1>
             {who === "client" && <p className="mt-0.5 text-sm text-text-2">{t("entrySub")}</p>}
           </div>
@@ -79,6 +80,7 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
           </a>
         )}
 
+        {who === "coach" && <p className="mt-3 text-center text-xs text-muted">{t("sameBrowser")}</p>}
         {who === "coach" && (
           <a href={asset("/")} className="mt-3 block w-full py-2 text-center text-sm font-bold text-gold">{t("traineeLogin")}</a>
         )}

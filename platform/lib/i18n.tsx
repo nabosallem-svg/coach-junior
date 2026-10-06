@@ -33,6 +33,9 @@ const dict = {
 
   // entry
   traineeLogin: ["دخول المشتركين", "Trainee login"],
+  roleCoach: ["كابتن", "Coach"],
+  roleClient: ["مشترك", "Trainee"],
+  sameBrowser: ["حساب الكابتن وحساب المشترك مش بيشتغلوا مع بعض في نفس المتصفح. افتح حساب المشترك في نافذة خاصة.", "Coach and trainee accounts can't be open together in one browser. Open the trainee account in a private window."],
   entryTitle: ["منصة كوتش جونيور", "Coach Junior Platform"],
   entrySub: ["خطتك، أكلك، تمرينك والمتابعة مع الكابتن في مكان واحد.", "Your plan, meals, workouts and coach check-ins in one place."],
   enterClient: ["دخول كمشترك", "Sign in as client"],
