@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { Home, Salad, Dumbbell, ClipboardList, LogOut, CreditCard, MessageCircle, Scale, Sparkles } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { useStore, normPw } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { useMe } from "@/lib/hooks";
 import { traineeNotices, type Notice } from "@/lib/notify";
@@ -155,9 +155,10 @@ export function ClientShell({ children }: { children: ReactNode }) {
           className="mb-4 space-y-2"
           onSubmit={(e) => {
             e.preventDefault();
-            if (pw.length < 6) return;
-            changeOwnPassword(pw).then(() => {
-              update((d) => { d.clients.find((x) => x.id === me.id)!.password = pw; });
+            const np = normPw(pw);
+            if (np.length < 6) return;
+            changeOwnPassword(np).then(() => {
+              update((d) => { d.clients.find((x) => x.id === me.id)!.password = np; });
               setPw("");
               setMenu(false);
             }, () => alert(t("syncFailed")));

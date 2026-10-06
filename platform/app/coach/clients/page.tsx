@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
-import { useStore, uid, genPassword, normPhone } from "@/lib/store";
+import { useStore, uid, genPassword, normPhone, normPw } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft } from "@/lib/calc";
 import { Avatar, Field, Sheet } from "@/components/ui";
@@ -88,14 +88,14 @@ function Clients() {
           className="space-y-4"
           onSubmit={async (e) => {
             e.preventDefault();
-            if (form.pw.trim().length < 6) return setErr(t("minChars"));
+            if (normPw(form.pw).length < 6) return setErr(t("minChars"));
             if (db.clients.some((x) => normPhone(x.phone) === normPhone(form.phone))) return setErr(t("phoneUsed"));
             setErr("");
             const months = PACKAGES.find((p) => p.label === form.pkg)!.months;
             const start = new Date();
             const end = new Date(start);
             end.setMonth(end.getMonth() + months);
-            const pw = form.pw.trim();
+            const pw = normPw(form.pw);
             let id: string;
             try { id = await createAccount(form.phone.trim(), pw); } catch { return setErr(t("accountFailed")); }
             update((d) => {

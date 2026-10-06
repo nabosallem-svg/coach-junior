@@ -121,7 +121,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (who: "coach" | "client", phone: string, pw: string) => {
     if (LIVE) {
-      const { error } = await (await sb()).auth.signInWithPassword({ email: who === "coach" ? COACH_EMAIL : phoneEmail(phone), password: pw });
+      const email = who === "coach" ? COACH_EMAIL : phoneEmail(phone), client = await sb();
+      let { error } = await client.auth.signInWithPassword({ email, password: normPw(pw) });
+      if (error && normPw(pw) !== pw) ({ error } = await client.auth.signInWithPassword({ email, password: pw }));   // accounts made before normPw
       if (error) return false;
       await boot();
       return true;
@@ -131,7 +133,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setSession({ role: "coach" });
       return true;
     }
-    const c = db.clients.find((x) => normPhone(x.phone) === normPhone(phone) && x.password === pw);
+    const c = db.clients.find((x) => normPhone(x.phone) === normPhone(phone) && normPw(x.password) === normPw(pw));
     if (!c) return false;
     setSession({ role: "client", clientId: c.id });
     return true;
@@ -173,6 +175,8 @@ export const COACH_DEMO_PASSWORD = "123456789";
 
 /** last 10 digits, so 010..., +2010... and 2010... all match */
 export const normPhone = (p: string) => p.replace(/\D/g, "").slice(-10);
+/** passwords typed on Arabic keyboards: Arabic/Persian digits to 0-9, no spaces */
+export const normPw = (p: string) => p.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x6f0)).replace(/\s+/g, "");
 
 /** readable password the coach can send on WhatsApp: no 0/O/1/l */
 export function genPassword() {
