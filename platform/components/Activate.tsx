@@ -11,6 +11,8 @@ import { Avatar, Field, Sheet } from "./ui";
 
 export const PACKAGES = [
   { label: "3", months: 3 },
+  { label: "6", months: 6 },
+  { label: "12", months: 12 },
 ];
 
 /** coach turns a self sign-up into an active client: package dates + plans */
@@ -39,7 +41,7 @@ export function ActivateSheet({ client, onClose, onDone }: { client: Client | nu
         }}
       >
         <Field group label={`${t("package")} (${t("months")})`}>
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {PACKAGES.map((p) => (
               <button type="button" key={p.label} onClick={() => setPkg(p.label)} className={`num h-12 rounded-xl border font-bold ${pkg === p.label ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>{p.label}</button>
             ))}

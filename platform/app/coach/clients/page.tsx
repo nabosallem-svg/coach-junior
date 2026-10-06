@@ -112,7 +112,7 @@ function Clients() {
           <Field label={t("phone")}><input className="input num text-start" inputMode="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required placeholder="+20" /></Field>
           <Field label={t("goal")}><input className="input" value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })} /></Field>
           <Field group label={`${t("package")} (${t("months")})`}>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {PACKAGES.map((p) => (
                 <button type="button" key={p.label} onClick={() => setForm({ ...form, pkg: p.label })} className={`num h-11 rounded-xl border font-bold ${form.pkg === p.label ? "border-gold bg-gold text-bg" : "border-line text-text-2"}`}>{p.label}</button>
               ))}

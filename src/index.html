@@ -237,6 +237,10 @@ button,input,select{font:inherit;color:inherit}
 .badges .ic{color:var(--gold);font-size:20px}
 
 /* ---- plans ---- */
+.toggle{display:flex;justify-content:center;margin:0 auto var(--s-4)}
+.toggle>div{display:inline-flex;gap:var(--s-0);padding:var(--s-0);background:var(--card);border:1px solid var(--line);border-radius:calc(var(--r-sm) + var(--s-0))}
+.toggle button{min-height:var(--ctl-h);padding:0 var(--s-3);background:none;border:0;border-radius:var(--r-sm);color:var(--muted);font-weight:700;font-size:var(--fs-sm);white-space:nowrap;cursor:pointer;transition:background-color .2s,color .2s}
+.toggle button.on{background:var(--gold);color:var(--ink)}
 .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3);align-items:stretch}   /* side-by-side cards share one row height; stacked cards size to content */
 .plan{position:relative;min-width:0;display:flex;flex-direction:column;gap:var(--s-3);padding:var(--s-4);background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);transition:border-color .35s,box-shadow .35s}
 .plan.star{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-soft),transparent 45%) var(--card);box-shadow:inset 0 0 0 1px var(--gold),0 24px 64px -24px var(--gold-glow)}
@@ -615,7 +619,6 @@ html.lenis,html.lenis body{height:auto}
           <span class="kicker rv" data-i="aboutK">عن الكابتن</span>
           <h2 class="title" data-i="aboutT">كابتن <span class="nw">عبد الملك</span> <span class="g">«جونيور»</span></h2>
         </div>
-        <p class="rv" data-i="aboutP">مدرب متخصص في المجال ولاعب كمال أجسام، معاه كورسات وشهادات وخبرة معتمدة.</p>
         <div class="badges rv">
           <span><svg class="ic" aria-hidden="true"><use href="#i-gym"/></svg><b data-i="b1">مدرب متخصص</b></span>
           <span><svg class="ic" aria-hidden="true"><use href="#i-cup"/></svg><b data-i="b2">لاعب كمال أجسام</b></span>
@@ -629,17 +632,24 @@ html.lenis,html.lenis body{height:auto}
   <section class="sec" id="plans">
     <div class="wrap">
       <div class="sec-head"><h2 class="title" data-i="plansTitle">اختار <span class="g">باقتك</span></h2></div>
+      <div class="toggle">
+        <div role="group" aria-label="Duration">
+          <button type="button" class="on" aria-pressed="true" data-d="3" data-i="d3">3 شهور</button>
+          <button type="button" aria-pressed="false" data-d="6" data-i="d6">6 شهور</button>
+          <button type="button" aria-pressed="false" data-d="12" data-i="d12">12 شهر</button>
+        </div>
+      </div>
       <div class="plans two">
         <article class="plan star rv" data-plan="pro">
           <span class="badge" data-i="popular">الأكثر طلباً</span>
           <h3 data-i="p2">المتابعة</h3>
-          <div class="price"><b class="num" data-p="2000">2,000</b><span data-i="egp">ج.م</span><small class="per">/ 3 شهور</small></div>
+          <div class="price"><b class="num" data-p3="2000" data-p6="4000" data-p12="8000">2,000</b><span data-i="egp">ج.م</span><small class="per">/ 3 شهور</small></div>
           <ul><li data-i="f4">برنامج تمرين ونظام أكل</li><li data-i="f5">متابعة أسبوعية</li><li data-i="f6">واتساب مباشر</li><li data-i="f7">تصحيح التكنيك بالفيديو</li></ul>
           <button class="btn btn-gold order mag" type="button" data-i="choose">اطلب</button>
         </article>
         <article class="plan rv" data-plan="comp">
           <h3 data-i="p3">تجهيز بطولة</h3>
-          <div class="price"><b class="num" data-p="4000">4,000</b><span data-i="egp">ج.م</span><small class="per">/ 3 شهور</small></div>
+          <div class="price"><b class="num" data-p3="4000" data-p6="7000" data-p12="16000">4,000</b><span data-i="egp">ج.م</span><small class="per">/ 3 شهور</small></div>
           <ul><li data-i="f8">كل اللي في المتابعة</li><li data-i="f9">Peak Week</li><li data-i="f10">تدريب بوزينج</li><li data-i="f11">متابعة يومية</li></ul>
           <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
         </article>
@@ -741,10 +751,10 @@ html.lenis,html.lenis body{height:auto}
       progK:'البرامج', progT:'اشتراكك <span class="g">فيه إيه؟</span>', pr1T:'تمرين على حسب هدفك', pr1P:'بنبدأ باختبار لمستواك وقوتك وأي إصابة عندك، وبنعدل البرنامج كل ما تتقدم.', pr2T:'نظام غذائي', pr2P:'أكل محسوب على هدفك ومواعيد يومك، وبنحسّنه كل ما تتقدم.', pr3T:'متابعة كل يوم على واتساب', pr3P:'بتبعت تمرينك وصورك، والكابتن بيرد عليك كل يوم ويظبطلك الخطة.', chat1:'تمرين النهارده خلص 💪', chat2:'عاش يا بطل، بكرة نزود الوزن',
       whyK:'ليه تشترك؟', whyT:'كل اللي محتاجه في <span class="g">مكان واحد</span>', v1:'تطوير في شكل جسمك وصحتك', v2:'تجهيز للبطولات', v3:'تحول طبيعي 100%',
       ft1:'نظام تمرين مخصص', ft2:'نظام أكل مرن', ft3:'متابعة واتساب يومية', ft4:'فيديو لكل تمرين',
-      aboutK:'عن الكابتن', aboutT:'كابتن <span class="nw">عبد الملك</span> <span class="g">«جونيور»</span>', aboutP:'مدرب متخصص في المجال ولاعب كمال أجسام، معاه كورسات وشهادات وخبرة معتمدة.',
+      aboutK:'عن الكابتن', aboutT:'كابتن <span class="nw">عبد الملك</span> <span class="g">«جونيور»</span>',
       b1:'مدرب متخصص', b2:'لاعب كمال أجسام', b3:'شهادات معتمدة',
       plansTitle:'اختار <span class="g">باقتك</span>',
-      per:'/ 3 شهور', egp:'ج.م', popular:'الأكثر طلباً', choose:'اطلب',
+      per3:'/ 3 شهور', per6:'/ 6 شهور', per12:'/ 12 شهر', d3:'3 شهور', d6:'6 شهور', d12:'12 شهر', egp:'ج.م', popular:'الأكثر طلباً', choose:'اطلب',
       p2:'المتابعة', p3:'تجهيز بطولة',
       f4:'برنامج تمرين ونظام أكل', f5:'متابعة أسبوعية', f6:'واتساب مباشر', f7:'تصحيح التكنيك بالفيديو', f8:'كل اللي في المتابعة', f9:'Peak Week', f10:'تدريب بوزينج', f11:'متابعة يومية',
       howK:'رحلتك معانا', howTitle:'<span class="g">4</span> خطوات وتبدأ', st1:'اشترك', st2:'التقييم', st3:'تحديد مستواك', st4:'استلم نظامك',
@@ -762,10 +772,10 @@ html.lenis,html.lenis body{height:auto}
       progK:'Programs', progT:'What you <span class="g">get</span>', pr1T:'Training for your goal', pr1P:'We start by testing your level, strength and any injuries, then adjust the plan as you progress.', pr2T:'Nutrition plan', pr2P:'Meals built around your goal and daily schedule, improved as you progress.', pr3T:'Daily check-ins on WhatsApp', pr3P:'Send your workouts and photos, and the coach replies every day and fine-tunes your plan.', chat1:'Workout done today 💪', chat2:'Great job champ, more weight tomorrow',
       whyK:'Why join?', whyT:'Everything you <span class="g">need</span>', v1:'A better body and better health', v2:'Competition prep', v3:'100% natural transformation',
       ft1:'Custom training', ft2:'Flexible nutrition', ft3:'Daily check-ins on WhatsApp', ft4:'Video for every exercise',
-      aboutK:'About the coach', aboutT:'Coach Abdelmalek <span class="g">"Junior"</span>', aboutP:'A specialist coach and bodybuilder, with certified courses, credentials and experience.',
+      aboutK:'About the coach', aboutT:'Coach Abdelmalek <span class="g">"Junior"</span>',
       b1:'Specialist coach', b2:'Bodybuilder', b3:'Certified',
       plansTitle:'Pick your <span class="g">plan</span>',
-      per:'/ 3 months', egp:'EGP', popular:'Most popular', choose:'Order',
+      per3:'/ 3 months', per6:'/ 6 months', per12:'/ 12 months', d3:'3 months', d6:'6 months', d12:'12 months', egp:'EGP', popular:'Most popular', choose:'Order',
       p2:'Follow-up', p3:'Contest prep',
       f4:'Training & nutrition plan', f5:'Weekly check-ins', f6:'Direct WhatsApp', f7:'Video form review', f8:'Everything in Follow-up', f9:'Peak week', f10:'Posing coaching', f11:'Daily check-ins',
       howK:'Your journey', howTitle:'4 <span class="g">steps</span>', st1:'Subscribe', st2:'Assessment', st3:'Your level', st4:'Get your system',
@@ -787,7 +797,9 @@ html.lenis,html.lenis body{height:auto}
   var hdr = $('#hdr'), langBtn = $('#lang'), fab = $('.fab');
   function wa(msg){ return 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg); }
   function money(n){ return n.toLocaleString('en-US'); }
-  function setPer(){ $$('.per').forEach(function(el){ el.textContent = T[lang].per; }); }
+  var dur = '3';
+  function price(el){ return +el.dataset['p' + dur]; }
+  function setPer(){ $$('.per').forEach(function(el){ el.textContent = T[lang]['per' + dur]; }); }
 
   function apply(){
     var t = T[lang];
@@ -818,7 +830,7 @@ html.lenis,html.lenis body{height:auto}
 
   // phones: CSS reveals triggered by IntersectionObserver (compositor-only opacity/transform)
   if (root.classList.contains('lite')) {
-    var groups = [['.sec-head .kicker, .title:not(.hero *)'], ['#stageRow .scard'], ['.prog'], ['.value'], ['.feat'], ['.about .pic, .about p, .badges'], ['.plan'], ['.step'], ['#faq details'], ['.final .ctas, .final p']];
+    var groups = [['.sec-head .kicker, .title:not(.hero *)'], ['#stageRow .scard'], ['.prog'], ['.value'], ['.feat'], ['.about .pic, .badges'], ['.toggle, .plan'], ['.step'], ['#faq details'], ['.final .ctas, .final p']];
     var revs = [];
     groups.forEach(function(g){ $$(g[0]).forEach(function(el, k){ if (el.closest('.hero')) return; el.classList.add('lr'); el.style.setProperty('--i', k % 4); revs.push(el); }); });
     if ('IntersectionObserver' in window) {
@@ -826,6 +838,21 @@ html.lenis,html.lenis body{height:auto}
       revs.forEach(function(el){ rio.observe(el); });
     } else revs.forEach(function(el){ el.classList.add('in'); });
   }
+
+  // duration toggle: each price carries its own total per duration
+  $$('.toggle button').forEach(function(b){
+    b.addEventListener('click', function(){
+      dur = b.dataset.d;
+      $$('.toggle button').forEach(function(x){ x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+      $$('.price b').forEach(function(el){
+        var to = price(el), from = +el.textContent.replace(/,/g, '');
+        if (el._tw) el._tw.kill();
+        if (window.gsap && !REDUCE) { var o = { v: from }; el._tw = gsap.to(o, { v: to, duration: .6, ease: 'power2.out', onUpdate: function(){ el.textContent = money(Math.round(o.v)); } }); }
+        else el.textContent = money(to);
+      });
+      setPer();
+    });
+  });
 
   // order sheet -> WhatsApp
   var sheet = $('#sheet'), form = $('#orderForm'), err = $('#oErr'), opener = null;
@@ -840,7 +867,7 @@ html.lenis,html.lenis body{height:auto}
       b.addEventListener('click', function(){
         var plan = b.closest('.plan'); opener = b;
         $('#pickedName').textContent = $('h3', plan).textContent;
-        $('#pickedPrice').textContent = money(+$('.price b', plan).dataset.p) + ' ' + T[lang].egp + ' ' + T[lang].per;
+        $('#pickedPrice').textContent = money(price($('.price b', plan))) + ' ' + T[lang].egp + ' ' + T[lang]['per' + dur];
         err.hidden = true; sheet.hidden = false; root.style.overflow = 'hidden';
         if (lenis) lenis.stop();
         if (window.gsap && !REDUCE) gsap.fromTo(form, { y: 40, opacity: 0, scale: .96 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(1.6)' });
