@@ -30,7 +30,7 @@ type Ctx = {
   login: (who: "coach" | "client", phone: string, pw: string) => Promise<boolean | string>;
   live: boolean;
   /** last save failed (live only) */
-  syncError: boolean;
+  syncError: string | false;
 };
 
 const StoreCtx = createContext<Ctx | null>(null);
@@ -55,7 +55,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [db, setDb] = useState<DB>(LIVE ? emptyDB : makeSeed);
   const [session, setSessionState] = useState<Session>(null);
-  const [syncError, setSyncError] = useState(false);
+  const [syncError, setSyncError] = useState<string | false>(false);
   const sessionRef = useRef<Session>(null);
   sessionRef.current = session;
 
@@ -70,7 +70,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     const { data: coach } = await (await sb()).from("coaches").select("id").eq("id", user.id).maybeSingle();
     if (coach) await seedIfEmpty(makeSeed()).catch(() => {});
-    setDb(await loadDB().catch(() => emptyDB()));
+    try { setDb(await loadDB()); setSyncError(false); } catch (e) { setSyncError(errText(e)); }   // keep what is on screen; never show an empty list as if it were saved
     setSessionState(coach ? { role: "coach" } : { role: "client", clientId: user.id });
   }, []);
 
@@ -110,7 +110,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (LIVE) {
         const s = sessionRef.current;
         // StrictMode may run this twice; upserts and deletes are idempotent
-        queueMicrotask(() => saveDiff(prev, next, s?.role === "client" ? s.clientId : undefined).then(() => setSyncError(false), () => setSyncError(true)));
+        queueMicrotask(() => saveDiff(prev, next, s?.role === "client" ? s.clientId : undefined).then(() => setSyncError(false), (e) => setSyncError(errText(e))));
       } else save(DB_KEY, next);
       return next;
     });
@@ -168,14 +168,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   return (
     <StoreCtx.Provider value={{ ready, db, update, session, setSession, reset, login, live: LIVE, syncError }}>
       {children}
-      {syncError && <SyncBanner />}
+      {syncError !== false && <SyncBanner msg={syncError} />}
     </StoreCtx.Provider>
   );
 }
 
-function SyncBanner() {
+const errText = (e: unknown) => ((e as { message?: string })?.message || String(e)).slice(0, 160);
+
+function SyncBanner({ msg }: { msg: string }) {
   const { t } = useI18n();
-  return <div role="alert" className="fixed inset-x-0 top-0 z-[60] bg-danger px-4 py-2 text-center text-sm font-bold text-white">{t("syncFailed")}</div>;
+  return <div role="alert" className="fixed inset-x-0 top-0 z-[60] bg-danger px-4 py-2 text-center text-sm font-bold text-white">{t("syncFailed")} <span dir="ltr" className="font-normal opacity-90">({msg})</span></div>;
 }
 
 export function useStore() {
