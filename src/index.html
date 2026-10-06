@@ -489,6 +489,28 @@ html.lenis,html.lenis body{height:auto}
 @keyframes liteZoom{from{transform:scale(1.12)}to{transform:none}}
 @keyframes liteRise{from{transform:translateY(110%)}to{transform:none}}
 @keyframes liteUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+/* ---- phones: a shorter page (programs swipe sideways, tighter sections, 3 FAQ items) ---- */
+@media (max-width:600px){
+  :root{--sec-y:var(--s-4);--band-y:var(--s-5)}
+  .hero{min-height:80svh}
+  .sec-head{margin-bottom:var(--s-3)}
+  .progs{display:flex;max-width:none;gap:var(--s-2);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(var(--s-3) * -1);padding-inline:var(--s-3)}
+  .progs::-webkit-scrollbar{display:none}
+  .prog{flex:0 0 78%;scroll-snap-align:center}
+  .prog-media{aspect-ratio:16/10}
+  .values{grid-template-columns:1fr 1fr;gap:var(--s-2)}
+  .value{flex-direction:column;text-align:center;padding:var(--s-2)}
+  .feats{gap:var(--s-2);margin-top:var(--s-2)}
+  .feat{padding:var(--s-2)}
+  .feat b{margin-top:var(--s-1)}
+  .about .pic{max-width:260px;aspect-ratio:1/1}
+  .steps{row-gap:var(--s-3)}
+  .faq details:nth-child(n+4){display:none}
+  .final .ctas{margin-top:var(--s-3)}
+  footer .fg{grid-template-columns:1fr 1fr;gap:var(--s-3)}
+  footer .fg > div:first-child{grid-column:1/-1}
+  footer{padding-top:var(--s-4)}
+}
 </style>
 </head>
 <body>
