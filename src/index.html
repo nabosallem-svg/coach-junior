@@ -657,20 +657,27 @@ html.lenis,html.lenis body{height:auto}
       <div class="sec-head"><h2 class="title" data-i="plansTitle">اختار <span class="g">باقتك</span></h2></div>
       <div class="toggle">
         <div role="group" aria-label="Duration">
-          <button type="button" class="on" aria-pressed="true" data-d="3" data-i="d3">3 شهور</button>
+          <button type="button" class="on" aria-pressed="true" data-d="1" data-i="d1">شهر</button>
+          <button type="button" aria-pressed="false" data-d="3" data-i="d3">3 شهور</button>
           <button type="button" aria-pressed="false" data-d="6" data-i="d6">6 شهور</button>
           <button type="button" aria-pressed="false" data-d="12" data-i="d12">12 شهر</button>
         </div>
       </div>
       <div class="plans two">
+        <article class="plan rv" data-plan="basic">
+          <h3 data-i="p1">البداية</h3>
+          <div class="price"><b class="num" data-p1="800">800</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
+          <ul><li data-i="f1">برنامج تمرين</li><li data-i="f2">نظام أكل</li><li data-i="f3">فيديوهات التمارين</li></ul>
+          <button class="btn btn-line order" type="button" data-i="choose">اطلب</button>
+        </article>
         <article class="plan star rv" data-plan="pro">
           <span class="badge" data-i="popular">الأكثر طلباً</span>
           <h3 data-i="p2">المتابعة</h3>
-          <div class="price"><b class="num" data-p3="2000" data-p6="4000" data-p12="8000">2,000</b><span data-i="egp">ج.م</span><small class="per">/ 3 شهور</small></div>
+          <div class="price"><b class="num" data-p1="1600" data-p3="2000" data-p6="4000" data-p12="8000">1,600</b><span data-i="egp">ج.م</span><small class="per">/ شهر</small></div>
           <ul><li data-i="f4">برنامج تمرين ونظام أكل</li><li data-i="f5">متابعة أسبوعية</li><li data-i="f6">واتساب مباشر</li><li data-i="f7">تصحيح التكنيك بالفيديو</li></ul>
           <button class="btn btn-gold order mag" type="button" data-i="choose">اطلب</button>
         </article>
-        <article class="plan rv" data-plan="comp">
+        <article class="plan rv" data-plan="comp" hidden>
           <h3 data-i="p3">تجهيز بطولة</h3>
           <div class="price"><b class="num" data-p3="4000" data-p6="7000" data-p12="16000">4,000</b><span data-i="egp">ج.م</span><small class="per">/ 3 شهور</small></div>
           <ul><li data-i="f8">كل اللي في المتابعة</li><li data-i="f9">Peak Week</li><li data-i="f10">تدريب بوزينج</li><li data-i="f11">متابعة يومية</li></ul>
@@ -777,8 +784,8 @@ html.lenis,html.lenis body{height:auto}
       trT:'تحولات <span class="g">المشتركين</span>', aboutK:'عن الكابتن', aboutT:'كابتن <span class="nw">عبد الملك</span> <span class="g">«جونيور»</span>',
       b1:'مدرب متخصص', b2:'لاعب كمال أجسام', b3:'شهادات معتمدة',
       plansTitle:'اختار <span class="g">باقتك</span>',
-      per3:'/ 3 شهور', per6:'/ 6 شهور', per12:'/ 12 شهر', d3:'3 شهور', d6:'6 شهور', d12:'12 شهر', egp:'ج.م', popular:'الأكثر طلباً', choose:'اطلب',
-      p2:'المتابعة', p3:'تجهيز بطولة',
+      per1:'/ شهر', d1:'شهر', per3:'/ 3 شهور', per6:'/ 6 شهور', per12:'/ 12 شهر', d3:'3 شهور', d6:'6 شهور', d12:'12 شهر', egp:'ج.م', popular:'الأكثر طلباً', choose:'اطلب',
+      p1:'البداية', f1:'برنامج تمرين', f2:'نظام أكل', f3:'فيديوهات التمارين', p2:'المتابعة', p3:'تجهيز بطولة',
       f4:'برنامج تمرين ونظام أكل', f5:'متابعة أسبوعية', f6:'واتساب مباشر', f7:'تصحيح التكنيك بالفيديو', f8:'كل اللي في المتابعة', f9:'Peak Week', f10:'تدريب بوزينج', f11:'متابعة يومية',
       howK:'رحلتك معانا', howTitle:'<span class="g">4</span> خطوات وتبدأ', st1:'اشترك', st2:'التقييم', st3:'تحديد مستواك', st4:'استلم نظامك',
       sp1:'اختار الباقة وادفع', sp2:'استبيان وصور البداية', sp3:'الكابتن يحدد مستواك وهدفك', sp4:'تمرين وأكل خلال أسبوع',
@@ -798,8 +805,8 @@ html.lenis,html.lenis body{height:auto}
       trT:'Client <span class="g">transformations</span>', aboutK:'About the coach', aboutT:'Coach Abdelmalek <span class="g">"Junior"</span>',
       b1:'Specialist coach', b2:'Bodybuilder', b3:'Certified',
       plansTitle:'Pick your <span class="g">plan</span>',
-      per3:'/ 3 months', per6:'/ 6 months', per12:'/ 12 months', d3:'3 months', d6:'6 months', d12:'12 months', egp:'EGP', popular:'Most popular', choose:'Order',
-      p2:'Follow-up', p3:'Contest prep',
+      per1:'/ month', d1:'1 month', per3:'/ 3 months', per6:'/ 6 months', per12:'/ 12 months', d3:'3 months', d6:'6 months', d12:'12 months', egp:'EGP', popular:'Most popular', choose:'Order',
+      p1:'Starter', f1:'Training program', f2:'Nutrition plan', f3:'Exercise videos', p2:'Follow-up', p3:'Contest prep',
       f4:'Training & nutrition plan', f5:'Weekly check-ins', f6:'Direct WhatsApp', f7:'Video form review', f8:'Everything in Follow-up', f9:'Peak week', f10:'Posing coaching', f11:'Daily check-ins',
       howK:'Your journey', howTitle:'4 <span class="g">steps</span>', st1:'Subscribe', st2:'Assessment', st3:'Your level', st4:'Get your system',
       sp1:'Pick a plan and pay', sp2:'Questionnaire and photos', sp3:'The coach sets your level and goal', sp4:'Training and diet within a week',
@@ -820,7 +827,7 @@ html.lenis,html.lenis body{height:auto}
   var hdr = $('#hdr'), langBtn = $('#lang'), fab = $('.fab');
   function wa(msg){ return 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg); }
   function money(n){ return n.toLocaleString('en-US'); }
-  var dur = '3';
+  var dur = '1';
   function price(el){ return +el.dataset['p' + dur]; }
   function setPer(){ $$('.per').forEach(function(el){ el.textContent = T[lang]['per' + dur]; }); }
 
@@ -867,7 +874,12 @@ html.lenis,html.lenis body{height:auto}
     b.addEventListener('click', function(){
       dur = b.dataset.d;
       $$('.toggle button').forEach(function(x){ x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
-      $$('.price b').forEach(function(el){
+      // monthly: البداية + المتابعة; 3/6/12: المتابعة + تجهيز بطولة
+      $$('.plan').forEach(function(pl){
+        pl.hidden = dur === '1' ? pl.dataset.plan === 'comp' : pl.dataset.plan === 'basic';
+        if (!pl.hidden) { pl.classList.add('in'); if (window.gsap) { gsap.killTweensOf(pl); gsap.set(pl, { clearProps: 'opacity,transform' }); } }   // a card hidden at load never got its reveal
+      });
+      $$('.plan:not([hidden]) .price b').forEach(function(el){
         var to = price(el), from = +el.textContent.replace(/,/g, '');
         if (el._tw) el._tw.kill();
         if (window.gsap && !REDUCE) { var o = { v: from }; el._tw = gsap.to(o, { v: to, duration: .6, ease: 'power2.out', onUpdate: function(){ el.textContent = money(Math.round(o.v)); } }); }
