@@ -344,7 +344,7 @@ function ClientDetail() {
         ) : <p className="whitespace-pre-line leading-relaxed text-text-2" dir="auto">{ai.text}</p>)}
       </Sheet>
       <Sheet open={renewing} onClose={() => setRenewing(false)} title={t("renewTitle", { name: c.name.split(" ")[0] })}>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-2">
           {PACKAGES.map((p) => (
             <button key={p.label} onClick={() => renew(p)} className="card flex flex-col items-center gap-1 p-4 hover:border-gold">
               <span className="num text-2xl font-black text-gold">{p.label}</span>
