@@ -91,7 +91,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
           <button onClick={() => setMenu(true)} aria-label={me.name}>
             <Avatar name={me.name} />
           </button>
-          <Brand />
+          <span className="flex items-center gap-2"><Brand /><span className="rounded-full bg-gold-soft px-2 py-0.5 text-[11px] font-black text-gold">{t("roleClient")}</span></span>
           <div className="flex items-center gap-1">
             <button onClick={toggle} className="grid h-10 min-w-10 place-items-center rounded-xl border border-line-gold px-2 text-sm font-bold text-gold">
               {t("langToggle")}

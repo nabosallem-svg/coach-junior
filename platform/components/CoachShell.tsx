@@ -65,7 +65,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
 
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-bg/90 px-4 backdrop-blur lg:hidden">
-          <Brand small />
+          <span className="flex items-center gap-2"><Brand small /><span className="rounded-full bg-gold px-2 py-0.5 text-[11px] font-black text-bg">{t("roleCoach")}</span></span>
           <div className="flex items-center gap-2">
             {bellButton}
             <button onClick={toggle} className="grid h-10 min-w-10 place-items-center rounded-xl border border-line-gold px-2 text-sm font-bold text-gold">{t("langToggle")}</button>
