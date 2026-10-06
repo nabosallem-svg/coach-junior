@@ -27,7 +27,11 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
     setBusy(true);
     const ok = await login(who, phone, pw);
     setBusy(false);
-    if (!ok) return setErr(t(who === "coach" ? "wrongCoachPw" : "wrongLogin"));
+    if (ok !== true) {
+      // the server's own reason (e.g. "Invalid login credentials", "Email not confirmed") helps when setting up Supabase
+      const why = typeof ok === "string" && !/invalid login credentials/i.test(ok) ? ` (${ok})` : "";
+      return setErr(t(who === "coach" ? "wrongCoachPw" : "wrongLogin") + why + (!live ? ` · ${t("demoMode")}` : ""));
+    }
     onDone();
   };
 
@@ -57,9 +61,9 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
             </Field>
           )}
           <Field label={who === "coach" ? t("coachPassword") : t("password")}>
-            <div className="relative">
-              <input className="input pe-11 text-start" dir="ltr" type={show ? "text" : "password"} autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} required />
-              <button type="button" onClick={() => setShow(!show)} aria-label={t("password")} className="absolute end-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center text-muted">
+            <div className="relative" dir="ltr">
+              <input className="input pe-12 text-start" dir="ltr" type={show ? "text" : "password"} autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} required />
+              <button type="button" onClick={() => setShow(!show)} aria-label={t("password")} className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center text-muted">
                 {show ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>

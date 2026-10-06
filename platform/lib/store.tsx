@@ -26,7 +26,8 @@ type Ctx = {
   session: Session;
   setSession: (s: Session) => void;
   reset: () => void;
-  login: (who: "coach" | "client", phone: string, pw: string) => Promise<boolean>;
+  /** true, or false / the server's reason when sign-in fails */
+  login: (who: "coach" | "client", phone: string, pw: string) => Promise<boolean | string>;
   live: boolean;
   /** last save failed (live only) */
   syncError: boolean;
@@ -124,7 +125,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const email = who === "coach" ? COACH_EMAIL : phoneEmail(phone), client = await sb();
       let { error } = await client.auth.signInWithPassword({ email, password: normPw(pw) });
       if (error && normPw(pw) !== pw) ({ error } = await client.auth.signInWithPassword({ email, password: pw }));   // accounts made before normPw
-      if (error) return false;
+      if (error) return error.message || false;
       await boot();
       return true;
     }
