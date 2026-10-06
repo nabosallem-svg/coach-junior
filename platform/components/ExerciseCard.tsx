@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ArrowUp, ArrowDown, Trash2, Minus, Plus, Video, ChevronDown, HelpCircle, X, Upload, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
-import { putVideo } from "@/lib/media";
+import { putVideo, uploadError } from "@/lib/media";
 import { VideoBox } from "@/components/VideoBox";
 import type { Exercise, PlanExercise } from "@/lib/types";
 
@@ -25,14 +25,18 @@ export function ExerciseCard({ pe, ex, index, count, onChange, onMove, onDelete 
   const [help, setHelp] = useState(false);
   const { update } = useStore();
   const [uploading, setUploading] = useState(false);
+  const [pct, setPct] = useState(0);
   const upload = async (file?: File) => {
     if (!ex || !file) return;
     setUploading(true);
+    setPct(0);
     try {
       const key = `${ex.id}-${Date.now()}`;
-      await putVideo(key, file);
+      await putVideo(key, file, setPct);
       update((d) => { const e = d.exercises.find((x) => x.id === ex.id); if (e) e.videoKey = key; });
-    } catch { alert(t("uploadFailed")); }
+    } catch (e) {
+      alert(uploadError(e, t));
+    }
     setUploading(false);
   };
   const first = pe.sets[0] ?? { reps: "" };
@@ -59,7 +63,7 @@ export function ExerciseCard({ pe, ex, index, count, onChange, onMove, onDelete 
         <div className="mt-3 w-full max-w-60"><VideoBox ex={ex} /></div>
       ) : (
         <label className={`mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line-gold px-3 text-sm font-bold text-gold hover:bg-gold-soft ${uploading ? "pointer-events-none opacity-60" : ""}`}>
-          {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />} {uploading ? t("uploading") : t("uploadVideoForEx")}
+          {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />} {uploading ? t("uploadingPct", { n: pct }) : t("uploadVideoForEx")}
           <input type="file" accept="video/*" className="hidden" onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ""; }} />
         </label>
       ))}

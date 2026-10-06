@@ -356,6 +356,8 @@ const dict = {
   uploading: ["بيترفع…", "Uploading…"],
   uploadVideoForEx: ["ارفع فيديو للتمرين ده", "Upload a video for this exercise"],
   uploadFailed: ["الرفع ما نجحش، جرّب تاني", "Upload failed, try again"],
+  uploadingPct: ["بيترفع… {n}%", "Uploading… {n}%"],
+  tooBigVideo: ["الفيديو كبير: {mb} MB، والحد الأقصى {max} MB. صغّر الفيديو أو ارفعه على يوتيوب وحط اللينك في خانة (أو لينك).", "Video is {mb} MB, the limit is {max} MB. Shrink it, or upload it to YouTube and paste the link in the link field."],
   usedIn: ["مستخدم في {n} خطة", "Used in {n} plan(s)"],
 
   // coach plans

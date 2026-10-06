@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Upload, Video, VideoOff, Pencil, Trash2, Link2 } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n, MUSCLES } from "@/lib/i18n";
-import { putVideo, deleteVideo } from "@/lib/media";
+import { putVideo, deleteVideo, uploadError, MAX_UPLOAD_MB } from "@/lib/media";
 import { VideoBox } from "@/components/VideoBox";
 import { Field, Pills, Sheet, Toast } from "@/components/ui";
 import type { Exercise, Muscle } from "@/lib/types";
@@ -31,6 +31,7 @@ function Library() {
   const fileRef = useRef<HTMLInputElement>(null);
   const bulkRef = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
+  const [pct, setPct] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
 
   const defaultMuscle = (filter === "all" ? "" : filter) as Muscle | "";
@@ -44,13 +45,20 @@ function Library() {
     if (vids.length === 1) return setDraft({ ...empty, name: niceName(vids[0].name), muscle: defaultMuscle, file: vids[0] });
     setBusy(true);
     const list: Pending[] = [];
-    for (const f of vids) {
-      const id = uid("ex");
-      const key = `${id}-${Date.now()}`;
-      await putVideo(key, f);
-      list.push({ id, key, file: f.name, name: niceName(f.name), muscle: defaultMuscle });
+    try {
+      for (const f of vids) {
+        const id = uid("ex");
+        const key = `${id}-${Date.now()}`;
+        await putVideo(key, f, setPct);
+        list.push({ id, key, file: f.name, name: niceName(f.name), muscle: defaultMuscle });
+      }
+    } catch (e) {
+      setBusy(false);
+      setPct(0);
+      return alert(uploadError(e, t));
     }
     setBusy(false);
+    setPct(0);
     setTried(false);
     setPending(list);
   };
@@ -77,9 +85,16 @@ function Library() {
     const id = draft.id ?? uid("ex");
     let videoKey = draft.removeVideo ? undefined : draft.videoKey;
     if (draft.file) {
-      if (draft.videoKey) await deleteVideo(draft.videoKey).catch(() => {});
       videoKey = `${id}-${Date.now()}`;
-      await putVideo(videoKey, draft.file);
+      try {
+        await putVideo(videoKey, draft.file, setPct);
+      } catch (e) {
+        setBusy(false);
+        setPct(0);
+        return alert(uploadError(e, t));
+      }
+      if (draft.videoKey) await deleteVideo(draft.videoKey).catch(() => {});
+      setPct(0);
     } else if (draft.removeVideo && draft.videoKey) {
       await deleteVideo(draft.videoKey).catch(() => {});
     }
@@ -112,7 +127,7 @@ function Library() {
         className={`mt-5 flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-6 text-center font-bold transition-colors ${drag ? "border-gold bg-gold-soft text-gold" : "border-line-gold text-gold hover:bg-gold-soft"}`}
       >
         <Upload size={28} />
-        <span>{busy ? t("uploading") : t("dropVideos")}</span>
+        <span>{busy ? t("uploadingPct", { n: pct }) : t("dropVideos")}</span>
       </button>
       <input ref={bulkRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => { if (e.target.files) bulk(e.target.files); e.target.value = ""; }} />
 
@@ -156,7 +171,7 @@ function Library() {
               <button type="button" onClick={() => fileRef.current?.click()} className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-line-gold bg-gold-soft/40 p-6 text-gold hover:bg-gold-soft">
                 <Upload size={26} />
                 <span className="font-bold">{draft.file ? draft.file.name : draft.videoKey && !draft.removeVideo ? t("replaceVideo") : t("uploadVideo")}</span>
-                {draft.file && <span className="num text-xs text-muted">{(draft.file.size / 1048576).toFixed(1)} MB</span>}
+                {draft.file && <span className={`num text-xs ${draft.file.size > MAX_UPLOAD_MB * 1048576 ? "font-bold text-danger" : "text-muted"}`}>{(draft.file.size / 1048576).toFixed(1)} MB{draft.file.size > MAX_UPLOAD_MB * 1048576 ? ` / ${MAX_UPLOAD_MB} MB` : ""}</span>}
               </button>
             </div>
             <Field label={t("orLink")}>
@@ -167,7 +182,7 @@ function Library() {
             </Field>
 
             <div className="flex gap-2">
-              <button disabled={busy} className="btn-gold flex-1">{busy ? t("uploading") : t("save")}</button>
+              <button disabled={busy} className="btn-gold flex-1">{busy ? (draft.file ? t("uploadingPct", { n: pct }) : t("uploading")) : t("save")}</button>
               {draft.id && (draft.videoKey || draft.videoUrl) && !draft.removeVideo && (
                 <button type="button" onClick={() => setDraft({ ...draft, removeVideo: true, file: null, videoUrl: "" })} className="btn-quiet"><VideoOff size={16} /> {t("removeVideo")}</button>
               )}

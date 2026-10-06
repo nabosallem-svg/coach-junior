@@ -8,6 +8,15 @@ import { LIVE, sb } from "./supabase";
 // (videos/<key>, photos/<clientId>/<id>.jpg) played through short-lived signed URLs.
 
 const BUCKET = "media";
+/** Supabase's free plan refuses anything bigger, and the request just hangs; catch it before it starts */
+export const MAX_UPLOAD_MB = 50;
+export const isTooBig = (e: unknown) => (e as { code?: string })?.code === "tooBig";
+/** one readable Arabic line for any upload failure, instead of a silent hang */
+export function uploadError(e: unknown, t: (k: "uploadFailed" | "tooBigVideo", v?: Record<string, string | number>) => string) {
+  if (isTooBig(e)) return t("tooBigVideo", { mb: fileMB(e), max: MAX_UPLOAD_MB });
+  return `${t("uploadFailed")}: ${e instanceof Error ? e.message : String(e)}`;
+}
+export const fileMB = (e: unknown) => Math.round(((e as { mb?: number })?.mb ?? 0) * 10) / 10;
 const path = (key: string) => (key.startsWith("photos/") ? key : `videos/${key}`);
 
 const DB_NAME = "cj-media";
@@ -22,10 +31,25 @@ function open(): Promise<IDBDatabase> {
   });
 }
 
-export async function putVideo(key: string, file: Blob) {
+export async function putVideo(key: string, file: Blob, onProgress?: (pct: number) => void) {
+  if (file.size > MAX_UPLOAD_MB * 1048576) throw Object.assign(new Error("tooBig"), { code: "tooBig", mb: file.size / 1048576 });
   if (LIVE) {
-    const { error } = await (await sb()).storage.from(BUCKET).upload(path(key), file, { upsert: true, contentType: file.type || undefined });
-    if (error) throw error;
+    const p = path(key);
+    // a signed upload URL lets us send the file with XHR, which reports progress; the plain SDK upload reports nothing
+    const { data, error } = await (await sb()).storage.from(BUCKET).createSignedUploadUrl(p, { upsert: true });
+    if (error || !data) throw error ?? new Error("no upload url");
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", data.signedUrl);
+      if (file.type) xhr.setRequestHeader("content-type", file.type);
+      xhr.setRequestHeader("x-upsert", "true");
+      xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100)); };
+      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(xhr.responseText?.slice(0, 120) || `HTTP ${xhr.status}`)));
+      xhr.onerror = () => reject(new Error("network"));
+      xhr.ontimeout = () => reject(new Error("timeout"));
+      xhr.send(file);
+    });
+    onProgress?.(100);
     return;
   }
   const db = await open();
@@ -35,6 +59,7 @@ export async function putVideo(key: string, file: Blob) {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
+  onProgress?.(100);
 }
 
 export async function getVideo(key: string): Promise<Blob | undefined> {
