@@ -16,10 +16,12 @@ async function call(body: Record<string, string>) {
 }
 
 /** the server's reason in words the coach can act on */
-export function accountError(e: unknown, t: (k: "accountFailed" | "keyMissing" | "notCoach") => string) {
+export function accountError(e: unknown, t: (k: "accountFailed" | "keyMissing" | "keyWrong" | "notCoach" | "relogin") => string) {
   const m = e instanceof Error ? e.message : String(e);
   if (m === "not configured") return t("keyMissing");
-  if (m === "forbidden" || m === "unauthorized") return t("notCoach");
+  if (m.startsWith("bad service key")) return `${t("keyWrong")} (${m.slice(17)})`;
+  if (m === "forbidden") return t("notCoach");
+  if (m === "unauthorized") return t("relogin");
   return `${t("accountFailed")}: ${m}`;
 }
 

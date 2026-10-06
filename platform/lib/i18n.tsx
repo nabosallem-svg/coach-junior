@@ -134,6 +134,8 @@ const dict = {
   restN: ["راحة {n} ث", "Rest {n}s"],
   syncFailed: ["التعديل متحفظش، اتأكد من النت وجرب تاني", "Change not saved, check your connection and try again"],
   accountFailed: ["معرفناش نعمل الحساب", "Could not create the account"],
+  keyWrong: ["مفتاح SUPABASE_SERVICE_ROLE_KEY على Vercel مش صح: لازم يكون الـ Secret key من Supabase (Settings ← API Keys)، مش الـ Publishable", "SUPABASE_SERVICE_ROLE_KEY on Vercel is wrong: it must be the Secret key (Supabase Settings → API Keys), not the Publishable one"],
+  relogin: ["الدخول انتهى، اعمل تسجيل خروج وادخل تاني", "Session expired, sign out and sign in again"],
   keyMissing: ["مفتاح SUPABASE_SERVICE_ROLE_KEY مش متحط على Vercel (أو محتاج Redeploy بعد ما اتحط)", "SUPABASE_SERVICE_ROLE_KEY isn't set on Vercel (or needs a redeploy after setting it)"],
   newPhotos: ["صور تقدم جديدة", "New progress photos"],
   sentPhotos: ["بعت صور تقدم جديدة", "Sent new progress photos"],
