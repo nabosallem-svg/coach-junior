@@ -233,6 +233,7 @@ const dict = {
   startDay: ["ابدأ اليوم ده", "Start this day"],
   finishDay: ["خلّصت التمرين", "Finish workout"],
   workoutSaved: ["عاش! التمرين اتسجل", "Nice! Workout saved"],
+  demoMode: ["المنصة لسه شغالة نسخة تجريبية", "the platform is still in demo mode"],
   doneToday: ["خلصت تمرين النهارده 💪", "Today's workout done 💪"],
   doneSummary: ["{a} من {b} تمارين", "{a} of {b} exercises"],
   nextDayBtn: ["اليوم الجاي", "Next day"],
