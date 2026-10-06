@@ -10,7 +10,7 @@ import { daysLeft } from "@/lib/calc";
 import { Avatar, Field, Sheet } from "@/components/ui";
 import { Creds } from "@/components/Creds";
 import { createAccount, accountError } from "@/lib/accounts";
-import { ActivateSheet, PendingList, PACKAGES } from "@/components/Activate";
+import { ActivateSheet, PendingList, PACKAGES, pkgMonths } from "@/components/Activate";
 import type { Client } from "@/lib/types";
 
 
@@ -70,7 +70,7 @@ function Clients() {
                 <Avatar name={c.name} size={44} />
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2 font-bold">{c.name}</span>
-                  <span className="block truncate text-sm text-muted">{c.goal} · <span className="num">{c.packageName}</span></span>
+                  <span className="block truncate text-sm text-muted">{c.goal} · <span className="num">{pkgMonths(c)}</span></span>
                 </span>
                 <span className={`num shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${!c.active ? "bg-card-hi text-muted" : left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>
                   {!c.active ? t("paused") : left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}

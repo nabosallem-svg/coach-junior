@@ -14,7 +14,7 @@ import { FormView } from "@/components/FormView";
 import { Avatar, Field, SectionLabel, Sheet, Toast } from "@/components/ui";
 import { waLink } from "@/lib/wa";
 import { Creds } from "@/components/Creds";
-import { ActivateSheet, PACKAGES } from "@/components/Activate";
+import { ActivateSheet, PACKAGES, pkgMonths } from "@/components/Activate";
 import { deleteAccount } from "@/lib/accounts";
 import { ProgressPhotos } from "@/components/ProgressPhotos";
 import { setAccountPassword } from "@/lib/accounts";
@@ -154,7 +154,7 @@ function ClientDetail() {
             <span className={`num rounded-full px-2.5 py-1 text-xs font-bold ${c.pending || !c.active ? "bg-card-hi text-muted" : left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>{c.pending ? t("requests") : !c.active ? t("paused") : left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}</span>
           </div>
           <dl className="mt-3 grid grid-cols-[auto_1fr_1fr] gap-5 text-sm">
-            <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{c.packageName}</dd></div>
+            <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{pkgMonths(c)}</dd></div>
             <div><dt className="text-muted">{t("start")}</dt><dd className="font-bold">{fmtDate(c.subStart, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
             <div><dt className="text-muted">{t("end")}</dt><dd className="font-bold">{fmtDate(c.subEnd, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
           </dl>

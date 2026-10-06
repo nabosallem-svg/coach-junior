@@ -16,6 +16,13 @@ export const PACKAGES = [
   { label: "12", months: 12 },
 ];
 
+/** months the subscription actually covers, read from its dates so it can't disagree with "days left" */
+export const pkgMonths = (c: Pick<Client, "subStart" | "subEnd" | "packageName">) => {
+  const s = new Date(c.subStart), e = new Date(c.subEnd);
+  const m = (e.getFullYear() - s.getFullYear()) * 12 + e.getMonth() - s.getMonth();
+  return m > 0 ? String(m) : c.packageName;
+};
+
 /** coach turns a self sign-up into an active client: package dates + plans */
 export function ActivateSheet({ client, onClose, onDone }: { client: Client | null; onClose: () => void; onDone?: () => void }) {
   const { db, update } = useStore();

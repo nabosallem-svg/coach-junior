@@ -63,7 +63,8 @@ export function ClientShell({ children }: { children: ReactNode }) {
     );
   }
   // first thing a new trainee does: the starter form; the app opens after it
-  const starter = db.assignments.find((a) => a.clientId === me.id && a.status === "pending" && db.forms.find((f) => f.id === a.formId)?.starter);
+  const isStarter = (a: (typeof db.assignments)[number]) => a.clientId === me.id && !!db.forms.find((f) => f.id === a.formId)?.starter;
+  const starter = !db.assignments.some((a) => isStarter(a) && a.status === "submitted") && db.assignments.find((a) => isStarter(a) && a.status === "pending");
   if (starter && !path.startsWith("/app/forms/fill")) {
     return (
       <div className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
