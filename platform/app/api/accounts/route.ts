@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { env, safe } from "@/lib/serverEnv";
 
 // Coach-only account management: create a trainee login, reset a password, delete.
 // Needs NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY on the server.
@@ -7,12 +8,11 @@ const email = (phone: string) => `${phone.replace(/\D/g, "").slice(-10)}@coach-j
 
 export async function POST(req: Request) {
   // any crash comes back as readable JSON, so the coach sees the real reason instead of a generic failure
-  try { return await handle(req); } catch (e) { return Response.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 }); }
+  try { return await handle(req); } catch (e) { return Response.json({ error: safe(e instanceof Error ? e.message : String(e)) }, { status: 500 }); }
 }
 
 async function handle(req: Request) {
-  // trimmed: a key pasted into Vercel with a trailing space or newline is otherwise rejected
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim(), anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim(), service = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const url = env("NEXT_PUBLIC_SUPABASE_URL"), anon = env("NEXT_PUBLIC_SUPABASE_ANON_KEY"), service = env("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !anon || !service) return Response.json({ error: "not configured" }, { status: 503 });
   const admin = createClient(url, service, { auth: { persistSession: false } });
 
@@ -58,4 +58,5 @@ async function handle(req: Request) {
 }
 
 /** admin calls fail like this when SUPABASE_SERVICE_ROLE_KEY is not the project's secret key */
-const adminError = (m: string) => (/not allowed|invalid api key|api key|jwt|unauthori[sz]ed|forbidden|permission/i.test(m) ? `bad service key: ${m}` : m);
+const adminError = (m: string) => safe(/not allowed|invalid api key|api key|jwt|unauthori[sz]ed|forbidden|permission/i.test(m) ? `bad service key: ${m}` : m);
+
