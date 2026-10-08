@@ -173,6 +173,13 @@ button,input,select{font:inherit;color:inherit}
 .tr{transition:transform .5s ease,opacity .5s ease}
 .tr-row.auto .tr:not(.on){transform:scale(.93);opacity:.6}
 .tr img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover}
+.tr img{transition:transform .6s ease}
+@keyframes trIn{from{opacity:0;transform:translateY(28px) scale(.95)}}
+.tr-row:not(.in) .tr{opacity:0}
+.tr-row.in .tr{animation:trIn .7s cubic-bezier(.2,.7,.2,1) backwards}
+.tr-row.in .tr:nth-child(2){animation-delay:.08s}.tr-row.in .tr:nth-child(3){animation-delay:.16s}.tr-row.in .tr:nth-child(4){animation-delay:.24s}.tr-row.in .tr:nth-child(n+5){animation-delay:.32s}
+@media (hover:hover){.tr:hover img{transform:scale(1.05)}.tr:hover{border-color:var(--gold)}}
+@media (prefers-reduced-motion:reduce){.tr-row:not(.in) .tr{opacity:1}.tr-row.in .tr{animation:none}}
 .tr-nav{position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:40px;height:40px;margin-top:-20px;border-radius:50%;background:var(--bg);border:1px solid var(--line-gold);color:var(--gold);font-size:24px;line-height:1;cursor:pointer}
 .tr-nav.prev{inset-inline-start:0}.tr-nav.next{inset-inline-end:0}
 .tr-wrap.one .tr-nav{display:none}
@@ -671,6 +678,13 @@ html.lenis,html.lenis body{height:auto}
           <a class="tr" href="img/tr2.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr2-600.avif"><img src="img/tr2-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
           <a class="tr" href="img/tr3.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr3-600.avif"><img src="img/tr3-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
           <a class="tr" href="img/tr4.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr4-600.avif"><img src="img/tr4-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
+          <a class="tr" href="img/tr5.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr5-600.avif"><img src="img/tr5-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
+          <a class="tr" href="img/tr6.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr6-600.avif"><img src="img/tr6-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
+          <a class="tr" href="img/tr7.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr7-600.avif"><img src="img/tr7-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
+          <a class="tr" href="img/tr8.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr8-600.avif"><img src="img/tr8-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
+          <a class="tr" href="img/tr9.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr9-600.avif"><img src="img/tr9-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
+          <a class="tr" href="img/tr10.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr10-600.avif"><img src="img/tr10-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
+          <a class="tr" href="img/tr11.webp" target="_blank" rel="noopener"><picture><source type="image/avif" srcset="img/tr11-600.avif"><img src="img/tr11-600.webp" alt="" width="600" height="800" loading="lazy" decoding="async"></picture></a>
         </div>
         <button class="tr-nav next" type="button" aria-label="Next">›</button>
       </div>
@@ -912,6 +926,8 @@ html.lenis,html.lenis body{height:auto}
   (function(){
     var row = $('#trRow'); if (!row) return;
     var wrap = row.parentNode;
+    // posters slide in one after another the first time the row is seen
+    if ('IntersectionObserver' in window) { var tio = new IntersectionObserver(function(es){ if (es[0].isIntersecting) { row.classList.add('in'); tio.disconnect(); } }, { threshold: .15 }); tio.observe(row); } else row.classList.add('in');
     function fit(){ wrap.classList.toggle('one', row.scrollWidth <= row.clientWidth + 2); }
     fit(); addEventListener('resize', fit);
     $$('.tr-nav', wrap).forEach(function(b){
