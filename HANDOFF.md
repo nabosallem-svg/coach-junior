@@ -38,7 +38,7 @@ npx next build && npx next start
 
 ## 4. Product decisions (from the owner)
 
-1. **Only the coach creates accounts.** Coach → المشتركين → إضافة مشترك: name, phone, goal, package (1 / 3+1 / 6+1 / 12+1 months), a password he types or generates, training and nutrition template. Then "ابعت على واتساب" sends the trainee a message with a link to `/?login=client&phone=…`, phone and password. No trainee self sign-up.
+1. **Only the coach creates accounts.** Coach → المشتركين → إضافة مشترك: name, phone, goal, package (1 / 3 / 6 / 12 months; end date uses month-end clamping, `addMonths` in `lib/calc.ts`), a password he types or generates, training and nutrition template. Then "ابعت على واتساب" sends the trainee a message with a link to `/?login=client&phone=…`, phone and password. No trainee self sign-up.
 2. Login = phone (last 10 digits compared) + password. Coach has a separate tab (demo password `123456789`).
 3. **Follow-up happens on WhatsApp**, not in the app: no chat, no recurring check-in forms. Only the starter form "استمارة البداية" remains. The trainee bottom nav has a WhatsApp tab to the coach.
 4. **Per-trainee plans:** plans without `ownerId` are templates. On a trainee's page, "خصّص الخطة لـ …" clones the assigned template into a personal copy (`ownerId = clientId`) and opens the editor; edits don't touch the template or other trainees.
@@ -51,7 +51,7 @@ npx next build && npx next start
 ## 5. Code map (`platform/`)
 
 - `lib/types.ts`: data model. `Client` (phone, demo `password`, package, `subStart/subEnd`, `active`, `trainingPlanId`, `nutritionPlanId`), `Exercise` (muscle, cue, `videoKey` in IndexedDB or `videoUrl`), `TrainingPlan` → days → `PlanExercise` (`sets[]` of reps/rir, `rest`, `note`), `Food` (macros per `per` × `unit`), `NutritionPlan` → meals → items, `Swap`, `WorkoutLog`, `Measurement`, `FormTemplate`/`FormAssignment`.
-- `lib/store.tsx`: **demo backend.** Whole DB in `localStorage` key `cj-platform-db-v12` (bump the version when the seed changes), session in `cj-platform-session-v1`. `useStore()` gives `db`, `update(fn)`, `session`, `setSession`, `reset`. `uid()`, `normPhone()`, `genPassword()`.
+- `lib/store.tsx`: **demo backend.** Whole DB in `localStorage` key `cj-platform-db-v10` (bump the version when the seed changes), session in `cj-platform-session-v1`. `useStore()` gives `db`, `update(fn)`, `session`, `setSession`, `reset`. `uid()`, `normPhone()`, `genPassword()`.
 - `lib/media.ts`: uploaded videos in IndexedDB. `lib/seed.ts`: demo data (3 trainees `01000000001/ahmed123`, `…02/mohamed123`, `…03/youssef123`, Arabic exercises, templates "علوي وسفلي - 4 أيام", "فول بادي - 3 أيام", "تنشيف - 4 وجبات", "سكيني فات - 4 وجبات"; food values checked against USDA, cooked weights).
 - `lib/plans.ts` (`personalize`), `lib/calc.ts` (macros, swaps, dates), `lib/wa.ts` (`waLink`, converts 01x → 201x), `lib/hooks.ts`.
 - Pages: `app/page.tsx` login; `app/app/*` trainee (home, nutrition, training, training/session, forms); `app/coach/*` coach (dashboard, clients, clients/view, library, plans + training/nutrition/forms editors). Detail pages use `?id=` so a static export works.
@@ -88,3 +88,24 @@ Open / waiting on the owner:
 - `GEMINI_API_KEY` on Vercel for AI calories and meal photos.
 - Real coach photos/prices for the landing if not final; a custom domain.
 - Old data in a browser that used an earlier demo version: hard refresh (the DB key version bump resets it).
+
+
+## 8. State on 2026-10-08 (read this first)
+
+PRs #63–#88 on top of §7. Things a new maintainer should know:
+
+- **Errors are visible, never silent.** A red bar at the top shows the real Supabase error when a live save or load fails (`syncError` in `lib/store.tsx`). A failed load keeps what is on screen instead of showing an empty list. Saves run one after another and a reload waits for them. The starter library is seeded only when `docs` is verifiably empty (`seedIfEmpty` in `lib/sync.ts`). Account-creation errors say whether the service key is missing/wrong (`lib/accounts.ts`, `lib/serverEnv.ts` strips whitespace from env keys and hides key text in errors).
+- **Roles are unmistakable.** Login pages and headers carry a small badge (كابتن / مشترك). Coach and trainee share one browser session, so the trainee login must be tested in a private window. The coach login links to the trainee login (`دخول المشتركين`).
+- **Videos:** upload (private `media` bucket, max 50 MB on the Supabase free plan, with progress and clear errors) or a YouTube link (youtu.be, watch?v=, shorts, unlisted all work; embedded with youtube-nocookie). A bad link is rejected when saving. If a file can't play on a phone (screen recordings are often MOV/H.265) the player shows a message with a link; MP4 (H.264) or YouTube is the safe choice.
+- **Phone notifications (Web Push):** `public/sw.js`, `/api/push`, `/api/push/cron` (daily 06:00 UTC, the Vercel Hobby limit), `components/PushToggle.tsx` (button in the side menu for both roles). Needs `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET` on Vercel and the `push_subs` table (in `schema.sql`). Generate keys with `node -e 'console.log(require("web-push").generateVAPIDKeys())'`. iPhone needs the app added to the home screen first.
+- **Packages and prices (landing):** monthly tab is the default. 1 month: البداية 800, المتابعة 1600; the 3/6/12 tabs show the other plans. Don't change prices or add offers without the owner.
+- **Landing:** 11 transformation posters (`img/tr1..tr11`), the stage title is English only ("ON STAGE"), posters slide in one after another. Mobile Lighthouse about 95.
+- **WhatsApp links** use `api.whatsapp.com/send` (wa.me re-encodes text and can break emoji). The login message asks the trainee to send start photos on WhatsApp.
+
+### Domain switch (one line each, when `coachjunior.com` is bought)
+
+1. Vercel, landing project: Settings → Domains → add `coachjunior.com` and `www.coachjunior.com`. Platform project → add `app.coachjunior.com`. Add the DNS records Vercel shows.
+2. Landing: rebuild with the two addresses (they feed the canonical/og tags, `sitemap.xml`, `robots.txt` and the "دخول المشتركين" footer link):
+   `SITE_URL=https://coachjunior.com APP_URL=https://app.coachjunior.com npm run build`, commit `index.html`, `sitemap.xml`, `robots.txt`. The defaults in `build.cjs` still point at github.io and vercel.app.
+3. Platform: nothing to change. The WhatsApp credentials link is built from `window.location.origin`, so it follows whatever address the coach opened. Optionally add the new origin to Supabase → Authentication → URL Configuration.
+4. Keep the old `vercel.app` and `github.io` addresses working; they redirect nowhere and need no change.
