@@ -21,7 +21,11 @@ import { setAccountPassword } from "@/lib/accounts";
 import { aiTask, photoForAi } from "@/lib/aiTasks";
 
 function ClientDetail() {
-  const id = useSearchParams().get("id") ?? "";
+  const params = useSearchParams();
+  const id = params.get("id") ?? "";
+  // straight after adding a client: jump to the plans card so the next step is obvious
+  const planStep = params.get("plan") === "1";
+  useEffect(() => { if (planStep) document.getElementById("plans")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [planStep]);
   const { db, update } = useStore();
   const { t, lang, dir } = useI18n();
   const [viewAs, setViewAs] = useState<string | null>(null);
@@ -178,7 +182,8 @@ function ClientDetail() {
           {pwEdit !== null && pwEdit.trim().length < 6 && <p className="mt-1.5 text-xs text-muted">{t("minChars")}</p>}
         </section>
 
-        <section className="card space-y-4 p-4">
+        <section id="plans" className={`card scroll-mt-4 space-y-4 p-4 ${planStep ? "border-gold" : ""}`}>
+          {planStep && <p className="rounded-xl bg-gold-soft p-3 text-sm font-bold text-gold">{t("nextPlan")}</p>}
           <div>
             <h2 className="font-bold">{t("hisPlans", { name: c.name.split(" ")[0] })}</h2>
             <p className="mt-1 text-sm text-muted">{t("hisPlansNote")}</p>

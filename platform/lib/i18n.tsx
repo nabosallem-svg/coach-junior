@@ -309,6 +309,17 @@ const dict = {
   loggedWorkout: ["سجّل تمرين {x}", "logged {x}"],
   noPlanAssigned: ["من غير خطة", "No plan assigned"],
 
+  // first-visit guide on the coach dashboard
+  newClient: ["مشترك جديد", "New client"],
+  introTitle: ["أهلاً يا كابتن 👋 دي الخطوات الأساسية", "Welcome, coach 👋 here are the basics"],
+  introStep1: ["ضيف مشترك جديد بالاسم ورقم الموبايل", "Add a new client with name and phone"],
+  introStep2: ["اختار له خطة تمرين وأكل من القوالب الجاهزة", "Pick training and meal plans from your templates"],
+  introStep3: ["ابعتله بيانات الدخول على الواتس بزرار واحد", "Send their login on WhatsApp in one tap"],
+  introGo: ["ابدأ: ضيف مشترك", "Start: add a client"],
+  introHide: ["فهمت، اخفي", "Got it, hide"],
+  startHere: ["ابدأ من هنا", "Start here"],
+  nextPlan: ["الخطوة الجاية: اختار له خطة من القوالب", "Next: pick a plan from the templates"],
+
   // coach clients
   addClient: ["إضافة مشترك", "Add client"],
   addClientNote: ["اكتب بيانات المشترك وكلمة السر واختار خطته. هيدخل برقم موبايله وكلمة السر دي.", "Enter the client, a password and their plans. They sign in with their phone and this password."],

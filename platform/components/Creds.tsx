@@ -8,7 +8,7 @@ import { Sheet } from "./ui";
 import { waLink } from "@/lib/wa";
 
 /** shown once after the coach creates an account or resets a password */
-export function Creds({ client, password, onClose }: { client: Client | null; password: string; onClose: () => void }) {
+export function Creds({ client, password, onClose, next }: { client: Client | null; password: string; onClose: () => void; next?: string }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   if (!client) return null;
@@ -30,6 +30,7 @@ export function Creds({ client, password, onClose }: { client: Client | null; pa
           <Copy size={18} /> {copied ? t("copied") : t("copy")}
         </button>
       </div>
+      {next && <button className="btn-ghost mt-2 w-full" onClick={onClose}>{next}</button>}
     </Sheet>
   );
 }
