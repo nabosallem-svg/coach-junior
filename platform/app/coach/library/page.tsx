@@ -156,7 +156,7 @@ function Library() {
       )}
 
       <div className="mt-5">
-        <Pills value={filter} onChange={setFilter} options={[{ value: "all", label: t("all") }, ...(missing ? [{ value: "novideo", label: t("noVideoShort") }] : []), ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m) }))]} />
+        <Pills wrap value={filter} onChange={setFilter} options={[{ value: "all", label: t("all") }, ...(missing ? [{ value: "novideo", label: t("noVideoShort") }] : []), ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m) }))]} />
       </div>
 
       <ul className="mt-5 grid grid-cols-1 gap-2 lg:grid-cols-2">
