@@ -13,6 +13,7 @@ import { Field, SectionLabel, Sheet } from "@/components/ui";
 import { noticeIcon, noticeText } from "@/components/ClientShell";
 import { COACH_WA, waLink } from "@/lib/wa";
 import { ProgressPhotos } from "@/components/ProgressPhotos";
+import { clientTargets } from "@/lib/intake";
 
 export default function ClientHome() {
   const { db, update } = useStore();
@@ -33,7 +34,8 @@ export default function ClientHome() {
   const np = me.active ? db.nutritionPlans.find((p) => p.id === me.nutritionPlanId) : undefined;
   const starter = db.assignments.find((a) => a.clientId === me.id && a.status === "pending" && db.forms.find((f) => f.id === a.formId)?.starter);
   const today = new Date().toISOString().slice(0, 10);
-  const total = np ? planMacros(db, np.meals, me.id).kcal : 0;
+  // same daily target the nutrition page shows; the plan total only when no target was set
+  const total = np ? clientTargets(db, me)?.kcal ?? planMacros(db, np.meals, me.id).kcal : 0;
   const eaten = np
     ? np.meals.reduce((acc, m) => acc + planMacros(db, [{ ...m, items: m.items.filter((it) => db.eaten.includes(`${today}:${it.id}`)) }], me.id).kcal, 0)
     : 0;

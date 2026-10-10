@@ -292,7 +292,13 @@ function ClientDetail() {
                 {Object.entries(l.sets).filter(([, s]) => s.some((x) => x.done)).map(([peId, s]) => {
                   const pe = day?.exercises.find((x) => x.id === peId);
                   const ex = db.exercises.find((e) => e.id === pe?.exerciseId);
-                  return <li key={peId}><span dir="auto">{ex?.name}</span>: <span className="num">{s.filter((x) => x.done).map((x) => `${x.weight}×${x.reps}`).join("  ")}</span></li>;
+                  return <li key={peId}><span dir="auto">{ex?.name}</span>: {(() => {
+                    // sessions are a check per exercise now, so most sets carry no weight: show "3 sets × 8-12" then
+                    const done = s.filter((x) => x.done);
+                    return done.some((x) => x.weight)
+                      ? <span className="num" dir="ltr">{done.map((x) => `${x.weight || "-"}×${x.reps}`).join("  ")}</span>
+                      : <span>{t("setsReps", { n: done.length, reps: `\u2066${[...new Set(done.map((x) => x.reps))].join(" / ")}\u2069` })}</span>;
+                  })()}</li>;
                 })}
               </ul>
             </li>
