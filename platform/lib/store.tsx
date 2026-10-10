@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { DB, ID } from "./types";
-import { makeSeed, seedExercises } from "./seed";
+import { makeSeed, mergeVariants, seedExercises } from "./seed";
 import { useI18n } from "./i18n";
 import { LIVE, sb, phoneEmail, COACH_EMAIL } from "./supabase";
 import { emptyDB, loadDB, saveDiff, seedIfEmpty } from "./sync";
@@ -72,7 +72,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     const { data: coach } = await (await sb()).from("coaches").select("id").eq("id", user.id).maybeSingle();
     if (coach) await seedIfEmpty(makeSeed()).catch(() => {});
-    try { setDb(await loadDB()); setSyncError(false); } catch (e) { setSyncError(errText(e)); }   // keep what is on screen; never show an empty list as if it were saved
+    try {
+      const loaded = await loadDB();
+      const next = structuredClone(loaded);
+      if (coach && mergeVariants(next)) await saveDiff(loaded, next).catch(() => {});
+      setDb(next); setSyncError(false);
+    } catch (e) { setSyncError(errText(e)); }   // keep what is on screen; never show an empty list as if it were saved
     setSessionState(coach ? { role: "coach" } : { role: "client", clientId: user.id });
   }, []);
 
@@ -93,6 +98,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       // exercises added to the seed later show up in older demo data too
       const have = new Set(stored.exercises.map((e) => e.id));
       stored.exercises.push(...seedExercises.filter((e) => !have.has(e.id)));
+      mergeVariants(stored);
       setDb(stored);
     }
     setSessionState(load<Session>(SESSION_KEY));
@@ -166,6 +172,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const fresh = makeSeed();
       const mine = prev.exercises.filter((e) => e.videoKey || e.videoUrl || !fresh.exercises.some((x) => x.id === e.id));
       fresh.exercises = [...mine, ...fresh.exercises.filter((x) => !mine.some((e) => e.id === x.id))];
+      mergeVariants(fresh);
       save(DB_KEY, fresh);
       return fresh;
     });
