@@ -62,7 +62,7 @@ function TrainingBuilder() {
       )}
 
       <div className="mt-5 flex items-center gap-2">
-        <div className="min-w-0 flex-1"><Pills bleed={false} value={day?.id ?? ""} onChange={setDayId} options={plan.days.map((d) => ({ value: d.id, label: d.name }))} /></div>
+        <div className="min-w-0 flex-1"><Pills wrap value={day?.id ?? ""} onChange={setDayId} options={plan.days.map((d) => ({ value: d.id, label: d.name }))} /></div>
         <button onClick={addDay} aria-label={t("addDay")} title={t("addDay")} className="btn-ghost size-11 shrink-0 p-0"><Plus size={20} /></button>
       </div>
 
@@ -130,7 +130,7 @@ function TrainingBuilder() {
             <button onClick={() => setNx({ name: q, muscle: mf === "all" ? "" : (mf as Muscle), file: null })} className="mb-3 flex w-full items-center gap-2 rounded-xl border border-dashed border-line-gold px-3 py-3 font-bold text-gold hover:bg-gold-soft">
               <Plus size={18} /> {q ? t("addNamedExercise", { x: q }) : t("newExercise")}
             </button>
-            <Pills bleed={false} value={mf} onChange={setMf} options={[{ value: "all", label: t("all") }, ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m as Muscle) }))]} />
+            <Pills wrap value={mf} onChange={setMf} options={[{ value: "all", label: t("all") }, ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m as Muscle) }))]} />
             <ul className="mt-3 space-y-1.5">
               {db.exercises.filter((e) => (mf === "all" || e.muscle === mf) && (!q || e.name.toLowerCase().includes(q.toLowerCase()) || muscle(e.muscle).includes(q))).map((e) => (
                 <li key={e.id}>
