@@ -7,24 +7,24 @@ const isoDate = (offsetDays: number) => iso(offsetDays).slice(0, 10);
 
 const exercises: Exercise[] = [
   { id: "ex-ty", name: "تسخين كتف", muscle: "shoulders", cue: "تسخين بأوزان خفيفة" },
-  { id: "ex-incline-db", name: "بنش عالي", muscle: "chest", cue: "انزل ببطء لحد ما تحس بفرد في الصدر" },
-  { id: "ex-flat-bb", name: "بنش مستوي", muscle: "chest" },
-  { id: "ex-fly", name: "تفتيح", muscle: "chest", cue: "اقفل في النص وامسك ثانية" },
+  { id: "ex-incline-db", name: "بنش عالي دمبل", muscle: "chest", cue: "انزل ببطء لحد ما تحس بفرد في الصدر" },
+  { id: "ex-flat-bb", name: "بنش بريس بار", muscle: "chest" },
+  { id: "ex-fly", name: "كابل كروس أوفر", muscle: "chest", cue: "اقفل في النص وامسك ثانية" },
   { id: "ex-pulldown", name: "سحب أمامي", muscle: "back", cue: "اسحب بالكوع مش بالإيد" },
-  { id: "ex-row", name: "سحب أرضي", muscle: "back" },
-  { id: "ex-rear", name: "كتف خلفي", muscle: "shoulders", cue: "رير دلت، متعليش الكتف" },
-  { id: "ex-lateral", name: "رفرفة جانبي", muscle: "shoulders" },
-  { id: "ex-ohp", name: "ضغط كتف", muscle: "shoulders" },
-  { id: "ex-curl", name: "باي", muscle: "biceps" },
-  { id: "ex-pushdown", name: "تراي كابل", muscle: "triceps" },
-  { id: "ex-wrist", name: "سواعد", muscle: "forearms" },
-  { id: "ex-squat", name: "سكوات", muscle: "legs", cue: "نزول كامل وظهرك لازق" },
+  { id: "ex-row", name: "سحب أرضي كابل", muscle: "back" },
+  { id: "ex-rear", name: "كتف خلفي جهاز", muscle: "shoulders", cue: "رير دلت، متعليش الكتف" },
+  { id: "ex-lateral", name: "رفرفة جانبي دمبل", muscle: "shoulders" },
+  { id: "ex-ohp", name: "ضغط كتف دمبل", muscle: "shoulders" },
+  { id: "ex-curl", name: "باي بار", muscle: "biceps" },
+  { id: "ex-pushdown", name: "تراي حبل كابل", muscle: "triceps" },
+  { id: "ex-wrist", name: "سواعد دمبل (ريست كيرل)", muscle: "forearms" },
+  { id: "ex-squat", name: "سكوات بار", muscle: "legs", cue: "نزول كامل وظهرك لازق" },
   { id: "ex-rdl", name: "رومانيان ديدلفت", muscle: "legs" },
-  { id: "ex-legext", name: "رفرفة أمامي", muscle: "legs" },
-  { id: "ex-calf", name: "سمانة", muscle: "calves" },
+  { id: "ex-legext", name: "رفرفة أمامي (ليج إكستنشن)", muscle: "legs" },
+  { id: "ex-calf", name: "سمانة واقف", muscle: "calves" },
   // common gym exercises without videos; the coach attaches his own later
   { id: "lib-chest-7", name: "ضغط (بوش أب)", muscle: "chest" },
-  { id: "lib-chest-8", name: "متوازي", muscle: "chest" },
+  { id: "lib-chest-8", name: "متوازي صدر (ديبس)", muscle: "chest" },
   { id: "lib-back-9", name: "عقلة", muscle: "back" },
   { id: "lib-back-13", name: "ديدلفت", muscle: "back" },
   { id: "lib-back-16", name: "بول أوفر كابل", muscle: "back" },
@@ -47,7 +47,7 @@ const exercises: Exercise[] = [
   { id: "lib-abs-51", name: "كرانش", muscle: "abs" },
   { id: "lib-abs-52", name: "بلانك", muscle: "abs" },
   { id: "lib-abs-56", name: "عجلة البطن", muscle: "abs" },
-  { id: "lib-abs-58", name: "رفع رجل", muscle: "abs" },
+  { id: "lib-abs-58", name: "رفع رجل نايم", muscle: "abs" },
   { id: "lib-forearms-63", name: "فارمر ووك", muscle: "forearms" },
   { id: "lib-cardio-64", name: "تريدميل", muscle: "cardio" },
   { id: "lib-cardio-65", name: "عجلة", muscle: "cardio" },
@@ -55,6 +55,45 @@ const exercises: Exercise[] = [
   { id: "lib-cardio-67", name: "نط حبل", muscle: "cardio" },
   { id: "lib-cardio-69", name: "سلم (ستير ماستر)", muscle: "cardio" },
   { id: "lib-cardio-70", name: "تجديف (رووينج)", muscle: "cardio" },
+  // full library: real gym exercises per muscle, no near-duplicate variants
+  { id: "x2-chest-1", name: "بنش مستوي دمبل", muscle: "chest" },
+  { id: "x2-chest-2", name: "بنش عالي بار", muscle: "chest" },
+  { id: "x2-chest-3", name: "بنش واطي بار", muscle: "chest" },
+  { id: "x2-chest-4", name: "تفتيح دمبل", muscle: "chest" },
+  { id: "x2-chest-5", name: "بيك دك (فراشة)", muscle: "chest" },
+  { id: "x2-chest-6", name: "تشست برس جهاز", muscle: "chest" },
+  { id: "x2-back-1", name: "تجديف بار (بنت أوفر رو)", muscle: "back" },
+  { id: "x2-back-2", name: "تجديف دمبل بإيد واحدة", muscle: "back" },
+  { id: "x2-back-3", name: "تي بار رو", muscle: "back" },
+  { id: "x2-back-4", name: "تجديف جهاز", muscle: "back" },
+  { id: "x2-back-6", name: "ترابيس دمبل (شرجز)", muscle: "back" },
+  { id: "x2-shoulders-1", name: "ميليتري برس بار", muscle: "shoulders" },
+  { id: "x2-shoulders-2", name: "أرنولد برس", muscle: "shoulders" },
+  { id: "x2-shoulders-3", name: "رفرفة جانبي كابل", muscle: "shoulders" },
+  { id: "x2-shoulders-4", name: "كتف خلفي دمبل منحني", muscle: "shoulders" },
+  { id: "x2-biceps-1", name: "باي دمبل تبادل", muscle: "biceps" },
+  { id: "x2-biceps-2", name: "باي مايل دمبل", muscle: "biceps" },
+  { id: "x2-biceps-3", name: "باي لاري (بريتشر)", muscle: "biceps" },
+  { id: "x2-biceps-4", name: "باي كابل", muscle: "biceps" },
+  { id: "x2-biceps-5", name: "باي تركيز", muscle: "biceps" },
+  { id: "x2-triceps-1", name: "تراي بار كابل", muscle: "triceps" },
+  { id: "x2-triceps-3", name: "ديبس على بنش", muscle: "triceps" },
+  { id: "x2-legs-1", name: "هاك سكوات", muscle: "legs" },
+  { id: "x2-legs-2", name: "بلغاري سبليت سكوات", muscle: "legs" },
+  { id: "x2-legs-3", name: "جوبلت سكوات", muscle: "legs" },
+  { id: "x2-legs-4", name: "أداكتور جهاز (ضم)", muscle: "legs" },
+  { id: "x2-legs-5", name: "سومو سكوات", muscle: "legs" },
+  { id: "x2-glutes-1", name: "جلوت بريدج", muscle: "glutes" },
+  { id: "x2-glutes-2", name: "بول ثرو كابل", muscle: "glutes" },
+  { id: "x2-glutes-3", name: "مشي جانبي بالأستك", muscle: "glutes" },
+  { id: "x2-calves-1", name: "سمانة جالس", muscle: "calves" },
+  { id: "x2-calves-2", name: "سمانة على الليج برس", muscle: "calves" },
+  { id: "x2-abs-1", name: "رفع رجل متعلق", muscle: "abs" },
+  { id: "x2-abs-2", name: "روسيان تويست", muscle: "abs" },
+  { id: "x2-abs-3", name: "كرانش كابل", muscle: "abs" },
+  { id: "x2-abs-4", name: "بلانك جانبي", muscle: "abs" },
+  { id: "x2-abs-5", name: "بايسكل كرانش", muscle: "abs" },
+  { id: "x2-forearms-1", name: "ريفرس كيرل", muscle: "forearms" },
 ];
 /** variants the coach found confusing, folded into one base exercise each: removed id -> surviving id */
 export const mergedExercises: Record<string, string> = {
@@ -97,25 +136,28 @@ export const mergedExercises: Record<string, string> = {
   "lib-forearms-62": "ex-wrist",
   "lib-cardio-68": "lib-cardio-64",
 };
-/** surviving exercises renamed to the plain name: id -> [old seed name, new name] */
-const renamedExercises: Record<string, [string, string]> = {
-  "ex-flat-bb": ["بنش بار مستوي", "بنش مستوي"],
-  "ex-incline-db": ["ضغط دمبل عالي", "بنش عالي"],
-  "ex-fly": ["تفتيح كابل", "تفتيح"],
-  "lib-chest-8": ["متوازي للصدر", "متوازي"],
-  "ex-row": ["سحب مسنود على الصدر", "سحب أرضي"],
-  "ex-ohp": ["ضغط كتف دمبل جالس", "ضغط كتف"],
-  "ex-lateral": ["رفرفة جانبي دمبل", "رفرفة جانبي"],
-  "ex-rear": ["كتف خلفي على الجهاز", "كتف خلفي"],
-  "ex-curl": ["باي دمبل على بنش مايل", "باي"],
-  "ex-pushdown": ["تراي حبل", "تراي كابل"],
-  "ex-squat": ["هاك سكوات", "سكوات"],
+/** seed exercises renamed to their proper gym names: id -> [earlier seed names..., current name] */
+const renamedExercises: Record<string, string[]> = {
+  "ex-flat-bb": ["بنش بار مستوي", "بنش مستوي", "بنش بريس بار"],
+  "ex-incline-db": ["ضغط دمبل عالي", "بنش عالي", "بنش عالي دمبل"],
+  "ex-fly": ["تفتيح كابل", "تفتيح", "كابل كروس أوفر"],
+  "lib-chest-8": ["متوازي للصدر", "متوازي", "متوازي صدر (ديبس)"],
+  "ex-row": ["سحب مسنود على الصدر", "سحب أرضي", "سحب أرضي كابل"],
+  "ex-ohp": ["ضغط كتف دمبل جالس", "ضغط كتف", "ضغط كتف دمبل"],
+  "ex-lateral": ["رفرفة جانبي دمبل", "رفرفة جانبي", "رفرفة جانبي دمبل"],
+  "ex-rear": ["كتف خلفي على الجهاز", "كتف خلفي", "كتف خلفي جهاز"],
+  "ex-curl": ["باي دمبل على بنش مايل", "باي", "باي بار"],
+  "ex-pushdown": ["تراي حبل", "تراي كابل", "تراي حبل كابل"],
+  "ex-squat": ["هاك سكوات", "سكوات", "سكوات بار"],
+  "ex-legext": ["رفرفة أمامي", "رفرفة أمامي (ليج إكستنشن)"],
   "lib-legs-40": ["طعن (لانجز) دمبل", "طعن (لانجز)"],
-  "lib-abs-58": ["رفع رجل على الأرض", "رفع رجل"],
-  "ex-calf": ["سمانة واقف", "سمانة"],
-  "ex-wrist": ["سواعد دمبل", "سواعد"],
+  "lib-abs-58": ["رفع رجل على الأرض", "رفع رجل", "رفع رجل نايم"],
+  "ex-calf": ["سمانة واقف", "سمانة", "سمانة واقف"],
+  "ex-wrist": ["سواعد دمبل", "سواعد", "سواعد دمبل (ريست كيرل)"],
   "lib-cardio-64": ["مشي سريع على التريدميل", "تريدميل"],
 };
+/** exercises added in the full-library update; live data gets them once (only if none of them is there yet, so ones the coach deletes stay deleted) */
+const addedBatch = (ex: Exercise[]) => ex.filter((e) => e.id.startsWith("x2-"));
 /** fold the old variants out of saved data; anything the coach gave a video or renamed stays as he left it. Returns true if it changed something. */
 export function mergeVariants(db: DB): boolean {
   let changed = false;
@@ -125,7 +167,9 @@ export function mergeVariants(db: DB): boolean {
     db.trainingPlans.forEach((p) => p.days.forEach((d) => d.exercises.forEach((pe) => { if (drop.has(pe.exerciseId)) pe.exerciseId = mergedExercises[pe.exerciseId]; })));
     changed = true;
   }
-  db.exercises.forEach((e) => { const r = renamedExercises[e.id]; if (r && e.name === r[0]) { e.name = r[1]; changed = true; } });
+  db.exercises.forEach((e) => { const r = renamedExercises[e.id]; if (r && e.name !== r.at(-1) && r.includes(e.name)) { e.name = r.at(-1)!; changed = true; } });
+  const batch = addedBatch(exercises);
+  if (!db.exercises.some((e) => e.id.startsWith("x2-"))) { db.exercises.push(...batch); changed = true; }
   return changed;
 }
 /** exported so stored demo data can pick up exercises added to the seed later */

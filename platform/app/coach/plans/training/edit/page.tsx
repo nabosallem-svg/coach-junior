@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Plus, Trash2, Search, Video, Upload, Loader2, Link2 } from "lucide-react";
+import { Plus, Trash2, Search, Video, VideoOff, Upload, Loader2, Link2 } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n, MUSCLES } from "@/lib/i18n";
 import { putVideo } from "@/lib/media";
@@ -142,7 +142,7 @@ function TrainingBuilder() {
                 <li key={e.id}>
                   <button onClick={() => { addEx(e.id); closePicker(); }} className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-start hover:bg-card-hi">
                     <span className="font-bold" dir="auto">{e.name}</span>
-                    <span className="flex shrink-0 items-center gap-2 text-sm text-muted">{e.videoKey || e.videoUrl ? <Video size={14} className="text-gold" /> : <span className="rounded-full border border-line px-2 py-0.5 text-[11px]">{t("noVideoShort")}</span>}{muscle(e.muscle)}</span>
+                    <span className="flex shrink-0 items-center gap-2 text-xs text-muted">{mf === "all" && <span>{muscle(e.muscle)}</span>}{e.videoKey || e.videoUrl ? <Video size={16} className="text-gold" aria-label={t("hasVideo")} /> : <VideoOff size={16} aria-label={t("noVideoShort")} />}</span>
                   </button>
                 </li>
               ))}
