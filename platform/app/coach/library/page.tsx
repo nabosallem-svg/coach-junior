@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Upload, Video, VideoOff, Pencil, Trash2, Link2 } from "lucide-react";
+import { Upload, Video, VideoOff, Pencil, Trash2, Link2, Plus } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n, MUSCLES } from "@/lib/i18n";
 import { putVideo, deleteVideo, uploadError, youtubeEmbed, MAX_UPLOAD_MB } from "@/lib/media";
@@ -11,7 +11,7 @@ import { Field, Pills, Sheet, Toast } from "@/components/ui";
 import type { Exercise, Muscle } from "@/lib/types";
 
 type Draft = { id?: string; name: string; muscle: Muscle | ""; cue: string; videoUrl: string; file: File | null; videoKey?: string; removeVideo?: boolean };
-type Pending = { id: string; key: string; file: string; name: string; muscle: Muscle | "" };
+type Pending = { id: string; key: string; file: string; name: string; muscle: Muscle | ""; target?: string };
 const empty: Draft = { name: "", muscle: "", cue: "", videoUrl: "", file: null };
 
 /** phone/screen-recorder file names are noise; only keep a file name that looks like a real exercise name */
@@ -34,7 +34,7 @@ function Library() {
   const [pct, setPct] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
 
-  const defaultMuscle = (filter === "all" ? "" : filter) as Muscle | "";
+  const defaultMuscle = (filter === "all" || filter === "novideo" ? "" : filter) as Muscle | "";
   const [pending, setPending] = useState<Pending[] | null>(null);
   const [tried, setTried] = useState(false);
 
@@ -50,7 +50,10 @@ function Library() {
         const id = uid("ex");
         const key = `${id}-${Date.now()}`;
         await putVideo(key, f, setPct);
-        list.push({ id, key, file: f.name, name: niceName(f.name), muscle: defaultMuscle });
+        const name = niceName(f.name);
+        // a file named like an exercise that has no video yet goes straight to it
+        const match = name && db.exercises.find((e) => !hasVid(e) && !list.some((x) => x.target === e.id) && e.name.trim().toLowerCase() === name.toLowerCase());
+        list.push({ id, key, file: f.name, name, muscle: defaultMuscle, target: match ? match.id : undefined });
       }
     } catch (e) {
       setBusy(false);
@@ -65,17 +68,26 @@ function Library() {
   const savePending = () => {
     if (!pending) return;
     setTried(true);
-    if (pending.some((p) => !p.name.trim() || !p.muscle)) return;
-    update((d) => { d.exercises.unshift(...pending.map((p) => ({ id: p.id, name: p.name.trim(), muscle: p.muscle as Muscle, videoKey: p.key }))); });
+    if (pending.some(incomplete)) return;
+    update((d) => {
+      for (const p of pending) {
+        const ex = p.target && d.exercises.find((e) => e.id === p.target);
+        if (ex) { ex.videoKey = p.key; ex.videoUrl = undefined; }
+        else d.exercises.unshift({ id: p.id, name: p.name.trim(), muscle: p.muscle as Muscle, videoKey: p.key });
+      }
+    });
     setToast(t("bulkDone", { n: pending.length }));
     setTimeout(() => setToast(null), 3000);
     setPending(null);
   };
+  const incomplete = (p: Pending) => !p.target && (!p.name.trim() || !p.muscle);
   const cancelPending = () => { pending?.forEach((p) => deleteVideo(p.key).catch(() => {})); setPending(null); };
 
   useEffect(() => { if (params.get("upload")) setDraft({ ...empty }); }, [params]);
 
-  const list = db.exercises.filter((e) => filter === "all" || e.muscle === filter);
+  const hasVid = (e: Exercise) => !!(e.videoKey || e.videoUrl);
+  const missing = db.exercises.filter((e) => !hasVid(e)).length;
+  const list = db.exercises.filter((e) => (filter === "novideo" ? !hasVid(e) : filter === "all" || e.muscle === filter));
   const used = (id: string) => db.trainingPlans.filter((p) => p.days.some((d) => d.exercises.some((x) => x.exerciseId === id))).length;
   const close = () => { setDraft(null); router.replace("/coach/library"); };
 
@@ -113,12 +125,9 @@ function Library() {
     <div>
       <div className="flex items-center justify-between gap-3">
         <h1 className="h1">{t("libraryShort")}</h1>
-        <button className="btn-gold shrink-0" onClick={() => setDraft({ ...empty, muscle: defaultMuscle })}><Upload size={18} /> {t("uploadVideo")}</button>
+        <button className="btn-gold shrink-0" onClick={() => setDraft({ ...empty, muscle: defaultMuscle })}><Plus size={18} /> {t("newExercise")}</button>
       </div>
 
-      <div className="mt-5">
-        <Pills value={filter} onChange={setFilter} options={[{ value: "all", label: t("all") }, ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m) }))]} />
-      </div>
 
       <button
         type="button"
@@ -126,12 +135,29 @@ function Library() {
         onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
         onDragLeave={() => setDrag(false)}
         onDrop={(e) => { e.preventDefault(); setDrag(false); bulk(e.dataTransfer.files); }}
-        className={`mt-5 flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-6 text-center font-bold transition-colors ${drag ? "border-gold bg-gold-soft text-gold" : "border-line-gold text-gold hover:bg-gold-soft"}`}
+        className={`mt-5 flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-7 text-center transition-colors ${drag ? "border-gold bg-gold-soft text-gold" : "border-gold bg-gold-soft/40 text-gold hover:bg-gold-soft"}`}
       >
-        <Upload size={28} />
-        <span>{busy ? t("uploadingPct", { n: pct }) : t("dropVideos")}</span>
+        <Upload size={32} />
+        <span className="text-lg font-black">{busy ? t("uploadingPct", { n: pct }) : t("bulkTitle")}</span>
+        {!busy && <span className="text-sm font-bold text-text-2">{t("dropVideos")}</span>}
       </button>
       <input ref={bulkRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => { if (e.target.files) bulk(e.target.files); e.target.value = ""; }} />
+
+      {missing > 0 && (
+        <button
+          type="button"
+          onClick={() => setFilter(filter === "novideo" ? "all" : "novideo")}
+          className={`mt-3 flex w-full items-center gap-3 rounded-2xl border p-3 text-start font-bold ${filter === "novideo" ? "border-danger bg-danger/15 text-danger" : "border-danger/50 bg-danger/10 text-danger"}`}
+        >
+          <VideoOff size={20} className="shrink-0" />
+          <span className="flex-1">{t("missingVideos", { n: missing })}</span>
+          <span className="shrink-0 text-xs underline">{filter === "novideo" ? t("showAll") : t("showThem")}</span>
+        </button>
+      )}
+
+      <div className="mt-5">
+        <Pills value={filter} onChange={setFilter} options={[{ value: "all", label: t("all") }, ...(missing ? [{ value: "novideo", label: t("noVideoShort") }] : []), ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m) }))]} />
+      </div>
 
       <ul className="mt-5 grid grid-cols-1 gap-2 lg:grid-cols-2">
         {list.map((e) => {
@@ -140,12 +166,12 @@ function Library() {
             <li key={e.id}>
               <button
                 onClick={() => setDraft({ id: e.id, name: e.name, muscle: e.muscle, cue: e.cue ?? "", videoUrl: e.videoUrl ?? "", file: null, videoKey: e.videoKey })}
-                className="card flex w-full items-center gap-3 p-3 text-start hover:border-line-gold"
+                className={`card flex w-full items-center gap-3 p-3 text-start hover:border-line-gold`}
               >
-                <span className={`grid size-12 shrink-0 place-items-center rounded-xl ${has ? "bg-gold-soft text-gold" : "bg-card-hi text-muted"}`}>{has ? <Video size={20} /> : <VideoOff size={20} />}</span>
+                <span className={`grid size-12 shrink-0 place-items-center rounded-xl ${has ? "bg-gold-soft text-gold" : "bg-danger/15 text-danger"}`}>{has ? <Video size={20} /> : <VideoOff size={20} />}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-bold" dir="auto">{e.name}</span>
-                  <span className="mt-0.5 block truncate text-xs text-muted">{muscle(e.muscle)} · {has ? t("hasVideo") : t("noVideoShort")} · {used(e.id) ? t("usedIn", { n: used(e.id) }) : t("notUsed")}</span>
+                  <span className="mt-0.5 block truncate text-xs text-muted">{muscle(e.muscle)} · {has ? t("hasVideo") : <b className="text-danger">{t("noVideoShort")}</b>} · {used(e.id) ? t("usedIn", { n: used(e.id) }) : t("notUsed")}</span>
                 </span>
                 <Pencil size={16} className="shrink-0 text-muted" />
               </button>
@@ -214,14 +240,20 @@ function Library() {
             {pending.map((p, i) => (
               <div key={p.key} className="card space-y-2 p-3">
                 <p className="truncate text-xs text-muted" dir="ltr">{p.file}</p>
+                <select className="input" value={p.target ?? ""} onChange={(e) => setPending(pending.map((x, j) => (j === i ? { ...x, target: e.target.value || undefined } : x)))}>
+                  <option value="">{t("asNewExercise")}</option>
+                  {db.exercises.filter((e) => !hasVid(e) && (e.id === p.target || !pending.some((x) => x.target === e.id))).map((e) => <option key={e.id} value={e.id}>{t("forExercise", { x: e.name })}</option>)}
+                </select>
+                {!p.target && <>
                 <input className={`input ${tried && !p.name.trim() ? "border-danger" : ""}`} dir="auto" placeholder={t("exerciseName")} value={p.name} onChange={(e) => setPending(pending.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
                 <select className={`input ${tried && !p.muscle ? "border-danger" : ""}`} value={p.muscle} onChange={(e) => setPending(pending.map((x, j) => (j === i ? { ...x, muscle: e.target.value as Muscle } : x)))}>
                   <option value="" disabled>{t("pickMuscle")}</option>
                   {MUSCLES.map((m) => <option key={m} value={m}>{muscle(m)}</option>)}
                 </select>
+                </>}
               </div>
             ))}
-            {tried && pending.some((p) => !p.name.trim() || !p.muscle) && <p className="text-center text-sm font-bold text-danger">{t("fillAll")}</p>}
+            {tried && pending.some(incomplete) && <p className="text-center text-sm font-bold text-danger">{t("fillAll")}</p>}
             <div className="grid grid-cols-2 gap-2">
               <button onClick={savePending} className="btn-gold">{t("save")}</button>
               <button onClick={cancelPending} className="btn-quiet">{t("cancel")}</button>

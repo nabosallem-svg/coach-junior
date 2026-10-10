@@ -158,7 +158,7 @@ function ClientDetail() {
             <span className={`num rounded-full px-2.5 py-1 text-xs font-bold ${c.pending || !c.active ? "bg-card-hi text-muted" : left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>{c.pending ? t("requests") : !c.active ? t("paused") : left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}</span>
           </div>
           <dl className="mt-3 grid grid-cols-[auto_1fr_1fr] gap-5 text-sm">
-            <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{pkgMonths(c)}</dd></div>
+            <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{pkgMonths(c)} {t("months")}</dd></div>
             <div><dt className="text-muted">{t("start")}</dt><dd className="font-bold">{fmtDate(c.subStart, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
             <div><dt className="text-muted">{t("end")}</dt><dd className="font-bold">{fmtDate(c.subEnd, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
           </dl>
@@ -245,7 +245,7 @@ function ClientDetail() {
       </div>
 
       <SectionLabel>{t("weight")}</SectionLabel>
-      <WeightCard readings={ms} goal={c.goal} label={t("weight")} />
+      <WeightCard readings={ms} goal={c.goal} label={t("lastWeight")} />
 
       <SectionLabel>{t("progressPhotos")}</SectionLabel>
       <ProgressPhotos clientId={c.id} />
@@ -272,7 +272,7 @@ function ClientDetail() {
                   <span className="flex items-center gap-2 font-bold">{f?.title}{a.status === "submitted" && !a.reviewed && <span className="size-2 rounded-full bg-gold" />}</span>
                   <span className="text-sm text-muted">{a.status === "pending" ? t("sentOn", { d: fmtDate(a.sentAt, lang) }) : t("submittedOn", { d: fmtDate(a.submittedAt!, lang) })}</span>
                 </span>
-                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${a.status === "pending" ? "bg-card-hi text-muted" : "bg-gold-soft text-gold"}`}>{t(a.status)}</span>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${a.status === "pending" ? "bg-card-hi text-muted" : "bg-gold-soft text-gold"}`}>{t(a.status === "pending" ? "notFilledYet" : "submitted")}</span>
               </button>
             </li>
           );
