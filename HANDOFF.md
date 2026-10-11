@@ -21,6 +21,7 @@ npx next build && npx next start
 ```
 
 - **Live platform:** Vercel project `coach-junior` on the owner's account (`vercel.com/nabeeh2`), **Root Directory = `platform`**, auto-deploys every push to `main`.
+- **Two sites, one codebase:** the same `platform` folder runs as two Vercel projects. The trainee project (`app.couchjunior.com`) sets `NEXT_PUBLIC_SITE_MODE=client`; the coach project (`coach.couchjunior.com`) sets `NEXT_PUBLIC_SITE_MODE=coach` plus the same env vars. `platform/proxy.ts` sends `/coach/*` from the trainee site to the coach site, and `/`, `/app/*` and the WhatsApp login link from the coach site to the trainee site. Same Supabase, same accounts; sessions are per domain. Only the trainee project sends the daily push (the cron returns early in coach mode). With the flag unset, one site serves both, as before.
 - **Static copy (optional):** `STATIC_EXPORT=1 BASE_PATH=/some/path npx next build` writes `out/`. It drops the API route (`pageExtensions: ["tsx"]`), so AI macros don't work there.
 - Env vars (Vercel → Settings → Environment Variables):
   - `GEMINI_API_KEY`: AI via `lib/ai.ts` (model `gemini-flash-latest`, falls back to `gemini-flash-lite-latest` when busy). Powers "احسب السعرات تلقائي" for new foods (`/api/macros`) and the trainee's "صوّر وجبتك" meal-photo estimate on the nutrition page (`/api/meal`). `ANTHROPIC_API_KEY` still works as a fallback if Gemini isn't set. Without either key the buttons say AI isn't set up.

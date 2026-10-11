@@ -3,11 +3,14 @@ import { env, safe } from "@/lib/serverEnv";
 import webpush from "web-push";
 import { coachNotices, traineeNotices } from "@/lib/notify";
 import type { DB } from "@/lib/types";
+import { SITE_MODE } from "@/lib/site";
 
 // Daily phone reminders (vercel.json cron). Works out the same notices the bell shows
 // and sends one short push per subscribed phone. Needs VAPID keys + CRON_SECRET.
 
 export async function GET(req: Request) {
+  // with two projects (lib/site.ts) only the trainee one sends, so nobody gets the same push twice
+  if (SITE_MODE === "coach") return Response.json({ skipped: "coach site" });
   const [url, service, pub, priv, secret] = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY", "CRON_SECRET"].map(env);
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) return Response.json({ error: "unauthorized" }, { status: 401 });
   if (!url || !service || !pub || !priv) return Response.json({ error: "not configured" }, { status: 503 });
