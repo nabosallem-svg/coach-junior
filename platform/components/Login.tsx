@@ -7,7 +7,7 @@ import { COACH_WA, waLink } from "@/lib/wa";
 import { useI18n } from "@/lib/i18n";
 import { Field } from "@/components/ui";
 import { asset } from "@/lib/asset";
-import { APP_URL } from "@/lib/site";
+import { APP_URL, appUrlHere } from "@/lib/site";
 
 /** one sign-in screen per audience: trainees at /, the coach at /coach (never linked from the trainee side) */
 export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; phone0?: string; onDone: () => void }) {
@@ -19,6 +19,8 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [demo, setDemo] = useState(false);
+  const [appUrl, setAppUrl] = useState(APP_URL); // the trainee site when this is the coach site
+  useEffect(() => { setAppUrl(appUrlHere()); }, []);
   useEffect(() => { setDemo(new URLSearchParams(window.location.search).has("demo")); }, []);
   useEffect(() => { if (phone0) setPhone(phone0); }, [phone0]);
 
@@ -81,9 +83,9 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
           </a>
         )}
 
-        {who === "coach" && !APP_URL && <p className="mt-3 text-center text-xs text-muted">{t("sameBrowser")}</p>}
+        {who === "coach" && !appUrl && <p className="mt-3 text-center text-xs text-muted">{t("sameBrowser")}</p>}
         {who === "coach" && (
-          <a href={APP_URL ? `${APP_URL}/` : asset("/")} className="mt-3 block w-full py-2 text-center text-sm font-bold text-gold">{t("traineeLogin")}</a>
+          <a href={appUrl ? `${appUrl}/` : asset("/")} className="mt-3 block w-full py-2 text-center text-sm font-bold text-gold">{t("traineeLogin")}</a>
         )}
 
         {/* sample logins only for us: add ?demo=1 to the URL */}

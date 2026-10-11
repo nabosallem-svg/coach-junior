@@ -1,12 +1,11 @@
 import type { MetadataRoute } from "next";
-import { SITE_MODE } from "@/lib/site";
+import { headers } from "next/headers";
+import { modeFor } from "@/lib/site";
 
 // "Add to home screen" opens the entry page (coach to /coach, trainee to /app); the coach site opens its panel directly
-export const dynamic = "force-static";
-
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-  const coach = SITE_MODE === "coach";
+  const coach = modeFor((await headers()).get("host")) === "coach";
   return {
     name: coach ? "لوحة الكابتن · Coach Junior" : "Coach Junior",
     short_name: coach ? "الكابتن" : "Junior",

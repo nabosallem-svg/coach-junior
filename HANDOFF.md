@@ -21,7 +21,7 @@ npx next build && npx next start
 ```
 
 - **Live platform:** Vercel project `coach-junior` on the owner's account (`vercel.com/nabeeh2`), **Root Directory = `platform`**, auto-deploys every push to `main`.
-- **Two sites, one codebase:** the same `platform` folder runs as two Vercel projects. The trainee project (`app.couchjunior.com`) sets `NEXT_PUBLIC_SITE_MODE=client`; the coach project (`coach.couchjunior.com`) sets `NEXT_PUBLIC_SITE_MODE=coach` plus the same env vars. `platform/proxy.ts` sends `/coach/*` from the trainee site to the coach site, and `/`, `/app/*` and the WhatsApp login link from the coach site to the trainee site. Same Supabase, same accounts; sessions are per domain. Only the trainee project sends the daily push (the cron returns early in coach mode). With the flag unset, one site serves both, as before.
+- **Two sites, one project:** the Vercel project `coach-junior` has both `app.couchjunior.com` (trainees) and `coach.couchjunior.com` (coach panel). The request host picks the site (`lib/site.ts` `modeFor`): `platform/proxy.ts` sends `/coach/*` on app.* to coach.*, and `/`, `/app/*` and the WhatsApp login link on coach.* to app.*. Coach title/manifest come from the host too. One set of env vars and keys, one cron. Sessions are per domain. Other hosts (vercel.app, previews, localhost) serve both, as before. `NEXT_PUBLIC_SITE_MODE=client|coach` still works for a two-project setup.
 - **Static copy (optional):** `STATIC_EXPORT=1 BASE_PATH=/some/path npx next build` writes `out/`. It drops the API route (`pageExtensions: ["tsx"]`), so AI macros don't work there.
 - Env vars (Vercel → Settings → Environment Variables):
   - `GEMINI_API_KEY`: AI via `lib/ai.ts` (model `gemini-flash-latest`, falls back to `gemini-flash-lite-latest` when busy). Powers "احسب السعرات تلقائي" for new foods (`/api/macros`) and the trainee's "صوّر وجبتك" meal-photo estimate on the nutrition page (`/api/meal`). `ANTHROPIC_API_KEY` still works as a fallback if Gemini isn't set. Without either key the buttons say AI isn't set up.
@@ -105,7 +105,7 @@ PRs #63–#88 on top of §7. Things a new maintainer should know:
 
 ### Domain (couchjunior.com, bought on Cloudflare, renews Oct 2027)
 
-- Landing on `couchjunior.com` (GitHub Pages, `CNAME` file in the repo root; www redirects to it). Platform on `app.couchjunior.com` (Vercel → Settings → Domains). DNS lives in Cloudflare: Pages records are DNS only (grey cloud).
+- Landing on `couchjunior.com` (GitHub Pages, `CNAME` file in the repo root; www redirects to it). Platform on `app.couchjunior.com` and the coach panel on `coach.couchjunior.com`, both on the `coach-junior` Vercel project (Settings → Domains). DNS lives in Cloudflare: Pages records are DNS only (grey cloud).
 - `build.cjs` defaults now point at those two addresses (canonical/og, `sitemap.xml`, `robots.txt`, "دخول المشتركين" link).
 - Platform: nothing to change; the WhatsApp credentials link uses `window.location.origin`. Don't touch the internal login-email domain `coach-junior.app`.
 - Old `coach-junior.vercel.app` keeps working; `nabosallem-svg.github.io/coach-junior` redirects to the new domain.
