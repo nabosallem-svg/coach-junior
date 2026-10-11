@@ -11,6 +11,7 @@ const cairoArabic = localFont({ src: "../public/fonts/cairo-arabic.woff2", weigh
 const anton = localFont({ src: "../public/fonts/anton-latin.woff2", weight: "400", variable: "--font-anton", display: "swap", adjustFontFallback: false });
 import { StoreProvider } from "@/lib/store";
 import { I18nProvider } from "@/lib/i18n";
+import { PwaBoot } from "@/components/Pwa";
 
 // the coach site (coach.* host or NEXT_PUBLIC_SITE_MODE=coach) gets its own title and stays out of search
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh">
         <I18nProvider>
           <StoreProvider>{children}</StoreProvider>
+          <PwaBoot />
         </I18nProvider>
       </body>
     </html>
