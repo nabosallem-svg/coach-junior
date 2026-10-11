@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import type { Client } from "@/lib/types";
 import { Sheet } from "./ui";
 import { waLink } from "@/lib/wa";
+import { APP_URL } from "@/lib/site";
 
 /** shown once after the coach creates an account or resets a password */
 export function Creds({ client, password, onClose, next }: { client: Client | null; password: string; onClose: () => void; next?: string }) {
@@ -13,7 +14,7 @@ export function Creds({ client, password, onClose, next }: { client: Client | nu
   const [copied, setCopied] = useState(false);
   if (!client) return null;
   // trainee-only login link: opens the client tab with the phone filled, even on a device signed in as coach
-  const url = typeof window !== "undefined" ? `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/?login=client&phone=${encodeURIComponent(client.phone.replace(/\s/g, ""))}` : "";
+  const url = typeof window !== "undefined" ? `${APP_URL || window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/?login=client&phone=${encodeURIComponent(client.phone.replace(/\s/g, ""))}` : "";
   const text = t("waCreds", { name: client.name, url, phone: client.phone, pw: password });
   return (
     <Sheet open onClose={onClose} title={t("credsTitle")}>
