@@ -28,17 +28,32 @@ export function traineeNotices(db: DB, clientId: ID, now = Date.now()): Notice[]
   return out;
 }
 
+/** rows grouped by trainee, so per-trainee lookups do not scan every row again */
+export function byClient<T extends { clientId: ID }>(rows: T[] | undefined): Map<ID, T[]> {
+  const m = new Map<ID, T[]>();
+  for (const r of rows ?? []) { const a = m.get(r.clientId); if (a) a.push(r); else m.set(r.clientId, [r]); }
+  return m;
+}
+
+/** one trainee's slice of the DB: traineeNotices on it costs the same with 10 or 1000 trainees */
+export function clientSlices(db: DB): (clientId: ID) => DB {
+  const logs = byClient(db.logs), ms = byClient(db.measurements), as = byClient(db.assignments);
+  return (id) => ({ ...db, clients: db.clients.filter((c) => c.id === id), logs: logs.get(id) ?? [], measurements: ms.get(id) ?? [], assignments: as.get(id) ?? [] });
+}
+
 export function coachNotices(db: DB, now = Date.now()): CoachNotice[] {
   const out: CoachNotice[] = [];
+  const starterForms = new Set(db.forms.filter((f) => f.starter).map((f) => f.id));
+  const assigns = byClient(db.assignments), photos = byClient((db.photos ?? []).filter((p) => ago(p.date, now) < 2));
   for (const c of db.clients.filter((x) => !x.pending && x.active)) {
     const left = daysLeft(c.subEnd);
     if (left <= 3) out.push({ key: `exp:${c.id}:${c.subEnd}`, kind: "expiring", clientId: c.id, n: left });
-    const starter = db.assignments.find((a) => a.clientId === c.id && a.status === "submitted" && a.submittedAt && db.forms.find((f) => f.id === a.formId)?.starter);
+    const starter = assigns.get(c.id)?.find((a) => a.status === "submitted" && a.submittedAt && starterForms.has(a.formId));
     if (starter && (!c.trainingPlanId || !c.nutritionPlanId)) {
       const d = Math.floor(ago(starter.submittedAt!, now));
       out.push(d >= 5 ? { key: `wait:${c.id}:late`, kind: "waiting", clientId: c.id, n: d } : { key: `form:${starter.id}`, kind: "form", clientId: c.id, n: d });
     }
-    const pics = (db.photos ?? []).filter((p) => p.clientId === c.id && ago(p.date, now) < 2);
+    const pics = photos.get(c.id) ?? [];
     if (pics.length) out.push({ key: `pics:${c.id}:${pics.map((p) => p.date).sort().at(-1)}`, kind: "photos", clientId: c.id, n: pics.length });
   }
   return out;

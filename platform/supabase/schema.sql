@@ -1,5 +1,7 @@
 -- Coach Junior platform: Supabase schema. Run once in the SQL editor of a new project.
 --
+-- Already set up before October 2026? Run supabase/perf.sql once for the faster indexes and policies.
+--
 -- Data: every record of lib/types.ts is one row in public.docs
 --   (coll = collection name like 'clients' or 'trainingPlans', id, client_id, data jsonb).
 -- The app reads everything RLS allows and writes back only the rows that changed (lib/sync.ts).
@@ -25,7 +27,8 @@ create table public.docs (
   updated_at timestamptz not null default now(),
   primary key (coll, id)
 );
-create index docs_client on public.docs (client_id);
+create index docs_client2 on public.docs (client_id, coll);
+create index docs_coll_updated on public.docs (coll, updated_at);
 
 create or replace function public.is_coach() returns boolean
 language sql stable security definer set search_path = public as $$
@@ -49,27 +52,27 @@ alter table public.docs enable row level security;
 create policy own_row on coaches for select using (id = auth.uid());
 
 -- the coach can do everything
-create policy coach_all on docs for all using (is_coach()) with check (is_coach());
+create policy coach_all on docs for all using ((select is_coach())) with check ((select is_coach()));
 
 -- trainee: own subscription record, read only (password changes go through Supabase Auth)
-create policy own_client on docs for select using (coll = 'clients' and id = auth.uid()::text);
+create policy own_client on docs for select using (coll = 'clients' and id = (select auth.uid())::text);
 
 -- trainee: their own logs, weights, photos, swaps, ticked meals, forms
 create policy own_rows on docs for all
-  using (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = auth.uid())
-  with check (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = auth.uid());
+  using (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = (select auth.uid()))
+  with check (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = (select auth.uid()));
 
 -- trainee: food list, assigned plans and the exercise library while the subscription runs
-create policy foods_read on docs for select using (coll = 'foods' and auth.uid() is not null);
-create policy forms_read on docs for select using (coll = 'forms' and auth.uid() is not null);
+create policy foods_read on docs for select using (coll = 'foods' and (select auth.uid()) is not null);
+create policy forms_read on docs for select using (coll = 'forms' and (select auth.uid()) is not null);
 create policy plans_read on docs for select using (
-  client_active() and (
-    (coll = 'trainingPlans' and id = my_client()->>'trainingPlanId') or
-    (coll = 'nutritionPlans' and id = my_client()->>'nutritionPlanId')
+  (select client_active()) and (
+    (coll = 'trainingPlans' and id = (select my_client()->>'trainingPlanId')) or
+    (coll = 'nutritionPlans' and id = (select my_client()->>'nutritionPlanId'))
   )
 );
 -- the whole exercise library, so "مش لاقي الجهاز؟" can suggest a replacement
-create policy exercises_read on docs for select using (coll = 'exercises' and client_active());
+create policy exercises_read on docs for select using (coll = 'exercises' and (select client_active()));
 
 -- Storage: one PRIVATE bucket 'media'.
 --   videos/<key>                 coach uploads, active trainees can play (signed URLs)

@@ -31,14 +31,43 @@ function rows(db: DB, me?: ID): Map<string, Row> {
   return out;
 }
 
-export async function loadDB(): Promise<DB> {
+const DAY = 864e5;
+/** how much workout history the coach loads; the trainee always gets all of their own */
+export const COACH_LOG_DAYS = 120;
+
+/** pages of 1000 rows, fetched a few at a time instead of one after another */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function readAll(where: (q: any) => any, into: Record<string, unknown[]>) {
+  const c = await sb();
+  const { count, error } = await where(c.from("docs").select("coll", { count: "exact", head: true }));
+  if (error) throw error;
+  const pages = Math.ceil((count ?? 0) / 1000);
+  for (let p = 0; p < pages; p += 6) {
+    const batch = await Promise.all(Array.from({ length: Math.min(6, pages - p) }, (_, i) => where(c.from("docs").select("coll,data")).order("coll").order("id").range((p + i) * 1000, (p + i) * 1000 + 999)));
+    for (const { data, error } of batch) {
+      if (error) throw error;
+      for (const r of data as { coll: string; data: unknown }[]) (into[r.coll] ??= []).push(r.data);
+    }
+  }
+}
+
+/**
+ * Coach: everything except ticked meals (only the trainee uses them) and workout logs older
+ * than COACH_LOG_DAYS, so the dashboard stays the same size however long the coach has run.
+ * Trainee: their own rows (RLS), with ticked meals from the last two days only; older ones
+ * are deleted so the table does not grow by ~15 rows per trainee per day forever.
+ */
+export async function loadDB(me?: ID): Promise<DB> {
   const db = emptyDB() as unknown as Record<string, unknown[]>;
-  // page through in case the coach has many rows
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await (await sb()).from("docs").select("coll,data").range(from, from + 999);
-    if (error) throw error;
-    for (const r of data) (db[r.coll] ??= []).push(r.data);
-    if (data.length < 1000) break;
+  if (!me) {
+    const since = new Date(Date.now() - COACH_LOG_DAYS * DAY).toISOString();
+    await readAll((q) => q.not("coll", "in", "(eaten,logs)"), db);
+    await readAll((q) => q.eq("coll", "logs").gte("updated_at", since), db);
+  } else {
+    await readAll((q) => q.neq("coll", "eaten"), db);
+    const day = (n: number) => new Date(Date.now() - n * DAY).toISOString().slice(0, 10);
+    await readAll((q) => q.eq("coll", "eaten").eq("client_id", me).gte("id", `${me}|${day(2)}`), db);
+    (await sb()).from("docs").delete().eq("coll", "eaten").eq("client_id", me).lt("id", `${me}|${day(7)}`).then(() => {}, () => {});
   }
   return db as unknown as DB;
 }

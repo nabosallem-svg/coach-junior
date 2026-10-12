@@ -8,7 +8,8 @@ import { daysLeft, fmtDate } from "@/lib/calc";
 import { waLink } from "@/lib/wa";
 import { Avatar, SectionLabel, Toast } from "@/components/ui";
 import { ActivateSheet, PendingList } from "@/components/Activate";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { byClient } from "@/lib/notify";
 import type { Client } from "@/lib/types";
 
 const DAY = 864e5;
@@ -21,60 +22,72 @@ export default function CoachHome() {
   const [act, setAct] = useState<Client | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  const [shown, setShown] = useState(30);   // the morning list can hold every trainee; draw it in pages
   // first-visit guide: shown until the coach hides it, "start here" brings it back
   const [intro, setIntro] = useState(false);
   useEffect(() => { try { setIntro(!localStorage.getItem(INTRO_KEY)); } catch { setIntro(true); } }, []);
   const showIntro = (v: boolean) => { setIntro(v); try { v ? localStorage.removeItem(INTRO_KEY) : localStorage.setItem(INTRO_KEY, "1"); } catch {} };
 
-  const now = Date.now();
-  const ago = (iso: string) => (now - new Date(iso).getTime()) / DAY;
-  const clients = db.clients.filter((c) => !c.pending);
-  const active = clients.filter((c) => c.active && daysLeft(c.subEnd) >= 0);
-  const first = (c: Client) => c.name.split(" ")[0];
-  const lastLog = (id: string) => db.logs.filter((l) => l.clientId === id).sort((a, b) => b.date.localeCompare(a.date))[0]?.date;
-  const weekLogs = db.logs.filter((l) => ago(l.date) < 7);
-  const newPhotos = (db.photos ?? []).filter((p) => ago(p.date) < 7);
-  const photoClients = [...new Set(newPhotos.map((p) => p.clientId))];
+  // everything below depends only on the data, so typing in the search box does not redo it
+  const { clients, todo, stats, feed, byId } = useMemo(() => {
+    const now = Date.now();
+    const ago = (iso: string) => (now - new Date(iso).getTime()) / DAY;
+    const clients = db.clients.filter((c) => !c.pending);
+    const active = clients.filter((c) => c.active && daysLeft(c.subEnd) >= 0);
+    const first = (c: Client) => c.name.split(" ")[0];
+    // latest workout and assignments per trainee, worked out once: scanning every row per trainee froze the page with hundreds of them
+    const lastLogs = new Map<string, string>();
+    for (const l of db.logs) if ((lastLogs.get(l.clientId) ?? "") < l.date) lastLogs.set(l.clientId, l.date);
+    const lastLog = (id: string) => lastLogs.get(id);
+    const assigns = byClient(db.assignments);
+    const starterForms = new Set(db.forms.filter((f) => f.starter).map((f) => f.id));
+    const weekLogs = db.logs.filter((l) => ago(l.date) < 7);
+    const newPhotos = (db.photos ?? []).filter((p) => ago(p.date) < 7);
+    const photoClients = [...new Set(newPhotos.map((p) => p.clientId))];
 
-  // the coach's morning list, most urgent first; one reason per trainee
-  type Item = { c: Client; text: string; tone: "red" | "gold" | "muted"; icon: typeof Users; wa?: string };
-  const items: Item[] = [];
-  for (const c of clients.filter((x) => x.active && daysLeft(x.subEnd) <= 7).sort((a, b) => daysLeft(a.subEnd) - daysLeft(b.subEnd))) {
-    const n = daysLeft(c.subEnd);
-    items.push({ c, text: n >= 0 ? t("daysLeftN", { n }) : t("expiredN", { n: -n }), tone: "red", icon: CalendarClock, wa: t("waRenew", { name: first(c), n: Math.max(n, 0) }) });
-  }
-  // filled the starter form but still has no plan: the coach promises one within a week
-  const waiting = active
-    .filter((c) => !c.trainingPlanId || !c.nutritionPlanId)
-    .map((c) => ({ c, a: db.assignments.find((x) => x.clientId === c.id && x.status === "submitted" && x.submittedAt && db.forms.find((f) => f.id === x.formId)?.starter) }))
-    .filter((x) => x.a)
-    .map(({ c, a }) => ({ c, days: Math.floor(ago(a!.submittedAt!)) }))
-    .sort((x, y) => y.days - x.days);
-  for (const { c, days } of waiting) items.push({ c, text: days >= 7 ? t("planLate", { n: days }) : t("planWaiting", { n: days, left: 7 - days }), tone: days >= 5 ? "red" : "gold", icon: ClipboardCheck });
-  for (const id of photoClients) { const c = clients.find((x) => x.id === id); if (c) items.push({ c, text: t("sentPhotos"), tone: "gold", icon: Camera }); }
-  for (const c of active) {
-    const pendingForm = db.assignments.find((a) => a.clientId === c.id && a.status === "pending" && ago(a.sentAt) >= 1);
-    const last = lastLog(c.id);
-    if (pendingForm) items.push({ c, text: t("formNotFilled"), tone: "muted", icon: ClipboardCheck, wa: t("waForm", { name: first(c) }) });
-    else if (!c.trainingPlanId || !c.nutritionPlanId) items.push({ c, text: t("noPlanAssigned"), tone: "muted", icon: ClipboardList });
-    else if (ago(c.subStart) >= 7 && (!last || ago(last) >= 7)) items.push({ c, text: last ? t("noWorkoutDays", { n: Math.floor(ago(last)) }) : t("noWorkoutYet"), tone: "muted", icon: Moon, wa: t("waNudge", { name: first(c) }) });
-  }
-  const todo = items.filter((it, i, arr) => arr.findIndex((x) => x.c.id === it.c.id) === i);
+    // the coach's morning list, most urgent first; one reason per trainee
+    type Item = { c: Client; text: string; tone: "red" | "gold" | "muted"; icon: typeof Users; wa?: string };
+    const items: Item[] = [];
+    for (const c of clients.filter((x) => x.active && daysLeft(x.subEnd) <= 7).sort((a, b) => daysLeft(a.subEnd) - daysLeft(b.subEnd))) {
+      const n = daysLeft(c.subEnd);
+      items.push({ c, text: n >= 0 ? t("daysLeftN", { n }) : t("expiredN", { n: -n }), tone: "red", icon: CalendarClock, wa: t("waRenew", { name: first(c), n: Math.max(n, 0) }) });
+    }
+    // filled the starter form but still has no plan: the coach promises one within a week
+    const waiting = active
+      .filter((c) => !c.trainingPlanId || !c.nutritionPlanId)
+      .map((c) => ({ c, a: assigns.get(c.id)?.find((x) => x.status === "submitted" && x.submittedAt && starterForms.has(x.formId)) }))
+      .filter((x) => x.a)
+      .map(({ c, a }) => ({ c, days: Math.floor(ago(a!.submittedAt!)) }))
+      .sort((x, y) => y.days - x.days);
+    for (const { c, days } of waiting) items.push({ c, text: days >= 7 ? t("planLate", { n: days }) : t("planWaiting", { n: days, left: 7 - days }), tone: days >= 5 ? "red" : "gold", icon: ClipboardCheck });
+    const byId = new Map(db.clients.map((c) => [c.id, c]));
+    for (const id of photoClients) { const c = byId.get(id); if (c) items.push({ c, text: t("sentPhotos"), tone: "gold", icon: Camera }); }
+    for (const c of active) {
+      const pendingForm = assigns.get(c.id)?.find((a) => a.status === "pending" && ago(a.sentAt) >= 1);
+      const last = lastLog(c.id);
+      if (pendingForm) items.push({ c, text: t("formNotFilled"), tone: "muted", icon: ClipboardCheck, wa: t("waForm", { name: first(c) }) });
+      else if (!c.trainingPlanId || !c.nutritionPlanId) items.push({ c, text: t("noPlanAssigned"), tone: "muted", icon: ClipboardList });
+      else if (ago(c.subStart) >= 7 && (!last || ago(last) >= 7)) items.push({ c, text: last ? t("noWorkoutDays", { n: Math.floor(ago(last)) }) : t("noWorkoutYet"), tone: "muted", icon: Moon, wa: t("waNudge", { name: first(c) }) });
+    }
+    const once = new Set<string>();
+    const todo = items.filter((it) => !once.has(it.c.id) && !!once.add(it.c.id));
 
-  const stats = [
-    { label: t("activeClients"), n: active.length, icon: Users, href: "/coach/clients" },
-    { label: t("expiringSoon"), n: clients.filter((c) => c.active && daysLeft(c.subEnd) <= 7).length, icon: CalendarClock, href: "/coach/clients" },
-    { label: t("workoutsThisWeek"), n: weekLogs.length, icon: Dumbbell, href: "/coach/clients" },
-    { label: t("newPhotos"), n: photoClients.length, icon: Camera, href: photoClients.length === 1 ? `/coach/clients/view?id=${photoClients[0]}` : "/coach/clients" },
-  ];
+    const stats = [
+      { label: t("activeClients"), n: active.length, icon: Users, href: "/coach/clients" },
+      { label: t("expiringSoon"), n: clients.filter((c) => c.active && daysLeft(c.subEnd) <= 7).length, icon: CalendarClock, href: "/coach/clients" },
+      { label: t("workoutsThisWeek"), n: weekLogs.length, icon: Dumbbell, href: "/coach/clients" },
+      { label: t("newPhotos"), n: photoClients.length, icon: Camera, href: photoClients.length === 1 ? `/coach/clients/view?id=${photoClients[0]}` : "/coach/clients" },
+    ];
 
-  // workouts, photos and filled forms in one feed
-  const feed = [
-    ...db.logs.map((l) => ({ id: l.id, cid: l.clientId, date: l.date, icon: Dumbbell, text: t("loggedWorkout", { x: db.trainingPlans.find((p) => p.id === l.planId)?.days.find((x) => x.id === l.dayId)?.name ?? "" }) })),
-    ...newPhotos.map((p) => ({ id: p.id, cid: p.clientId, date: p.date, icon: Camera, text: t("sentPhotos") })),
-    ...db.assignments.filter((a) => a.status === "submitted" && a.submittedAt).map((a) => ({ id: a.id, cid: a.clientId, date: a.submittedAt!, icon: ClipboardCheck, text: t("filledForm") })),
-  ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
-
+    // workouts, photos and filled forms in one feed
+    const feed = [
+      ...db.logs.filter((l) => ago(l.date) < 30).map((l) => ({ id: l.id, cid: l.clientId, date: l.date, icon: Dumbbell, text: t("loggedWorkout", { x: db.trainingPlans.find((p) => p.id === l.planId)?.days.find((x) => x.id === l.dayId)?.name ?? "" }) })),
+      ...newPhotos.map((p) => ({ id: p.id, cid: p.clientId, date: p.date, icon: Camera, text: t("sentPhotos") })),
+      ...db.assignments.filter((a) => a.status === "submitted" && a.submittedAt).map((a) => ({ id: a.id, cid: a.clientId, date: a.submittedAt!, icon: ClipboardCheck, text: t("filledForm") })),
+    ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
+    return { clients, todo, stats, feed, byId };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db, t]);
   const found = q.trim() ? clients.filter((c) => c.name.includes(q.trim()) || c.phone.includes(q.trim())).slice(0, 5) : [];
   const hour = new Date().getHours();
 
@@ -141,7 +154,7 @@ export default function CoachHome() {
             <p className="card p-4 text-muted">{t("allGood")}</p>
           ) : (
             <ul className="space-y-2">
-              {todo.map(({ c, text, tone, icon: Icon, wa }) => (
+              {todo.slice(0, shown).map(({ c, text, tone, icon: Icon, wa }) => (
                 <li key={c.id} className="card flex items-center gap-3 p-3 hover:border-line-gold">
                   <Link href={`/coach/clients/view?id=${c.id}`} className="flex min-w-0 flex-1 items-center gap-3">
                     <Avatar name={c.name} />
@@ -159,6 +172,7 @@ export default function CoachHome() {
               ))}
             </ul>
           )}
+          {todo.length > shown && <button onClick={() => setShown(shown + 30)} className="btn-quiet mt-2 w-full">{t("showMore")} <span className="num opacity-70">({todo.length - shown})</span></button>}
         </div>
         <div>
           <SectionLabel>{t("recentActivity")}</SectionLabel>
@@ -168,7 +182,7 @@ export default function CoachHome() {
               <li key={f.id}>
                 <Link href={`/coach/clients/view?id=${f.cid}`} className="flex items-center gap-3 p-3 hover:bg-card-hi">
                   <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gold-soft text-gold"><f.icon size={16} /></span>
-                  <span className="flex-1 text-sm"><b>{db.clients.find((c) => c.id === f.cid)?.name}</b> {f.text}</span>
+                  <span className="flex-1 text-sm"><b>{byId.get(f.cid)?.name}</b> {f.text}</span>
                   <span className="text-xs text-muted">{fmtDate(f.date, lang, { day: "numeric", month: "short" })}</span>
                 </Link>
               </li>
