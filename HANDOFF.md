@@ -21,6 +21,7 @@ npx next build && npx next start
 ```
 
 - **Live platform:** Vercel project `coach-junior` on the owner's account (`vercel.com/nabeeh2`), **Root Directory = `platform`**, auto-deploys every push to `main`.
+- **Two sites, one project:** the Vercel project `coach-junior` has both `app.couchjunior.com` (trainees) and `admin.couchjunior.com` (coach panel). The request host picks the site (`lib/site.ts` `modeFor`): `platform/proxy.ts` sends `/coach/*` on app.* to admin.*, and `/`, `/app/*` and the WhatsApp login link on admin.* to app.*. Coach title/manifest come from the host too. One set of env vars and keys, one cron. Sessions are per domain. Other hosts (vercel.app, previews, localhost) serve both, as before. `NEXT_PUBLIC_SITE_MODE=client|coach` still works for a two-project setup.
 - **Static copy (optional):** `STATIC_EXPORT=1 BASE_PATH=/some/path npx next build` writes `out/`. It drops the API route (`pageExtensions: ["tsx"]`), so AI macros don't work there.
 - Env vars (Vercel → Settings → Environment Variables):
   - `GEMINI_API_KEY`: AI via `lib/ai.ts` (model `gemini-flash-latest`, falls back to `gemini-flash-lite-latest` when busy). Powers "احسب السعرات تلقائي" for new foods (`/api/macros`) and the trainee's "صوّر وجبتك" meal-photo estimate on the nutrition page (`/api/meal`). `ANTHROPIC_API_KEY` still works as a fallback if Gemini isn't set. Without either key the buttons say AI isn't set up.
@@ -102,10 +103,9 @@ PRs #63–#88 on top of §7. Things a new maintainer should know:
 - **Landing:** 11 transformation posters (`img/tr1..tr11`), the stage title is English only ("ON STAGE"), posters slide in one after another. Mobile Lighthouse about 95.
 - **WhatsApp links** use `api.whatsapp.com/send` (wa.me re-encodes text and can break emoji). The login message asks the trainee to send start photos on WhatsApp.
 
-### Domain switch (one line each, when `coachjunior.com` is bought)
+### Domain (couchjunior.com, bought on Cloudflare, renews Oct 2027)
 
-1. Vercel, landing project: Settings → Domains → add `coachjunior.com` and `www.coachjunior.com`. Platform project → add `app.coachjunior.com`. Add the DNS records Vercel shows.
-2. Landing: rebuild with the two addresses (they feed the canonical/og tags, `sitemap.xml`, `robots.txt` and the "دخول المشتركين" footer link):
-   `SITE_URL=https://coachjunior.com APP_URL=https://app.coachjunior.com npm run build`, commit `index.html`, `sitemap.xml`, `robots.txt`. The defaults in `build.cjs` still point at github.io and vercel.app.
-3. Platform: nothing to change. The WhatsApp credentials link is built from `window.location.origin`, so it follows whatever address the coach opened. Optionally add the new origin to Supabase → Authentication → URL Configuration.
-4. Keep the old `vercel.app` and `github.io` addresses working; they redirect nowhere and need no change.
+- Landing on `couchjunior.com` (GitHub Pages, `CNAME` file in the repo root; www redirects to it). Platform on `app.couchjunior.com` and the coach panel on `admin.couchjunior.com`, both on the `coach-junior` Vercel project (Settings → Domains). DNS lives in Cloudflare: Pages records are DNS only (grey cloud).
+- `build.cjs` defaults now point at those two addresses (canonical/og, `sitemap.xml`, `robots.txt`, "دخول المشتركين" link).
+- Platform: nothing to change; the WhatsApp credentials link uses `window.location.origin`. Don't touch the internal login-email domain `coach-junior.app`.
+- Old `coach-junior.vercel.app` keeps working; `nabosallem-svg.github.io/coach-junior` redirects to the new domain.

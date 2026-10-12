@@ -81,7 +81,8 @@ function Session() {
           const ex = db.exercises.find((e) => e.id === pe.exerciseId);
           if (!ex) return null;
           const isDone = doneIds.includes(pe.id);
-          const reps = [...new Set(pe.sets.map((x) => x.reps))].join(" / ");
+          // isolate the range so "6-10" is not flipped to "10-6" inside the Arabic sentence
+          const reps = `\u2066${[...new Set(pe.sets.map((x) => x.reps))].join(" / ")}\u2069`;
           return (
             <section key={pe.id} className={`card overflow-hidden ${isDone ? "border-line-gold" : ""}`}>
               {(ex.videoKey || ex.videoUrl) && <VideoBox ex={ex} />}

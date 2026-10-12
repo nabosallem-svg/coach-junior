@@ -67,14 +67,14 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
   );
 }
 
-export function Pills<T extends string>({ value, onChange, options, bleed = true }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; bleed?: boolean }) {
+export function Pills<T extends string>({ value, onChange, options, bleed = true, wrap = false }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; bleed?: boolean; wrap?: boolean }) {
   return (
-    <div className={`no-scrollbar flex gap-2 overflow-x-auto ${bleed ? "-mx-4 px-4" : ""}`}>
+    <div className={wrap ? "flex flex-wrap gap-2" : `no-scrollbar flex gap-2 overflow-x-auto ${bleed ? "-mx-4 px-4" : ""}`}>
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={`shrink-0 rounded-full border px-5 py-2 font-bold transition-colors ${value === o.value ? "border-gold bg-gold text-bg" : "border-line text-text-2 hover:border-line-gold"}`}
+          className={`shrink-0 rounded-full border font-bold ${wrap ? "px-4 py-1.5 text-sm" : "px-5 py-2"} transition-colors ${value === o.value ? "border-gold bg-gold text-bg" : "border-line text-text-2 hover:border-line-gold"}`}
         >
           {o.label}
         </button>

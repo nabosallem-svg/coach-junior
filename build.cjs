@@ -9,9 +9,9 @@ const SRC = path.join(__dirname, 'src', 'index.html');
 const OUT = path.join(__dirname, 'index.html');
 
 // The two addresses used inside the page (og tags, canonical, sitemap, the "trainee login" link).
-// Domain switch, one line: SITE_URL=https://coachjunior.com APP_URL=https://app.coachjunior.com npm run build
-const SITE = (process.env.SITE_URL || 'https://nabosallem-svg.github.io/coach-junior').replace(/\/$/, '');
-const APP = (process.env.APP_URL || 'https://coach-junior.vercel.app').replace(/\/$/, '');
+// Live on couchjunior.com (Pages, see CNAME) and app.couchjunior.com (Vercel). Override with SITE_URL / APP_URL if needed.
+const SITE = (process.env.SITE_URL || 'https://couchjunior.com').replace(/\/$/, '');
+const APP = (process.env.APP_URL || 'https://app.couchjunior.com').replace(/\/$/, '');
 
 (async () => {
   const src = fs.readFileSync(SRC, 'utf8').replace(/\{\{SITE\}\}/g, SITE).replace(/\{\{APP\}\}/g, APP);

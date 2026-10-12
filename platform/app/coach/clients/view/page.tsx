@@ -21,7 +21,11 @@ import { setAccountPassword } from "@/lib/accounts";
 import { aiTask, photoForAi } from "@/lib/aiTasks";
 
 function ClientDetail() {
-  const id = useSearchParams().get("id") ?? "";
+  const params = useSearchParams();
+  const id = params.get("id") ?? "";
+  // straight after adding a client: jump to the plans card so the next step is obvious
+  const planStep = params.get("plan") === "1";
+  useEffect(() => { if (planStep) document.getElementById("plans")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [planStep]);
   const { db, update } = useStore();
   const { t, lang, dir } = useI18n();
   const [viewAs, setViewAs] = useState<string | null>(null);
@@ -154,7 +158,7 @@ function ClientDetail() {
             <span className={`num rounded-full px-2.5 py-1 text-xs font-bold ${c.pending || !c.active ? "bg-card-hi text-muted" : left <= 7 ? "bg-danger/15 text-danger" : "bg-gold-soft text-gold"}`}>{c.pending ? t("requests") : !c.active ? t("paused") : left >= 0 ? t("daysLeftN", { n: left }) : t("expiredN", { n: -left })}</span>
           </div>
           <dl className="mt-3 grid grid-cols-[auto_1fr_1fr] gap-5 text-sm">
-            <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{pkgMonths(c)}</dd></div>
+            <div><dt className="text-muted">{t("package")}</dt><dd className="num font-bold">{pkgMonths(c)} {t("months")}</dd></div>
             <div><dt className="text-muted">{t("start")}</dt><dd className="font-bold">{fmtDate(c.subStart, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
             <div><dt className="text-muted">{t("end")}</dt><dd className="font-bold">{fmtDate(c.subEnd, lang, { day: "numeric", month: "short", year: "2-digit" })}</dd></div>
           </dl>
@@ -178,7 +182,8 @@ function ClientDetail() {
           {pwEdit !== null && pwEdit.trim().length < 6 && <p className="mt-1.5 text-xs text-muted">{t("minChars")}</p>}
         </section>
 
-        <section className="card space-y-4 p-4">
+        <section id="plans" className={`card scroll-mt-4 space-y-4 p-4 ${planStep ? "border-gold" : ""}`}>
+          {planStep && <p className="rounded-xl bg-gold-soft p-3 text-sm font-bold text-gold">{t("nextPlan")}</p>}
           <div>
             <h2 className="font-bold">{t("hisPlans", { name: c.name.split(" ")[0] })}</h2>
             <p className="mt-1 text-sm text-muted">{t("hisPlansNote")}</p>
@@ -240,7 +245,7 @@ function ClientDetail() {
       </div>
 
       <SectionLabel>{t("weight")}</SectionLabel>
-      <WeightCard readings={ms} goal={c.goal} label={t("weight")} />
+      <WeightCard readings={ms} goal={c.goal} label={t("lastWeight")} />
 
       <SectionLabel>{t("progressPhotos")}</SectionLabel>
       <ProgressPhotos clientId={c.id} />
@@ -267,7 +272,7 @@ function ClientDetail() {
                   <span className="flex items-center gap-2 font-bold">{f?.title}{a.status === "submitted" && !a.reviewed && <span className="size-2 rounded-full bg-gold" />}</span>
                   <span className="text-sm text-muted">{a.status === "pending" ? t("sentOn", { d: fmtDate(a.sentAt, lang) }) : t("submittedOn", { d: fmtDate(a.submittedAt!, lang) })}</span>
                 </span>
-                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${a.status === "pending" ? "bg-card-hi text-muted" : "bg-gold-soft text-gold"}`}>{t(a.status)}</span>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${a.status === "pending" ? "bg-card-hi text-muted" : "bg-gold-soft text-gold"}`}>{t(a.status === "pending" ? "notFilledYet" : "submitted")}</span>
               </button>
             </li>
           );
@@ -287,7 +292,13 @@ function ClientDetail() {
                 {Object.entries(l.sets).filter(([, s]) => s.some((x) => x.done)).map(([peId, s]) => {
                   const pe = day?.exercises.find((x) => x.id === peId);
                   const ex = db.exercises.find((e) => e.id === pe?.exerciseId);
-                  return <li key={peId}><span dir="auto">{ex?.name}</span>: <span className="num">{s.filter((x) => x.done).map((x) => `${x.weight}×${x.reps}`).join("  ")}</span></li>;
+                  return <li key={peId}><span dir="auto">{ex?.name}</span>: {(() => {
+                    // sessions are a check per exercise now, so most sets carry no weight: show "3 sets × 8-12" then
+                    const done = s.filter((x) => x.done);
+                    return done.some((x) => x.weight)
+                      ? <span className="num" dir="ltr">{done.map((x) => `${x.weight || "-"}×${x.reps}`).join("  ")}</span>
+                      : <span>{t("setsReps", { n: done.length, reps: `\u2066${[...new Set(done.map((x) => x.reps))].join(" / ")}\u2069` })}</span>;
+                  })()}</li>;
                 })}
               </ul>
             </li>

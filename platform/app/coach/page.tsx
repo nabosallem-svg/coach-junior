@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Users, CalendarClock, Dumbbell, Camera, Upload, UserPlus, ChevronLeft, ChevronRight, Search, MessageCircle, ClipboardList, Moon, ClipboardCheck } from "lucide-react";
+import { Users, CalendarClock, Dumbbell, Camera, Upload, UserPlus, ChevronLeft, ChevronRight, Search, MessageCircle, ClipboardList, Moon, ClipboardCheck, X, HelpCircle } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { daysLeft, fmtDate } from "@/lib/calc";
 import { waLink } from "@/lib/wa";
 import { Avatar, SectionLabel, Toast } from "@/components/ui";
 import { ActivateSheet, PendingList } from "@/components/Activate";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Client } from "@/lib/types";
 
 const DAY = 864e5;
+const INTRO_KEY = "cj-coach-intro-hidden";
 
 export default function CoachHome() {
   const { db } = useStore();
@@ -20,6 +21,10 @@ export default function CoachHome() {
   const [act, setAct] = useState<Client | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  // first-visit guide: shown until the coach hides it, "start here" brings it back
+  const [intro, setIntro] = useState(false);
+  useEffect(() => { try { setIntro(!localStorage.getItem(INTRO_KEY)); } catch { setIntro(true); } }, []);
+  const showIntro = (v: boolean) => { setIntro(v); try { v ? localStorage.removeItem(INTRO_KEY) : localStorage.setItem(INTRO_KEY, "1"); } catch {} };
 
   const now = Date.now();
   const ago = (iso: string) => (now - new Date(iso).getTime()) / DAY;
@@ -75,10 +80,31 @@ export default function CoachHome() {
 
   return (
     <div>
-      <h1 className="h1">{t(hour < 12 ? "goodMorning" : "goodEvening")}</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="h1">{t(hour < 12 ? "goodMorning" : "goodEvening")}</h1>
+        {!intro && <button onClick={() => showIntro(true)} className="flex shrink-0 items-center gap-1 text-sm font-bold text-gold"><HelpCircle size={16} /> {t("startHere")}</button>}
+      </div>
       <p className="mt-1 text-muted">
         {fmtDate(new Date().toISOString(), lang, { weekday: "long", day: "numeric", month: "long" })} · {todo.length ? <span className="font-bold text-gold">{t("todoCount", { n: todo.length })}</span> : t("allGood")}
       </p>
+
+      {intro && (
+        <section className="card relative mt-4 border-line-gold p-4">
+          <button onClick={() => showIntro(false)} aria-label={t("introHide")} className="absolute end-3 top-3 text-muted"><X size={18} /></button>
+          <h2 className="pe-8 font-bold">{t("introTitle")}</h2>
+          <ol className="mt-3 space-y-2">
+            {(["introStep1", "introStep2", "introStep3"] as const).map((k, i) => (
+              <li key={k} className="flex items-center gap-3"><span className="num grid size-7 shrink-0 place-items-center rounded-full bg-gold font-black text-bg">{i + 1}</span><span className="text-sm">{t(k)}</span></li>
+            ))}
+          </ol>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <Link href="/coach/clients?add=1" className="btn-gold"><UserPlus size={18} /> {t("introGo")}</Link>
+            <button onClick={() => showIntro(false)} className="btn-quiet">{t("introHide")}</button>
+          </div>
+        </section>
+      )}
+
+      <Link href="/coach/clients?add=1" className="btn-gold mt-4 min-h-13 w-full text-lg"><UserPlus size={20} /> {t("newClient")}</Link>
 
       <div className="relative mt-4">
         <Search size={18} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
@@ -106,10 +132,7 @@ export default function CoachHome() {
         ))}
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <Link href="/coach/clients?add=1" className="btn-gold"><UserPlus size={18} /> {t("addClient")}</Link>
-        <Link href="/coach/library?upload=1" className="btn-ghost"><Upload size={18} /> {t("uploadVideo")}</Link>
-      </div>
+      <Link href="/coach/library?upload=1" className="btn-ghost mt-3 w-full"><Upload size={18} /> {t("uploadVideo")}</Link>
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-6">
         <div>

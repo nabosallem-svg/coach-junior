@@ -89,7 +89,7 @@ export default function Training() {
                   {pe.sets.map((s, i) => (
                     <tr key={i} className="text-text-2">
                       <td className="num py-3 text-start">{i + 1}</td>
-                      <td className="num text-muted">{prev?.[i]?.done ? `${prev[i].weight}×${prev[i].reps}` : "—"}</td>
+                      <td className="num text-muted">{prev?.[i]?.done ? `${prev[i].weight ? `${prev[i].weight}×` : ""}${prev[i].reps}` : "—"}</td>
                       <td className="num text-text">{s.reps}</td>
                       <td className="num">{s.rir || "—"}</td>
                     </tr>

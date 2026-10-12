@@ -69,7 +69,7 @@ export function WeightCard({ readings, goal, onLog, label }: { readings: Measure
           </div>
         </>
       )}
-      {ms.length <= 1 && <p className="mt-2 text-sm text-muted">{t("weighWeekly")}</p>}
+      {ms.length <= 1 && <p className="mt-2 text-sm text-muted">{t(onLog ? "weighWeekly" : ms.length ? "oneWeightOnly" : "noWeightYet")}</p>}
 
       {onLog && <button onClick={onLog} className="btn-gold mt-4 w-full"><Plus size={18} /> {t("logWeight")}</button>}
     </div>

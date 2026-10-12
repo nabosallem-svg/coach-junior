@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Plus, Trash2, Search, Video, Upload, Loader2, Link2 } from "lucide-react";
+import { Plus, Trash2, Search, Video, VideoOff, Upload, Loader2, Link2 } from "lucide-react";
 import { useStore, uid } from "@/lib/store";
 import { useI18n, MUSCLES } from "@/lib/i18n";
 import { putVideo } from "@/lib/media";
@@ -51,31 +51,37 @@ function TrainingBuilder() {
 
   return (
     <div>
-      <BuilderHeader backTab="training" label={t("planName")} value={plan.name} onChange={(v) => edit((p) => { p.name = v; })} onDelete={() => update((d) => {
+      <BuilderHeader backTab="training" label={t("planName")} placeholder={t("planNamePh")} value={plan.name} onChange={(v) => edit((p) => { p.name = v; })} onDelete={() => update((d) => {
         d.trainingPlans = d.trainingPlans.filter((p) => p.id !== id);
         d.clients.forEach((c) => { if (c.trainingPlanId === id) c.trainingPlanId = undefined; });
       })} />
       {plan.ownerId ? (
         <p className="mt-2 inline-flex rounded-full border border-line-gold bg-gold-soft px-3 py-1 text-sm font-bold text-gold">{t("personalFor", { name: db.clients.find((c) => c.id === plan.ownerId)?.name ?? "" })}</p>
       ) : (
-        <p className="mt-2 text-sm text-muted">{t("templateNote", { n: db.clients.filter((c) => c.trainingPlanId === id).length })}</p>
+        <p className="mt-2 text-sm text-muted">{(() => { const n = db.clients.filter((c) => c.trainingPlanId === id).length; return n ? t("templateNote", { n }) : t("templateNoteNew"); })()}</p>
       )}
 
-      <div className="mt-5 flex items-center gap-2">
-        <div className="min-w-0 flex-1"><Pills bleed={false} value={day?.id ?? ""} onChange={setDayId} options={plan.days.map((d) => ({ value: d.id, label: d.name }))} /></div>
-        <button onClick={addDay} aria-label={t("addDay")} title={t("addDay")} className="btn-ghost size-11 shrink-0 p-0"><Plus size={20} /></button>
+      <p className="mt-3 max-w-3xl rounded-xl bg-card-hi px-3 py-2 text-sm text-text-2">{t("planHow")}</p>
+
+      <div className="mt-5 flex items-center justify-between gap-2">
+        <h2 className="font-black">{t("planDays", { n: plan.days.length })}</h2>
+        <button onClick={addDay} className="btn-ghost h-10 shrink-0 px-3 text-sm"><Plus size={18} /> {t("addDay")}</button>
       </div>
+      <div className="mt-2"><Pills wrap value={day?.id ?? ""} onChange={setDayId} options={plan.days.map((d) => ({ value: d.id, label: d.name || "…" }))} /></div>
 
       {day && (
-        <div className="mt-5">
+        <div className="mt-5 max-w-3xl rounded-2xl border border-line-gold p-3 sm:p-4">
+          <label className="mb-1.5 block text-sm font-bold text-text-2" htmlFor="day-name">{t("dayName")}</label>
           <div className="flex items-center gap-2">
-            <input aria-label={t("dayName")} className="input text-lg font-bold" dir="auto" value={day.name} onChange={(e) => editDay((d) => { d.name = e.target.value; })} />
+            <input id="day-name" className="input text-lg font-bold" dir="auto" placeholder={t("dayNamePh")} value={day.name} onChange={(e) => editDay((d) => { d.name = e.target.value; })} />
             {plan.days.length > 1 && (
-              <button aria-label={t("delete")} onClick={() => { if (confirm(t("confirmDelete"))) { edit((p) => { p.days = p.days.filter((x) => x.id !== day.id); }); setDayId(undefined); } }} className="grid size-11 shrink-0 place-items-center rounded-xl border border-line text-muted hover:text-danger"><Trash2 size={18} /></button>
+              <button aria-label={t("deleteDay")} title={t("deleteDay")} onClick={() => { if (confirm(t("confirmDelete"))) { edit((p) => { p.days = p.days.filter((x) => x.id !== day.id); }); setDayId(undefined); } }} className="grid size-11 shrink-0 place-items-center rounded-xl border border-line text-muted hover:text-danger"><Trash2 size={18} /></button>
             )}
           </div>
 
-          <ol className="mt-4 max-w-3xl space-y-3">
+          <h3 className="mt-5 text-sm font-bold text-text-2">{t("dayExercises", { n: day.exercises.length })}</h3>
+          {day.exercises.length === 0 && <p className="mt-2 rounded-xl border border-dashed border-line p-4 text-center text-sm text-muted">{t("dayEmpty")}</p>}
+          <ol className="mt-3 space-y-3">
             {day.exercises.map((pe, i) => {
               return (
                 <ExerciseCard
@@ -92,7 +98,7 @@ function TrainingBuilder() {
             })}
           </ol>
 
-          <button onClick={() => setPicker(true)} className="mt-4 flex w-full max-w-3xl items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addExerciseFromLib")}</button>
+          <button onClick={() => setPicker(true)} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line-gold p-4 font-bold text-gold hover:bg-gold-soft"><Plus size={20} /> {t("addExToDay")}</button>
         </div>
       )}
 
@@ -130,13 +136,13 @@ function TrainingBuilder() {
             <button onClick={() => setNx({ name: q, muscle: mf === "all" ? "" : (mf as Muscle), file: null })} className="mb-3 flex w-full items-center gap-2 rounded-xl border border-dashed border-line-gold px-3 py-3 font-bold text-gold hover:bg-gold-soft">
               <Plus size={18} /> {q ? t("addNamedExercise", { x: q }) : t("newExercise")}
             </button>
-            <Pills bleed={false} value={mf} onChange={setMf} options={[{ value: "all", label: t("all") }, ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m as Muscle) }))]} />
+            <Pills wrap value={mf} onChange={setMf} options={[{ value: "all", label: t("all") }, ...MUSCLES.filter((m) => db.exercises.some((e) => e.muscle === m)).map((m) => ({ value: m, label: muscle(m as Muscle) }))]} />
             <ul className="mt-3 space-y-1.5">
               {db.exercises.filter((e) => (mf === "all" || e.muscle === mf) && (!q || e.name.toLowerCase().includes(q.toLowerCase()) || muscle(e.muscle).includes(q))).map((e) => (
                 <li key={e.id}>
                   <button onClick={() => { addEx(e.id); closePicker(); }} className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-start hover:bg-card-hi">
                     <span className="font-bold" dir="auto">{e.name}</span>
-                    <span className="flex shrink-0 items-center gap-2 text-sm text-muted">{e.videoKey || e.videoUrl ? <Video size={14} className="text-gold" /> : <span className="rounded-full border border-line px-2 py-0.5 text-[11px]">{t("noVideoShort")}</span>}{muscle(e.muscle)}</span>
+                    <span className="flex shrink-0 items-center gap-2 text-xs text-muted">{mf === "all" && <span>{muscle(e.muscle)}</span>}{e.videoKey || e.videoUrl ? <Video size={16} className="text-gold" aria-label={t("hasVideo")} /> : <VideoOff size={16} aria-label={t("noVideoShort")} />}</span>
                   </button>
                 </li>
               ))}

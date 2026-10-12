@@ -140,7 +140,7 @@ function Clients() {
         </form>
       </Sheet>
       <ActivateSheet client={act} onClose={() => setAct(null)} />
-      <Creds client={db.clients.find((c) => c.id === created?.id) ?? null} password={created?.pw ?? ""} onClose={() => { const id = created?.id; setCreated(null); router.push(`/coach/clients/view?id=${id}`); }} />
+      <Creds client={db.clients.find((c) => c.id === created?.id) ?? null} password={created?.pw ?? ""} next={t("nextPlan")} onClose={() => { const id = created?.id; setCreated(null); router.push(`/coach/clients/view?id=${id}&plan=1`); }} />
     </div>
   );
 }
