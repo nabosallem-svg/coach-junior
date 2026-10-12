@@ -364,6 +364,7 @@ const dict = {
   answers: ["الإجابات", "Answers"],
   workouts: ["التمارين المتسجلة", "Logged workouts"],
   searchClients: ["دوّر على مشترك", "Search clients"],
+  showMore: ["اعرض أكتر", "Show more"],
   active: ["فعال", "Active"],
   inactive: ["موقوف", "Paused"],
 

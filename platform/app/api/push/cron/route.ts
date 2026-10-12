@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { env, safe } from "@/lib/serverEnv";
 import webpush from "web-push";
-import { coachNotices, traineeNotices } from "@/lib/notify";
+import { clientSlices, coachNotices, traineeNotices } from "@/lib/notify";
 import type { DB } from "@/lib/types";
 import { SITE_MODE } from "@/lib/site";
 
@@ -27,15 +27,18 @@ export async function GET(req: Request) {
   const all = db as unknown as DB;
   const friday = new Date().getDay() === 5;
 
+  const slice = clientSlices(all);
+  const coachCount = coachNotices(all).length;
+
   const { data: subs } = await admin.from("push_subs").select("endpoint,user_id,is_coach,sub");
-  let sent = 0;
+  const jobs: { s: NonNullable<typeof subs>[number]; msg: { title: string; body: string; url: string } }[] = [];
   for (const s of subs ?? []) {
     let msg: { title: string; body: string; url: string } | null = null;
     if (s.is_coach) {
-      const n = coachNotices(all).length;
+      const n = coachCount;
       if (n) msg = { title: "صباح الخير يا كابتن", body: `عندك ${n} ${n === 1 ? "حاجة" : "حاجات"} محتاجة تشوفها النهارده`, url: "/coach" };
     } else {
-      const ns = traineeNotices(all, s.user_id);
+      const ns = traineeNotices(slice(s.user_id), s.user_id);
       const sub = ns.find((x) => x.kind === "sub" && x.n <= 3);
       const plan = ns.find((x) => x.kind === "plan");
       if (sub) msg = sub.n >= 0 ? { title: "اشتراكك قرب يخلص", body: `فاضل ${sub.n} يوم. كلم الكابتن عشان تجدد.`, url: "/app" } : { title: "اشتراكك خلص", body: "كلم الكابتن عشان تجدد.", url: "/app" };
@@ -43,14 +46,20 @@ export async function GET(req: Request) {
       else if (ns.some((x) => x.kind === "workout")) msg = { title: "جاهز لتمرين النهارده؟", body: "افتح التمرين وعلّم ✓ على كل تمرين تخلّصه.", url: "/app/training" };
       else if (friday && ns.some((x) => x.kind === "weigh")) msg = { title: "سجّل وزنك", body: "سجّل وزن الأسبوع عشان الكابتن يتابع تقدمك.", url: "/app" };
     }
-    if (!msg) continue;
-    try {
-      await webpush.sendNotification(s.sub, JSON.stringify(msg));
-      sent++;
-    } catch (e) {
-      const code = (e as { statusCode?: number }).statusCode;
-      if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("endpoint", s.endpoint);
-    }
+    if (msg) jobs.push({ s, msg });
+  }
+  // 50 at a time: one by one, 1000 phones would outlast the function's time limit
+  let sent = 0;
+  for (let i = 0; i < jobs.length; i += 50) {
+    await Promise.all(jobs.slice(i, i + 50).map(async ({ s, msg }) => {
+      try {
+        await webpush.sendNotification(s.sub, JSON.stringify(msg));
+        sent++;
+      } catch (e) {
+        const code = (e as { statusCode?: number }).statusCode;
+        if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("endpoint", s.endpoint);
+      }
+    }));
   }
   return Response.json({ sent });
 }

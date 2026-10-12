@@ -73,7 +73,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const { data: coach } = await (await sb()).from("coaches").select("id").eq("id", user.id).maybeSingle();
     if (coach) await seedIfEmpty(makeSeed()).catch(() => {});
     try {
-      const loaded = await loadDB();
+      const loaded = await loadDB(coach ? undefined : user.id);
       const next = structuredClone(loaded);
       if (coach && mergeVariants(next)) await saveDiff(loaded, next).catch(() => {});
       setDb(next); setSyncError(false);

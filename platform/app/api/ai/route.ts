@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { aiLimited } from "@/lib/rateLimit";
 import { aiConfigured, askJSON } from "@/lib/ai";
 
 // Small Gemini helpers for the coach and trainee. The browser sends only the data a task
@@ -31,6 +32,8 @@ Reply JSON: {"exerciseId": string, "why": one short sentence in ${lang}}. If not
 
 export async function POST(req: Request) {
   if (!aiConfigured()) return NextResponse.json({ error: "no_key" }, { status: 503 });
+  const limited = aiLimited(req);
+  if (limited) return limited;
   const body = await req.json().catch(() => null);
   const task = String(body?.task ?? "");
   const make = PROMPTS[task];

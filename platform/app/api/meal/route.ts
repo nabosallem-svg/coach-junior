@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
+import { aiLimited } from "@/lib/rateLimit";
 import { aiConfigured, askJSON, num } from "@/lib/ai";
 
 // A trainee's meal photo -> estimated calories and macros (Gemini, see lib/ai.ts).
 export async function POST(req: Request) {
   if (!aiConfigured()) return NextResponse.json({ error: "no_key" }, { status: 503 });
+  const limited = aiLimited(req);
+  if (limited) return limited;
   const body = await req.json().catch(() => null);
   const mime = String(body?.mime ?? "image/jpeg");
   const data = String(body?.image ?? "");

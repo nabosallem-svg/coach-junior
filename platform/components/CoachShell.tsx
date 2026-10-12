@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { LayoutDashboard, Users, Clapperboard, ClipboardList, LogOut, CalendarClock, Camera, ClipboardCheck, Hourglass } from "lucide-react";
 import { coachNotices } from "@/lib/notify";
 import { BellButton, useSeen } from "./Bell";
@@ -26,6 +26,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [bell, setBell] = useState(false);
   const [seen, markSeen] = useSeen("coach");
+  const notes = useMemo(() => coachNotices(db), [db]);
 
   if (!ready) return <Splash />;
   // /coach is the coach's own door: signed-out visitors get the coach sign-in here
@@ -34,7 +35,6 @@ export function CoachShell({ children }: { children: ReactNode }) {
   const unread = db.clients.filter((c) => c.pending).length;
   const isOn = (href: string) => (href === "/coach" ? path === "/coach" : path.startsWith(href));
   const logout = () => { setSession(null); router.replace("/coach"); };
-  const notes = coachNotices(db);
   const unseen = notes.filter((n) => !seen.has(n.key)).length;
   const openBell = () => { setBell(true); markSeen(notes.map((n) => n.key)); };
   const noteIcon = { waiting: Hourglass, expiring: CalendarClock, photos: Camera, form: ClipboardCheck };

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useStore, uid, genPassword, normPhone, normPw } from "@/lib/store";
@@ -13,6 +13,9 @@ import { createAccount, accountError } from "@/lib/accounts";
 import { ActivateSheet, PendingList, PACKAGES, pkgMonths } from "@/components/Activate";
 import type { Client } from "@/lib/types";
 
+
+/** trainees drawn at a time: a list of 1000 cards made the page slow on phones */
+const PAGE = 50;
 
 function Clients() {
   const { db, update } = useStore();
@@ -26,18 +29,26 @@ function Clients() {
   const [form, setForm] = useState(blank);
   const [err, setErr] = useState("");
   const [act, setAct] = useState<Client | null>(null);
+  const [shown, setShown] = useState(PAGE);
   const [created, setCreated] = useState<{ id: string; pw: string } | null>(null);
   const Chevron = dir === "rtl" ? ChevronLeft : ChevronRight;
 
   useEffect(() => { if (params.get("add")) setAdd(true); }, [params]);
 
   const soon = (c: Client) => c.active && daysLeft(c.subEnd) <= 7;
-  const list = db.clients
-    .filter((c) => !c.pending && (c.name.includes(q) || c.phone.includes(q)))
-    .filter((c) => show === "all" || (show === "soon" ? soon(c) : !c.active))
-    // ending soon first, paused last
-    .sort((a, b) => Number(!a.active) - Number(!b.active) || daysLeft(a.subEnd) - daysLeft(b.subEnd));
-  const counts = { all: db.clients.filter((c) => !c.pending).length, soon: db.clients.filter((c) => !c.pending && soon(c)).length, paused: db.clients.filter((c) => !c.pending && !c.active).length };
+  const { list, counts } = useMemo(() => {
+    const all = db.clients.filter((c) => !c.pending);
+    const list = all
+      .filter((c) => c.name.includes(q) || c.phone.includes(q))
+      .filter((c) => show === "all" || (show === "soon" ? soon(c) : !c.active))
+      // ending soon first, paused last
+      .map((c) => ({ c, left: daysLeft(c.subEnd) }))
+      .sort((a, b) => Number(!a.c.active) - Number(!b.c.active) || a.left - b.left)
+      .map((x) => x.c);
+    return { list, counts: { all: all.length, soon: all.filter(soon).length, paused: all.filter((c) => !c.active).length } };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db.clients, q, show]);
+  useEffect(() => setShown(PAGE), [q, show]);
 
   return (
     <div>
@@ -62,7 +73,7 @@ function Clients() {
       </div>
 
       <ul className="mt-3 grid grid-cols-1 gap-2 lg:grid-cols-2">
-        {list.map((c) => {
+        {list.slice(0, shown).map((c) => {
           const left = daysLeft(c.subEnd);
           return (
             <li key={c.id}>
@@ -81,6 +92,7 @@ function Clients() {
           );
         })}
       </ul>
+      {list.length > shown && <button onClick={() => setShown(shown + PAGE)} className="btn-quiet mt-3 w-full">{t("showMore")} <span className="num opacity-70">({list.length - shown})</span></button>}
 
       <Sheet open={add} onClose={() => { setAdd(false); setErr(""); router.replace("/coach/clients"); }} title={t("addClient")}>
         <p className="mb-4 text-sm text-muted">{t("addClientNote")}</p>
