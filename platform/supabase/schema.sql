@@ -1,6 +1,6 @@
 -- Coach Junior platform: Supabase schema. Run once in the SQL editor of a new project.
 --
--- Already set up before October 2026? Run supabase/perf.sql once for the faster indexes and policies.
+-- Already set up before October 2026? Run supabase/perf.sql and then supabase/security.sql once.
 --
 -- Data: every record of lib/types.ts is one row in public.docs
 --   (coll = collection name like 'clients' or 'trainingPlans', id, client_id, data jsonb).
@@ -43,7 +43,8 @@ $$;
 
 create or replace function public.client_active() returns boolean
 language sql stable security definer set search_path = public as $$
-  select coalesce((my_client()->>'active')::boolean and (my_client()->>'subEnd')::date >= current_date, false)
+  -- Cairo's date, not the server's UTC one, so the last day lasts until midnight in Egypt
+  select coalesce((my_client()->>'active')::boolean and (my_client()->>'subEnd')::date >= (now() at time zone 'Africa/Cairo')::date, false)
 $$;
 
 alter table public.coaches enable row level security;
@@ -57,14 +58,26 @@ create policy coach_all on docs for all using ((select is_coach())) with check (
 -- trainee: own subscription record, read only (password changes go through Supabase Auth)
 create policy own_client on docs for select using (coll = 'clients' and id = (select auth.uid())::text);
 
--- trainee: their own logs, weights, photos, swaps, ticked meals, forms
+-- trainee: their own logs, weights, photos, swaps, ticked meals, forms.
+-- The app reads the trainee id from inside data (data->>'clientId'), so that must match too;
+-- swap and meal-tick ids start with the trainee id so nobody can take another trainee's id;
+-- a trainee can't write a message "from the coach" or mark their own form as reviewed.
 create policy own_rows on docs for all
   using (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = (select auth.uid()))
-  with check (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = (select auth.uid()));
+  with check (
+    coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = (select auth.uid()) and (
+      (coll = 'eaten' and id like (select auth.uid())::text || '|%') or
+      (coll <> 'eaten' and data->>'clientId' = (select auth.uid())::text
+        and (coll <> 'swaps' or id like (select auth.uid())::text || ':%')
+        and (coll <> 'messages' or data->>'from' = 'client')
+        and (coll <> 'assignments' or coalesce(data->>'reviewed', 'false') <> 'true'))
+    )
+  );
 
 -- trainee: food list, assigned plans and the exercise library while the subscription runs
-create policy foods_read on docs for select using (coll = 'foods' and (select auth.uid()) is not null);
-create policy forms_read on docs for select using (coll = 'forms' and (select auth.uid()) is not null);
+-- only real trainees (a clients row exists), so a stray self sign-up sees nothing
+create policy foods_read on docs for select using (coll = 'foods' and (select my_client()) is not null);
+create policy forms_read on docs for select using (coll = 'forms' and (select my_client()) is not null);
 create policy plans_read on docs for select using (
   (select client_active()) and (
     (coll = 'trainingPlans' and id = (select my_client()->>'trainingPlanId')) or
@@ -78,6 +91,10 @@ create policy exercises_read on docs for select using (coll = 'exercises' and (s
 --   videos/<key>                 coach uploads, active trainees can play (signed URLs)
 --   photos/<client id>/<id>.jpg  each trainee uploads their own progress photos, the coach sees all
 insert into storage.buckets (id, name, public) values ('media', 'media', false) on conflict do nothing;
+-- the server enforces what the app already checks: 50 MB at most, only videos and photos
+update storage.buckets set file_size_limit = 52428800,
+  allowed_mime_types = array['video/mp4','video/quicktime','video/webm','video/x-m4v','video/3gpp','image/jpeg','image/png','image/webp']
+  where id = 'media';
 create policy coach_media on storage.objects for all
   using (bucket_id = 'media' and is_coach()) with check (bucket_id = 'media' and is_coach());
 create policy client_videos on storage.objects for select

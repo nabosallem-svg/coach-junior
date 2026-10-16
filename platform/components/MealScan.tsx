@@ -1,5 +1,6 @@
 "use client";
 
+import { authHeader } from "@/lib/supabase";
 import { useRef, useState } from "react";
 import { Camera, Loader2, PencilLine } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
@@ -30,7 +31,7 @@ export function MealScan() {
     setRes(null);
     setState("busy");
     try {
-      const r = await fetch("/api/meal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...payload, lang }) });
+      const r = await fetch("/api/meal", { method: "POST", headers: { "content-type": "application/json", ...(await authHeader()) }, body: JSON.stringify({ ...payload, lang }) });
       if (r.status === 503 || r.status === 404) return setState("nokey");
       if (!r.ok) return setState("fail");
       const j: Result = await r.json();

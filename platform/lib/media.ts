@@ -44,7 +44,7 @@ export async function putVideo(key: string, file: Blob, onProgress?: (pct: numbe
     await new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", data.signedUrl);
-      if (file.type) xhr.setRequestHeader("content-type", file.type);
+      xhr.setRequestHeader("content-type", file.type || "video/mp4");   // the bucket only takes video and image types
       xhr.setRequestHeader("x-upsert", "true");
       xhr.timeout = 15 * 60_000;   // a stalled connection fails with a message instead of spinning forever
       xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100)); };

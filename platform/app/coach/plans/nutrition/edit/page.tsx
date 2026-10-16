@@ -1,5 +1,6 @@
 "use client";
 
+import { authHeader } from "@/lib/supabase";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Plus, Trash2, Search, Pencil, Sparkles, Loader2, ArrowLeftRight } from "lucide-react";
@@ -38,7 +39,7 @@ function NutritionBuilder() {
     if (!nf?.name.trim()) return;
     setAi("busy");
     try {
-      const r = await fetch("/api/macros", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: nf.name, unit: nf.unit, per: nf.per }) });
+      const r = await fetch("/api/macros", { method: "POST", headers: { "content-type": "application/json", ...(await authHeader()) }, body: JSON.stringify({ name: nf.name, unit: nf.unit, per: nf.per }) });
       if (r.status === 503 || r.status === 404) return setAi("nokey");
       if (!r.ok) return setAi("fail");
       const j = await r.json();
