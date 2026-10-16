@@ -10,6 +10,7 @@ import { useMe } from "@/lib/hooks";
 import { traineeNotices, type Notice } from "@/lib/notify";
 import { BellButton, useSeen } from "./Bell";
 import { PushToggle } from "./PushToggle";
+import { InstallApp } from "./Pwa";
 import { Avatar, Brand, Field, Sheet, Splash } from "./ui";
 import { asset } from "@/lib/asset";
 import { COACH_WA, waLink } from "@/lib/wa";
@@ -148,6 +149,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
             })}
           </ul>
         )}
+        <InstallApp className="mt-4" />
         <PushToggle />
       </Sheet>
 

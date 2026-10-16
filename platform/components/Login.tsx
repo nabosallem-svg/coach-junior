@@ -8,6 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { Field } from "@/components/ui";
 import { asset } from "@/lib/asset";
 import { APP_URL, appUrlHere } from "@/lib/site";
+import { InstallApp } from "@/components/Pwa";
 
 /** one sign-in screen per audience: trainees at /, the coach at /coach (never linked from the trainee side) */
 export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; phone0?: string; onDone: () => void }) {
@@ -87,6 +88,8 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
         {who === "coach" && (
           <a href={appUrl ? `${appUrl}/` : asset("/")} className="mt-3 block w-full py-2 text-center text-sm font-bold text-gold">{t("traineeLogin")}</a>
         )}
+
+        <InstallApp className="mt-4" />
 
         {/* sample logins only for us: add ?demo=1 to the URL */}
         {!live && demo && <details className="mt-4 text-sm text-muted">

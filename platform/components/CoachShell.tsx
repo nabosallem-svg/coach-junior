@@ -7,6 +7,7 @@ import { LayoutDashboard, Users, Clapperboard, ClipboardList, LogOut, CalendarCl
 import { coachNotices } from "@/lib/notify";
 import { BellButton, useSeen } from "./Bell";
 import { PushToggle } from "./PushToggle";
+import { InstallApp } from "./Pwa";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { Avatar, Brand, Sheet, Splash } from "./ui";
@@ -115,6 +116,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
             })}
           </ul>
         )}
+        <InstallApp className="mt-4" />
         <PushToggle />
       </Sheet>
     </div>
