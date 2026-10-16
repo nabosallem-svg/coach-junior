@@ -144,7 +144,7 @@ export default function ClientHome() {
           onSubmit={(e) => {
             e.preventDefault();
             const wn = parseFloat(w);
-            if (!wn) return;
+            if (!(wn >= 20 && wn <= 350)) return;
             update((d) => {
               d.measurements = d.measurements.filter((m) => !(m.clientId === me.id && m.date === today));
               d.measurements.push({ id: uid("ms"), clientId: me.id, date: today, weight: wn, waist: parseFloat(waist) || undefined });
@@ -152,7 +152,7 @@ export default function ClientHome() {
             setW(""); setWaist(""); setLogOpen(false);
           }}
         >
-          <Field label={`${t("weight")} (${t("kg")})`}><input className="input num text-start" inputMode="decimal" value={w} onChange={(e) => setW(e.target.value)} autoFocus required /></Field>
+          <Field label={`${t("weight")} (${t("kg")})`}><input className="input num text-start" type="number" step="0.1" min={20} max={350} inputMode="decimal" value={w} onChange={(e) => setW(e.target.value)} autoFocus required /></Field>
           <Field label={`${t("waist")} (cm)`}><input className="input num text-start" inputMode="decimal" value={waist} onChange={(e) => setWaist(e.target.value)} /></Field>
           <button className="btn-gold w-full">{t("save")}</button>
         </form>

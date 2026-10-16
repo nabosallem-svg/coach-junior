@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { aiLimited } from "@/lib/rateLimit";
+import { signedIn } from "@/lib/serverAuth";
 import { aiConfigured, askJSON, num } from "@/lib/ai";
 
 // Estimates macros for a food the coach types in. Needs GEMINI_API_KEY (or ANTHROPIC_API_KEY)
@@ -9,6 +10,7 @@ const UNITS = { g: "grams", piece: "piece(s)", ml: "millilitres", scoop: "scoop(
 
 export async function POST(req: Request) {
   if (!aiConfigured()) return NextResponse.json({ error: "no_key" }, { status: 503 });
+  if (!(await signedIn(req))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const limited = aiLimited(req);
   if (limited) return limited;
 

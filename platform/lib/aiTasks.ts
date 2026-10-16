@@ -1,13 +1,13 @@
 "use client";
 
 import { getVideo } from "./media";
-import { LIVE, sb } from "./supabase";
+import { LIVE, sb, authHeader } from "./supabase";
 
 export type AiError = "nokey" | "fail";
 
 /** calls /api/ai; throws "nokey" when AI isn't set up on the server */
 export async function aiTask<T = { text: string }>(task: string, data: unknown, lang: string, images: { mime: string; data: string }[] = []): Promise<T> {
-  const r = await fetch("/api/ai", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ task, data, lang, images }) });
+  const r = await fetch("/api/ai", { method: "POST", headers: { "content-type": "application/json", ...(await authHeader()) }, body: JSON.stringify({ task, data, lang, images }) });
   if (r.status === 503 || r.status === 404) throw new Error("nokey");
   if (!r.ok) throw new Error("fail");
   return r.json();

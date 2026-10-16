@@ -19,3 +19,10 @@ export async function sb() {
 export const phoneEmail = (phone: string) => `${phone.replace(/\D/g, "").slice(-10)}@coach-junior.app`;
 /** the coach signs in with only a password; his auth user uses this email */
 export const COACH_EMAIL = "coach@coach-junior.app";
+
+/** the signed-in user's token for our own API routes (empty in the demo) */
+export async function authHeader(): Promise<Record<string, string>> {
+  if (!LIVE) return {};
+  const { data } = await (await sb()).auth.getSession();
+  return data.session ? { authorization: `Bearer ${data.session.access_token}` } : {};
+}

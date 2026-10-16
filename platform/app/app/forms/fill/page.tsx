@@ -38,7 +38,7 @@ function FillForm() {
                   // a weight answer also lands in the progress chart
                   const wq = form.questions.find((q) => q.type === "number" && /وزن|weight/i.test(q.label));
                   const w = wq ? parseFloat(answers[wq.id]) : NaN;
-                  if (w) {
+                  if (w >= 20 && w <= 350) {
                     const today = new Date().toISOString().slice(0, 10);
                     d.measurements = d.measurements.filter((m) => !(m.clientId === me.id && m.date === today));
                     d.measurements.push({ id: `ms-${id}`, clientId: me.id, date: today, weight: w });
