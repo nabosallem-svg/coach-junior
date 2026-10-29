@@ -6,6 +6,7 @@ import { makeSeed, mergeVariants, seedExercises } from "./seed";
 import { useI18n } from "./i18n";
 import { LIVE, sb, phoneEmail, COACH_EMAIL } from "./supabase";
 import { emptyDB, loadDB, saveDiff, seedIfEmpty } from "./sync";
+import { clearSignedUrls } from "./media";
 
 // Two backends behind one API:
 // - demo (no Supabase keys): the whole database lives in localStorage so both sides
@@ -131,13 +132,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setSession = useCallback((s: Session) => {
     setSessionState(s);
     if (LIVE) {
-      if (!s) sb().then((c) => c.auth.signOut()).then(() => setDb(emptyDB()));
+      if (!s) { clearSignedUrls(); sb().then((c) => c.auth.signOut()).then(() => setDb(emptyDB())); }
     } else save(SESSION_KEY, s);
   }, []);
 
   const login = useCallback(async (who: "coach" | "client", phone: string, pw: string) => {
     if (LIVE) {
       const email = who === "coach" ? COACH_EMAIL : phoneEmail(phone), client = await sb();
+      clearSignedUrls();   // photo links cached for whoever used this browser before
       try {
         let { error } = await client.auth.signInWithPassword({ email, password: normPw(pw) });
         if (error && normPw(pw) !== pw) ({ error } = await client.auth.signInWithPassword({ email, password: pw }));   // accounts made before normPw
