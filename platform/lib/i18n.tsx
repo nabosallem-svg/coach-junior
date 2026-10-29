@@ -56,6 +56,8 @@ const dict = {
   ntWeighSub: ["عدّى أسبوع من آخر وزن، سجّله عشان الكابتن يتابع.", "It's been a week; log it so your coach can follow."],
   ntPlan: ["خطتك جاهزة 💪", "Your plan is ready 💪"],
   ntPlanSub: ["الكابتن جهزلك خطتك، ادخل شوفها.", "Your coach set up your plan, take a look."],
+  installApp: ["نزّل التطبيق على موبايلك", "Install the app"],
+  installIos: ["عشان تنزّل التطبيق على الآيفون: اضغط زرار المشاركة في Safari ← Add to Home Screen.", "To install on iPhone: tap Share in Safari → Add to Home Screen."],
   pushOn: ["فعّل إشعارات الموبايل", "Turn on phone notifications"],
   pushOff: ["وقّف إشعارات الموبايل", "Turn off phone notifications"],
   pushLater: ["إشعارات الموبايل هتشتغل أول ما المنصة تتربط بـ Supabase.", "Phone notifications start once the platform is on Supabase."],
