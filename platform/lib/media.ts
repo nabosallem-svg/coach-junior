@@ -46,6 +46,8 @@ export async function putVideo(key: string, file: Blob, onProgress?: (pct: numbe
       xhr.open("PUT", data.signedUrl);
       xhr.setRequestHeader("content-type", file.type || "video/mp4");   // the bucket only takes video and image types
       xhr.setRequestHeader("x-upsert", "true");
+      // without this the bucket stores "no-cache" and every view downloads the file again; photo keys never change, videos may be replaced
+      xhr.setRequestHeader("cache-control", `max-age=${p.startsWith("photos/") ? 31536000 : 86400}`);
       xhr.timeout = 15 * 60_000;   // a stalled connection fails with a message instead of spinning forever
       xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100)); };
       xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(xhr.responseText?.slice(0, 120) || `HTTP ${xhr.status}`)));
@@ -77,6 +79,7 @@ export async function getVideo(key: string): Promise<Blob | undefined> {
 
 export async function deleteVideo(key: string) {
   if (LIVE) {
+    delete urlCache()[path(key)];
     await (await sb()).storage.from(BUCKET).remove([path(key)]);
     return;
   }
@@ -96,6 +99,46 @@ export async function shrinkImage(file: File, max = 1280): Promise<Blob> {
   return new Promise((res) => c.toBlob((b) => res(b ?? file), "image/jpeg", 0.85));
 }
 
+// Signed URLs are reused (memory + localStorage) until near expiry: the same URL lets the browser
+// serve the file from its cache, and a page of photos asks Supabase once instead of once per photo.
+const SIGN_SECS = 7 * 86400;
+const URLS_KEY = "cj-signed-urls";
+type Signed = { url: string; exp: number };
+let urls: Record<string, Signed> | null = null;
+function urlCache() {
+  if (!urls) {
+    try { urls = JSON.parse(localStorage.getItem(URLS_KEY) ?? "{}"); } catch { urls = {}; }
+    const now = Date.now();
+    for (const [k, v] of Object.entries(urls!)) if (v.exp < now) delete urls![k];
+  }
+  return urls!;
+}
+let waiting: { p: string; done: (u?: string) => void }[] = [];
+function flushSign() {
+  const batch = waiting;
+  waiting = [];
+  const paths = [...new Set(batch.map((w) => w.p))];
+  sb()
+    .then((c) => c.storage.from(BUCKET).createSignedUrls(paths, SIGN_SECS))
+    .then(({ data }) => {
+      const cache = urlCache();
+      const exp = Date.now() + (SIGN_SECS - 3600) * 1000;
+      for (const d of data ?? []) if (d.signedUrl && d.path) cache[d.path] = { url: d.signedUrl, exp };
+      try { localStorage.setItem(URLS_KEY, JSON.stringify(cache)); } catch {}
+      for (const w of batch) w.done(cache[w.p]?.url);
+    })
+    .catch(() => batch.forEach((w) => w.done()));
+}
+function signedUrl(key: string): Promise<string | undefined> {
+  const p = path(key);
+  const hit = urlCache()[p];
+  if (hit && hit.exp > Date.now()) return Promise.resolve(hit.url);
+  return new Promise((done) => {
+    if (!waiting.length) setTimeout(flushSign, 0);
+    waiting.push({ p, done });
+  });
+}
+
 /** object URL for a stored video, or the external URL, or undefined */
 export function useVideoSrc(videoKey?: string, videoUrl?: string) {
   const [src, setSrc] = useState<string | undefined>(videoUrl);
@@ -107,7 +150,7 @@ export function useVideoSrc(videoKey?: string, videoUrl?: string) {
     let url: string | undefined;
     let alive = true;
     if (LIVE) {
-      sb().then((c) => c.storage.from(BUCKET).createSignedUrl(path(videoKey!), 3600)).then(({ data }) => { if (alive) setSrc(data?.signedUrl ?? videoUrl); });
+      signedUrl(videoKey).then((u) => { if (alive) setSrc(u ?? videoUrl); });
       return () => { alive = false; };
     }
     getVideo(videoKey)
