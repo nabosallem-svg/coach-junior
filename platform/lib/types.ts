@@ -100,7 +100,7 @@ export type FormAssignment = {
 export type Message = { id: ID; clientId: ID; from: "coach" | "client"; text: string; at: string; read: boolean };
 
 /** progress photo the trainee uploads; image blob stored under `key` */
-export type ProgressPhoto = { id: ID; clientId: ID; date: string; pose: "front" | "side" | "back"; key: string };
+export type ProgressPhoto = { id: ID; clientId: ID; date: string; pose: "front" | "side" | "back"; key: string; /** small grid copy; older photos have none */ thumb?: string };
 
 export type DB = {
   clients: Client[];

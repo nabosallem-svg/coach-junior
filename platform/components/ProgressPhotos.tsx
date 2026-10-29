@@ -12,11 +12,11 @@ import { Sheet } from "./ui";
 const POSES: ProgressPhoto["pose"][] = ["front", "side", "back"];
 
 function Thumb({ ph, onOpen }: { ph: ProgressPhoto; onOpen: () => void }) {
-  const src = useVideoSrc(ph.key);
+  const src = useVideoSrc(ph.thumb ?? ph.key);
   const { t } = useI18n();
   return (
     <button onClick={onOpen} className="relative aspect-[3/4] overflow-hidden rounded-xl border border-line bg-card-hi">
-      {src && <img src={src} alt="" className="size-full object-cover" />}
+      {src && <img src={src} alt="" loading="lazy" decoding="async" className="size-full object-cover" />}
       <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-2 pb-1 pt-4 text-xs font-bold">{t(`pose_${ph.pose}`)}</span>
     </button>
   );
@@ -46,8 +46,10 @@ export function ProgressPhotos({ clientId, canAdd }: { clientId: string; canAdd?
     for (const f of [...files].filter((x) => x.type.startsWith("image/"))) {
       const id = uid("ph");
       const key = `photos/${clientId}/${id}.jpg`;
-      await putVideo(key, await shrinkImage(f));
-      made.push({ id, clientId, date, pose, key });
+      const thumb = `photos/${clientId}/${id}_t.jpg`;
+      // a small copy for the grid, so a page of thumbnails isn't a page of full photos
+      await Promise.all([putVideo(key, await shrinkImage(f)), putVideo(thumb, await shrinkImage(f, 360))]);
+      made.push({ id, clientId, date, pose, key, thumb });
     }
     update((d) => { (d.photos ??= []).push(...made); });
     setBusy(false);
@@ -87,7 +89,7 @@ export function ProgressPhotos({ clientId, canAdd }: { clientId: string; canAdd?
             <Big ph={open} />
             {canAdd && (
               <button
-                onClick={() => { if (!confirm(t("confirmDelete"))) return; deleteVideo(open.key).catch(() => {}); update((d) => { d.photos = (d.photos ?? []).filter((x) => x.id !== open.id); }); setOpen(null); }}
+                onClick={() => { if (!confirm(t("confirmDelete"))) return; deleteVideo(open.key).catch(() => {}); if (open.thumb) deleteVideo(open.thumb).catch(() => {}); update((d) => { d.photos = (d.photos ?? []).filter((x) => x.id !== open.id); }); setOpen(null); }}
                 className="btn-quiet w-full text-danger"
               >
                 <Trash2 size={16} /> {t("delete")}
