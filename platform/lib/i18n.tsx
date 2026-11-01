@@ -437,6 +437,7 @@ const dict = {
   signIn: ["دخول", "Sign in"],
   wrongLogin: ["رقم الموبايل أو كلمة السر غلط", "Wrong phone or password"],
   wrongCoachPw: ["كلمة السر غلط", "Wrong password"],
+  netDown: ["مش قادرين نوصل للسيرفر (مش كلمة السر). جرّب نت تاني أو كلّم الإدارة", "Can't reach the server (not your password). Try another network or contact support"],
   notCoach: ["الحساب مش متسجل ككابتن: شغّل سطر coaches في Supabase", "This account isn't registered as coach: run the coaches line in Supabase"],
   accountPaused: ["حسابك موقوف، كلم الكابتن", "Your account is paused, message your coach"],
   coachPassword: ["كلمة سر الكابتن", "Coach password"],

@@ -31,6 +31,8 @@ export function Login({ who, phone0 = "", onDone }: { who: "client" | "coach"; p
     const ok = await login(who, phone, pw);
     setBusy(false);
     if (ok === "notCoach") return setErr(t("notCoach"));
+    // a network failure is not a wrong password: say so, or people keep retyping a correct one
+    if (typeof ok === "string" && /failed to fetch|networkerror|load failed|network request failed|fetch failed/i.test(ok)) return setErr(t("netDown"));
     if (ok !== true) {
       // the server's own reason (e.g. "Invalid login credentials", "Email not confirmed") helps when setting up Supabase
       const why = typeof ok === "string" && !/invalid login credentials/i.test(ok) ? ` (${ok})` : "";
