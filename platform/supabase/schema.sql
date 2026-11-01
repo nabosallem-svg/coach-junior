@@ -58,21 +58,31 @@ create policy coach_all on docs for all using ((select is_coach())) with check (
 -- trainee: own subscription record, read only (password changes go through Supabase Auth)
 create policy own_client on docs for select using (coll = 'clients' and id = (select auth.uid())::text);
 
+-- what a trainee may save in their own rows (used by the insert and update policies below)
+create or replace function public.own_row_ok(coll text, id text, client_id uuid, data jsonb) returns boolean
+language sql stable set search_path = public as $$
+  select coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = auth.uid() and (
+    (coll = 'eaten' and id like auth.uid()::text || '|%') or
+    (coll <> 'eaten' and data->>'clientId' = auth.uid()::text
+      and (coll <> 'swaps' or id like auth.uid()::text || ':%')
+      and (coll <> 'messages' or data->>'from' = 'client')
+      and (coll <> 'assignments' or coalesce(data->>'reviewed', 'false') <> 'true'))
+  )
+$$;
+
 -- trainee: their own logs, weights, photos, swaps, ticked meals, forms.
 -- The app reads the trainee id from inside data (data->>'clientId'), so that must match too;
 -- swap and meal-tick ids start with the trainee id so nobody can take another trainee's id;
--- a trainee can't write a message "from the coach" or mark their own form as reviewed.
-create policy own_rows on docs for all
-  using (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = (select auth.uid()))
-  with check (
-    coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = (select auth.uid()) and (
-      (coll = 'eaten' and id like (select auth.uid())::text || '|%') or
-      (coll <> 'eaten' and data->>'clientId' = (select auth.uid())::text
-        and (coll <> 'swaps' or id like (select auth.uid())::text || ':%')
-        and (coll <> 'messages' or data->>'from' = 'client')
-        and (coll <> 'assignments' or coalesce(data->>'reviewed', 'false') <> 'true'))
-    )
-  );
+-- a trainee can't write a message "from the coach" or mark their own form as reviewed,
+-- and can't rewrite or delete the coach's messages or the forms the coach sent them.
+create policy own_rows on docs for select
+  using (coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and client_id = (select auth.uid()));
+create policy own_rows_add on docs for insert with check (public.own_row_ok(coll, id, client_id, data));
+create policy own_rows_edit on docs for update
+  using (client_id = (select auth.uid()) and coll in ('measurements','logs','swaps','photos','eaten','assignments','messages') and (coll <> 'messages' or data->>'from' = 'client'))
+  with check (public.own_row_ok(coll, id, client_id, data));
+create policy own_rows_remove on docs for delete
+  using (client_id = (select auth.uid()) and (coll in ('measurements','logs','swaps','photos','eaten') or (coll = 'messages' and data->>'from' = 'client')));
 
 -- trainee: food list, assigned plans and the exercise library while the subscription runs
 -- only real trainees (a clients row exists), so a stray self sign-up sees nothing
@@ -100,8 +110,8 @@ create policy coach_media on storage.objects for all
 create policy client_videos on storage.objects for select
   using (bucket_id = 'media' and name like 'videos/%' and client_active());
 create policy own_photos on storage.objects for all
-  using (bucket_id = 'media' and name like 'photos/' || auth.uid()::text || '/%')
-  with check (bucket_id = 'media' and name like 'photos/' || auth.uid()::text || '/%');
+  using (bucket_id = 'media' and name like 'photos/' || auth.uid()::text || '/%' and (select public.my_client()) is not null)
+  with check (bucket_id = 'media' and name like 'photos/' || auth.uid()::text || '/%' and (select public.my_client()) is not null);
 
 -- Phone notifications (Web Push): one row per subscribed browser. Only the server
 -- (service role) reads or writes it, so RLS stays on with no policies.
