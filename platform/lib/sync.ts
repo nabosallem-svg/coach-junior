@@ -35,19 +35,25 @@ const DAY = 864e5;
 /** how much workout history the coach loads; the trainee always gets all of their own */
 export const COACH_LOG_DAYS = 120;
 
-/** pages of 1000 rows, fetched a few at a time instead of one after another */
+/**
+ * pages of 1000 rows. No count request first: page 0 comes straight away, and only if it is
+ * full do the next pages follow, a few at a time. Saves a round trip per read, which matters
+ * most when the database has just woken up and every request is slow.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function readAll(where: (q: any) => any, into: Record<string, unknown[]>) {
   const c = await sb();
-  const { count, error } = await where(c.from("docs").select("coll", { count: "exact", head: true }));
-  if (error) throw error;
-  const pages = Math.ceil((count ?? 0) / 1000);
-  for (let p = 0; p < pages; p += 6) {
-    const batch = await Promise.all(Array.from({ length: Math.min(6, pages - p) }, (_, i) => where(c.from("docs").select("coll,data")).order("coll").order("id").range((p + i) * 1000, (p + i) * 1000 + 999)));
-    for (const { data, error } of batch) {
-      if (error) throw error;
-      for (const r of data as { coll: string; data: unknown }[]) (into[r.coll] ??= []).push(r.data);
-    }
+  const page = (p: number) => where(c.from("docs").select("coll,data")).order("coll").order("id").range(p * 1000, p * 1000 + 999);
+  const take = ({ data, error }: { data: unknown; error: unknown }) => {
+    if (error) throw error;
+    const rows = data as { coll: string; data: unknown }[];
+    for (const r of rows) (into[r.coll] ??= []).push(r.data);
+    return rows.length === 1000;
+  };
+  if (!take(await page(0))) return;
+  for (let p = 1; ; p += 6) {
+    const batch = await Promise.all(Array.from({ length: 6 }, (_, i) => page(p + i)));
+    if (!batch.map(take).every(Boolean)) return;
   }
 }
 
@@ -61,8 +67,10 @@ export async function loadDB(me?: ID): Promise<DB> {
   const db = emptyDB() as unknown as Record<string, unknown[]>;
   if (!me) {
     const since = new Date(Date.now() - COACH_LOG_DAYS * DAY).toISOString();
-    await readAll((q) => q.not("coll", "in", "(eaten,logs)"), db);
-    await readAll((q) => q.eq("coll", "logs").gte("updated_at", since), db);
+    await Promise.all([
+      readAll((q) => q.not("coll", "in", "(eaten,logs)"), db),
+      readAll((q) => q.eq("coll", "logs").gte("updated_at", since), db),
+    ]);
   } else {
     await readAll((q) => q.neq("coll", "eaten"), db);
     const day = (n: number) => new Date(Date.now() - n * DAY).toISOString().slice(0, 10);
@@ -89,8 +97,9 @@ export async function saveDiff(prev: DB, next: DB, me?: ID) {
 
 /** first coach login on an empty project: copy the starter library (foods, exercises, plan templates) */
 export async function seedIfEmpty(seed: DB) {
-  const { count, error } = await (await sb()).from("docs").select("id", { count: "exact", head: true });
-  if (error || count !== 0) return false;   // on any doubt do nothing: re-seeding would overwrite the coach's own exercises and videos
+  // one row is enough to know: an exact count would scan the whole table on every coach login
+  const { data, error } = await (await sb()).from("docs").select("id").limit(1);
+  if (error || !data || data.length !== 0) return false;   // on any doubt do nothing: re-seeding would overwrite the coach's own exercises and videos
   const lib: DB = { ...emptyDB(), foods: seed.foods, exercises: seed.exercises.map(({ videoKey: _v, ...e }) => e), trainingPlans: seed.trainingPlans.filter((p) => !p.ownerId), nutritionPlans: seed.nutritionPlans.filter((p) => !p.ownerId), forms: seed.forms };
   await saveDiff(emptyDB(), lib);
   return true;
