@@ -79,7 +79,9 @@ export async function getVideo(key: string): Promise<Blob | undefined> {
 
 export async function deleteVideo(key: string) {
   if (LIVE) {
-    delete urlCache()[path(key)];
+    const cache = urlCache();
+    delete cache[path(key)];
+    try { localStorage.setItem(URLS_KEY, JSON.stringify(cache)); } catch {}
     await (await sb()).storage.from(BUCKET).remove([path(key)]);
     return;
   }
@@ -101,7 +103,10 @@ export async function shrinkImage(file: File, max = 1280): Promise<Blob> {
 
 // Signed URLs are reused (memory + localStorage) until near expiry: the same URL lets the browser
 // serve the file from its cache, and a page of photos asks Supabase once instead of once per photo.
-const SIGN_SECS = 7 * 86400;
+// A signed URL keeps working after the subscription ends, so videos get one day and only a
+// trainee's own photos (or the coach's view of them) get a week. The cache is wiped on login and
+// logout, so the next person on a shared phone never inherits the last one's photo links.
+const signSecs = (p: string) => (p.startsWith("photos/") ? 7 * 86400 : 86400);
 const URLS_KEY = "cj-signed-urls";
 type Signed = { url: string; exp: number };
 let urls: Record<string, Signed> | null = null;
@@ -113,17 +118,25 @@ function urlCache() {
   }
   return urls!;
 }
+/** forget every cached signed URL (login and logout) */
+export function clearSignedUrls() {
+  urls = {};
+  try { localStorage.removeItem(URLS_KEY); } catch {}
+}
 let waiting: { p: string; done: (u?: string) => void }[] = [];
 function flushSign() {
   const batch = waiting;
   waiting = [];
   const paths = [...new Set(batch.map((w) => w.p))];
+  const groups = [...new Set(paths.map(signSecs))].map((secs) => ({ secs, paths: paths.filter((p) => signSecs(p) === secs) }));
   sb()
-    .then((c) => c.storage.from(BUCKET).createSignedUrls(paths, SIGN_SECS))
-    .then(({ data }) => {
+    .then((c) => Promise.all(groups.map((g) => c.storage.from(BUCKET).createSignedUrls(g.paths, g.secs).then(({ data }) => ({ secs: g.secs, data })))))
+    .then((res) => {
       const cache = urlCache();
-      const exp = Date.now() + (SIGN_SECS - 3600) * 1000;
-      for (const d of data ?? []) if (d.signedUrl && d.path) cache[d.path] = { url: d.signedUrl, exp };
+      for (const { secs, data } of res) {
+        const exp = Date.now() + (secs - 3600) * 1000;
+        for (const d of data ?? []) if (d.signedUrl && d.path) cache[d.path] = { url: d.signedUrl, exp };
+      }
       try { localStorage.setItem(URLS_KEY, JSON.stringify(cache)); } catch {}
       for (const w of batch) w.done(cache[w.p]?.url);
     })

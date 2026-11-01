@@ -41,6 +41,11 @@ async function handle(req: Request) {
     }
     return Response.json({ error: adminError(error.message) }, { status: 400 });
   }
+  // password resets and deletes are for trainee logins only, never the coach's own
+  if ((body.action === "password" || body.action === "delete") && body.id) {
+    const { data: isCoach } = await admin.from("coaches").select("id").eq("id", body.id).maybeSingle();
+    if (isCoach) return Response.json({ error: "forbidden" }, { status: 403 });
+  }
   if (body.action === "password") {
     if (!body.id || (body.password ?? "").length < 6) return Response.json({ error: "bad input" }, { status: 400 });
     const { error } = await admin.auth.admin.updateUserById(body.id, { password: body.password });
@@ -50,6 +55,10 @@ async function handle(req: Request) {
   if (body.action === "delete") {
     if (!body.id) return Response.json({ error: "bad input" }, { status: 400 });
     await admin.from("docs").delete().eq("client_id", body.id);
+    // their progress photos too, or they stay in the bucket after the account is gone
+    const dir = `photos/${body.id}`;
+    const { data: files } = await admin.storage.from("media").list(dir, { limit: 1000 });
+    if (files?.length) await admin.storage.from("media").remove(files.map((f) => `${dir}/${f.name}`));
     const { error } = await admin.auth.admin.deleteUser(body.id);
     if (error) return Response.json({ error: adminError(error.message) }, { status: 400 });
     return Response.json({});
