@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { LayoutDashboard, Users, Clapperboard, ClipboardList, LogOut, CalendarClock, Camera, ClipboardCheck, Hourglass } from "lucide-react";
 import { coachNotices } from "@/lib/notify";
 import { BellButton, useSeen } from "./Bell";
@@ -20,6 +20,7 @@ const nav = [
 ] as const;
 
 export function CoachShell({ children }: { children: ReactNode }) {
+  useEffect(() => { document.title = "لوحة الكابتن · Coach Junior"; }, []);   // the layout's title is the trainee one (kept static for speed)
   const { ready, session, setSession, db, live } = useStore();
   const { t, toggle } = useI18n();
   const path = usePathname();

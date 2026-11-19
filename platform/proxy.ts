@@ -9,12 +9,15 @@ export function proxy(req: NextRequest) {
   const { app, coach } = sitesFor(host);
   const isApp = pathname === "/app" || pathname.startsWith("/app/");
   if (mode === "coach") {
+    if (pathname === "/manifest.webmanifest") return NextResponse.rewrite(new URL("/coach-manifest", req.url));
     // trainee links (the WhatsApp login link, /app pages) belong to the trainee site
     if (isApp || (pathname === "/" && search.includes("login=client"))) return NextResponse.redirect(`${app}${pathname}${search}`);
     if (pathname === "/") return NextResponse.redirect(new URL("/coach", req.url));
   }
   if (mode === "client" && (pathname === "/coach" || pathname.startsWith("/coach/"))) return NextResponse.redirect(`${coach}${pathname}${search}`);
-  return NextResponse.next();
+  const res = NextResponse.next();
+  if (mode === "coach") res.headers.set("X-Robots-Tag", "noindex, nofollow");   // was a <meta robots> from the layout
+  return res;
 }
 
-export const config = { matcher: ["/", "/app/:path*", "/coach/:path*"] };
+export const config = { matcher: ["/", "/app/:path*", "/coach/:path*", "/manifest.webmanifest"] };
